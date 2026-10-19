@@ -1,210 +1,201 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KENYA-PAY - National Payment Gateway | By Collins Letting</title>
+<title>Kenya-Pay - Sender Details Tracker | Collins Letting</title>
 <style>
-:root{--green:#0a3d1f;--green2:#0d8d57;--yellow:#f9c50b}
-*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,system-ui}
-body{background:#f5f7f0}
-.top{background:var(--green);color:white;padding:12px 15px;display:flex;justify-content:space-between;align-items:center}
-.brand{font-weight:900;letter-spacing:1px}
-.brand span{color:var(--yellow)}
-.hero{background:linear-gradient(135deg,var(--green),var(--green2));color:white;padding:25px 15px;text-align:center}
-.hero h1{font-size:24px;margin-bottom:5px}
-.hero p{opacity:0.9;font-size:13px}
-.container{max-width:450px;margin:-20px auto 20px;background:white;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,0.15);overflow:hidden;border:4px solid white}
-.badge-bar{background:var(--yellow);color:var(--green);padding:8px;text-align:center;font-weight:700;font-size:12px}
-.section{padding:18px}
-.label{font-size:12px;color:#666;margin-bottom:5px;font-weight:600;text-transform:uppercase}
-.input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:10px;font-size:14px;margin-bottom:12px}
-.amount-card{background:#f8fafc;border:2px solid var(--green2);border-radius:12px;padding:15px;text-align:center;margin-bottom:12px}
-.amount-card h2{font-size:36px;color:var(--green)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.quick{padding:10px;border:1px solid #ddd;border-radius:8px;text-align:center;cursor:pointer;font-weight:600}
-.quick.active{background:var(--green);color:white;border-color:var(--green)}
-.paybtn{background:var(--green2);color:white;border:none;width:100%;padding:16px;border-radius:12px;font-weight:800;font-size:16px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer}
-.paybtn:active{transform:scale(0.98)}
-.offline{background:#fffbe6;border:1px dashed var(--yellow);border-radius:12px;padding:12px;font-size:12px;line-height:1.6;margin-top:12px}
-.counties{max-height:120px;overflow:auto;border:1px solid #eee;border-radius:8px;padding:5px}
-.footer{text-align:center;padding:15px;font-size:11px;color:#888}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Arial}
+body{background:#f1f5f9}
+.top{background:#0a3d1f;color:#fff;padding:12px 15px;display:flex;justify-content:space-between;align-items:center}
+.wrap{max-width:1200px;margin:15px auto;padding:0 12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:12px 0}
+.card{background:#fff;border-radius:10px;padding:12px;border-left:4px solid #0d8d57;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.card small{color:#666;font-size:11px}.card b{font-size:18px}
+.toolbar{background:#fff;padding:12px;border-radius:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.toolbar input,.toolbar select{padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px}
+.tableBox{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#0a3d1f;color:#fff;padding:10px 8px;text-align:left;font-size:11px;position:sticky;top:0}
+td{padding:10px 8px;border-bottom:1px solid #eef2f7}
+.status{padding:4px 8px;border-radius:12px;font-size:11px;font-weight:700}
+.ok{background:#dcfce7;color:#166534}.pending{background:#fef9c3;color:#854d0e}
+.phone{font-family:monospace;font-weight:600}
+.btn{padding:6px 10px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:12px}
+.btnG{background:#0d8d57;color:#fff;border:none}
 </style>
 </head>
 <body>
-
 <div class="top">
-  <div class="brand">🛡️ KENYA-PAY <span>PAYMENT GATEWAY</span></div>
-  <div style="font-size:11px">Collins Letting • CL • 0790928450</div>
+<div><b>🛡️ KENYA-PAY</b> | NATIONAL DASHBOARD - Sender Tracking</div>
+<div style="font-size:12px">Till 0790928450 | Collins Letting | <span id="liveDot" style="color:#22c55e">● LIVE</span></div>
 </div>
 
-<div class="hero">
-  <h1>Lipa Na M-Pesa • All Kenyans</h1>
-  <p>Pay From Anywhere in Kenya - No Internet Needed • 47 Counties Supported</p>
+<div class="wrap">
+<h2>All Processes - Track Sender Details</h2>
+<p style="font-size:12px;color:#666">Built by Collins Letting | Kapsabet - Real-time for all 47 counties</p>
+
+<div class="cards">
+<div class="card"><small>Paybill / Till</small><br><b>0790928450</b><br><small>Till Account</small></div>
+<div class="card"><small>Total Payments</small><br><b id="cTotal">0</b><br><small id="cToday">+0 today</small></div>
+<div class="card"><small>Total Earnings</small><br><b id="cEarn">Ksh 0</b><br><small>Total received</small></div>
+<div class="card"><small>Counties Covered</small><br><b id="cCounties">0</b><br><small>All Kenya</small></div>
 </div>
 
-<div class="container">
-  <div class="badge-bar">🇰🇪 NATIONAL PAYMENT SYSTEM - Built by Collins Letting | Kapsabet</div>
-  
-  <div class="section">
-    <div class="label">What are you paying for?</div>
-    <select id="product">
-      <option>Amazing Grace Music - Collins Letting</option>
-      <option>Collins Letting - House Rent / Commission</option>
-      <option>School Fees / Uniform</option>
-      <option>Church Offering / Tithe</option>
-      <option>Market Product / Mama Mboga</option>
-      <option>Other - Custom Payment</option>
-    </select>
-
-    <div class="label">Your Name</div>
-    <input id="name" class="input" placeholder="e.g. John Kiprotich">
-
-    <div class="label">Your M-Pesa Phone (07...)</div>
-    <input id="phone" class="input" placeholder="07XXXXXXXX - STK Push will come here">
-
-    <div class="label">Select Your County (47 Counties)</div>
-    <select id="county" class="input">
-      <option>Nandi - Kapsabet</option>
-      <option>Nandi - Nandi Hills</option>
-      <option>Uasin Gishu - Eldoret</option>
-      <option>Nairobi - Nairobi</option>
-      <option>Mombasa - Mombasa</option>
-      <option>Kisumu - Kisumu</option>
-      <option>Nakuru - Nakuru</option>
-      <option>Kiambu - Kiambu</option>
-      <option>Laikipia - Nanyuki</option>
-      <option>Baringo - Kabarnet</option>
-      <option>Bomet - Bomet</option>
-      <option>Bungoma - Bungoma</option>
-      <option>Busia - Busia</option>
-      <option>Elgeyo Marakwet - Iten</option>
-      <option>Embu - Embu</option>
-      <option>Garissa - Garissa</option>
-      <option>Homa Bay - Homa Bay</option>
-      <option>Isiolo - Isiolo</option>
-      <option>Kajiado - Kajiado</option>
-      <option>Kakamega - Kakamega</option>
-      <option>Kericho - Kericho</option>
-      <option>Kilifi - Kilifi</option>
-      <option>Kirinyaga - Kerugoya</option>
-      <option>Kisii - Kisii</option>
-      <option>Kitui - Kitui</option>
-      <option>Kwale - Kwale</option>
-      <option>Laikipia - Rumuruti</option>
-      <option>Lamu - Lamu</option>
-      <option>Machakos - Machakos</option>
-      <option>Makueni - Wote</option>
-      <option>Mandera - Mandera</option>
-      <option>Marsabit - Marsabit</option>
-      <option>Meru - Meru</option>
-      <option>Migori - Migori</option>
-      <option>Murang'a - Murang'a</option>
-      <option>Narok - Narok</option>
-      <option>Nyamira - Nyamira</option>
-      <option>Nyandarua - Ol Kalou</option>
-      <option>Nyeri - Nyeri</option>
-      <option>Samburu - Maralal</option>
-      <option>Siaya - Siaya</option>
-      <option>Taita Taveta - Voi</option>
-      <option>Tana River - Hola</option>
-      <option>Tharaka Nithi - Chuka</option>
-      <option>Trans Nzoia - Kitale</option>
-      <option>Turkana - Lodwar</option>
-      <option>Vihiga - Vihiga</option>
-      <option>Wajir - Wajir</option>
-      <option>West Pokot - Kapenguria</option>
-    </select>
-
-    <div class="label">Quick Amount</div>
-    <div class="grid2">
-      <div class="quick active" onclick="setAmt(50)">Ksh 50</div>
-      <div class="quick" onclick="setAmt(100)">Ksh 100</div>
-      <div class="quick" onclick="setAmt(200)">Ksh 200</div>
-      <div class="quick" onclick="setAmt(500)">Ksh 500</div>
-    </div>
-
-    <div class="amount-card">
-      <div class="label">Amount to Pay</div>
-      <h2>Ksh <span id="amtDisplay">50</span></h2>
-      <input id="customAmt" type="number" placeholder="Enter other amount" style="margin-top:10px;width:100%;padding:10px;border-radius:8px;border:1px solid #ddd;text-align:center" oninput="setAmt(this.value)">
-    </div>
-
-    <button class="paybtn" onclick="payNational()">
-      <span style="background:white;color:var(--green2);padding:5px 10px;border-radius:6px">M-PESA</span> LIPA NA M-PESA - STK Push
-    </button>
-
-    <div class="offline">
-      <b>📵 Offline for ALL Kenyans - Kabambe Phones (No Internet)</b><br>
-      <b>Method 1 - Till:</b> Dial *334# → Lipa na M-Pesa → Buy Goods → Till: <b>0790928450</b> → Amount: <span class="amtText">50</span><br>
-      <b>Method 2 - Paybill:</b> *334# → Lipa na M-Pesa → Paybill → Business: <b>522522</b> → Account: <b>0790928450</b><br>
-      This works in ALL 47 counties - Turkana to Kwale!
-    </div>
-
-    <div id="status"></div>
-  </div>
+<div class="toolbar">
+<input id="search" placeholder="Search sender name, phone, transaction code..." style="flex:1;min-width:200px" oninput="filterTable()">
+<select id="countyFilter" onchange="filterTable()"><option value="">All Counties</option><option>Nandi - Kapsabet</option><option>Nairobi - Nairobi</option><option>Mombasa - Mombasa</option><option>Kisumu - Kisumu</option><option>Uasin Gishu - Eldoret</option></select>
+<select id="statusFilter" onchange="filterTable()"><option value="">All Status</option><option>Completed</option><option>PENDING PAYMENT</option><option>STK_PUSH_SENT</option></select>
+<button class="btn" onclick="exportCSV()">Export CSV</button>
+<button class="btn btnG" onclick="loadData()">Refresh</button>
+<button class="btn" onclick="clearDemo()">Clear Demo</button>
 </div>
 
-<div class="footer">
-  Secure • Powered by Kenya-Pay • Built by Collins Letting, Kapsabet • Till 0790928450 Active Verified<br>
-  All transactions encrypted • Works on Safaricom, Airtel, Telkom
+<div class="tableBox" style="overflow:auto;max-height:70vh">
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Transaction Code</th>
+<th>Sender Details (Name + Phone)</th>
+<th>County / Location</th>
+<th>Product</th>
+<th>Amount</th>
+<th>Status</th>
+<th>Time / Date</th>
+<th>IP / Device</th>
+</tr>
+</thead>
+<tbody id="tbody">
+<tr><td colspan="9" style="text-align:center;padding:30px">Loading sender details from Firebase amazinggracecomments-e68ea...</td></tr>
+</tbody>
+</table>
+</div>
+<p style="font-size:11px;color:#888;margin-top:8px">Source: Firebase collection <b>kenya_pay_payments</b> | Pay page saves: name, phone, county, amount, product, time, userAgent | Admin sees everything here</p>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+// --- PASTE YOUR APIKEY HERE FROM CONFIG TAB ---
 const firebaseConfig = {
-  apiKey: "PASTE_YOUR_APIKEY_HERE",
+  apiKey: "AIzaSyD9-9y9YPASTE_YOUR_REAL_KEY_HERE",
   authDomain: "amazinggracecomments-e68ea.firebaseapp.com",
   projectId: "amazinggracecomments-e68ea",
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-window.currentAmt = 50;
-window.setAmt = (v) => {
-  currentAmt = parseInt(v)||0;
-  document.getElementById('amtDisplay').innerText = currentAmt;
-  document.querySelectorAll('.amtText').forEach(e=>e.innerText=currentAmt);
-  document.querySelectorAll('.quick').forEach(e=>e.classList.remove('active'));
+  storageBucket: "amazinggracecomments-e68ea.appspot.com",
+  messagingSenderId: "4941267481",
+  appId: "1:4941267481:web:c31db22b5e0c4b9e4e7a3c"
 };
 
-window.payNational = async () => {
-  const name = document.getElementById('name').value;
-  const phone = document.getElementById('phone').value;
-  const county = document.getElementById('county').value;
-  const product = document.getElementById('product').value;
-  if(!name || !phone) return alert("Please enter Name and M-Pesa Phone 07...");
-  if(phone.length < 10) return alert("Enter correct Safaricom number 07...");
+let db;
+let allData = [];
+try {
+  const app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
+} catch(e) {
+  console.log("Firebase init failed, using local storage demo", e);
+}
 
-  document.getElementById('status').innerHTML = "<div style='background:#e8f5e9;padding:15px;border-radius:10px;margin-top:12px'>⏳ Generating National Payment... Sending STK Push to "+phone+"...</div>";
-
-  try{
-    await addDoc(collection(db, "kenya_pay_payments"), {
-      name, phone, county, product, amount: currentAmt,
-      till: "0790928450", paybill: "522522",
-      status: "STK_PUSH_INITIATED",
-      time: new Date().toISOString(),
-      createdAt: serverTimestamp(),
-      countyCode: county.split('-')[0].trim(),
-      national: true
-    });
-
-    document.getElementById('status').innerHTML = `
-      <div style="background:#d4edda;border:1px solid #0d8d57;padding:18px;border-radius:12px;margin-top:12px">
-        <h3>✅ STK Push Sent to ${phone}!</h3>
-        <p>Amount: <b>Ksh ${currentAmt}</b> for <b>${product}</b></p>
-        <p>County: ${county}</p>
-        <p>Check your phone, enter M-Pesa PIN to complete.</p>
-        <p style="margin-top:10px;background:white;padding:10px;border-radius:8px">Till: 0790928450 will receive Ksh ${currentAmt} instantly. Transaction saved to National Dashboard.</p>
-        <p style="font-size:11px;margin-top:8px;color:#666">For ALL Kenyans: This payment works even in Turkana, Garissa, Mandera. No internet needed after STK.</p>
-      </div>
-    `;
-  }catch(e){
-    document.getElementById('status').innerHTML = `<div style="background:#f8d7da;padding:12px;border-radius:8px">Error: ${e.message} - Check Firebase Config apiKey</div>`;
+async function loadData(){
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px">⏳ Fetching from Firebase...</td></tr>`;
+  
+  try {
+    if(db){
+      const q = query(collection(db, "kenya_pay_payments"), orderBy("createdAt","desc"), limit(100));
+      const snap = await getDocs(q);
+      allData = [];
+      snap.forEach(doc=>{
+        const d = doc.data();
+        allData.push({
+          id: doc.id,
+          code: d.transactionCode || doc.id.substring(0,10).toUpperCase(),
+          name: d.name || d.client || "Unknown",
+          phone: d.phone || "+254 7...",
+          county: d.county || "Nandi - Kapsabet",
+          product: d.product || d.house || "Amazing Grace Music",
+          amount: d.amount || d.commissionAmount || 50,
+          status: d.status || "Completed",
+          time: d.createdAt?.toDate ? d.createdAt.toDate().toLocaleString() : (d.time || new Date().toLocaleString()),
+          ip: d.userAgent ? d.userAgent.substring(0,30) : (d.ip || "Mobile")
+        });
+      });
+    }
+    
+    // If no Firebase data, load from localStorage (from pay.html)
+    if(allData.length===0){
+      const local = JSON.parse(localStorage.getItem('kenya_pay_local') || "[]");
+      allData = local.reverse();
+      // Add demo if empty
+      if(allData.length===0){
+        allData = [
+          {code:"QGH7T2J9K8",name:"John Kiprotich",phone:"+254 712 345 681",county:"Nandi - Kapsabet",product:"Amazing Grace Music",amount:50,status:"Completed",time:new Date().toLocaleString(),ip:"Android / Kapsabet"},
+          {code:"QGH7T2K1L4",name:"Mary Wanjiku",phone:"+254 722 908 113",county:"Nairobi - Nairobi",product:"Collins Letting - House Rent",amount:100,status:"Completed",time:new Date().toLocaleString(),ip:"iPhone / Nairobi"},
+        ];
+      }
+    }
+    
+    renderTable(allData);
+    updateStats(allData);
+  } catch(e){
+    tbody.innerHTML = `<tr><td colspan="9" style="color:red;padding:20px">Firebase Error: ${e.message}<br><br>1. Check you pasted correct apiKey from Config tab<br>2. Go to Firestore Rules and set: allow read, write: if true;<br>3. Or view local data from pay.html</td></tr>`;
+    console.error(e);
   }
+}
+
+function renderTable(data){
+  const tbody = document.getElementById('tbody');
+  if(data.length===0){ tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:30px">No payments yet. Share your pay.html link to all Kenyans!</td></tr>`; return; }
+  let html="";
+  data.forEach((r,i)=>{
+    html+= `<tr>
+      <td>${i+1}.</td>
+      <td><b>${r.code}</b></td>
+      <td><b>${r.name}</b><br><span class="phone">${r.phone}</span></td>
+      <td>📍 ${r.county}</td>
+      <td>${r.product}</td>
+      <td><b>Ksh ${r.amount}</b></td>
+      <td><span class="status ${r.status==='Completed'?'ok':'pending'}">${r.status}</span></td>
+      <td style="font-size:11px">${r.time}</td>
+      <td style="font-size:11px">${r.ip}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+function updateStats(data){
+  document.getElementById('cTotal').innerText = data.length;
+  document.getElementById('cToday').innerText = `+${data.filter(d=>d.time.includes(new Date().toLocaleDateString()) || d.time.includes('Today')).length} today`;
+  const total = data.reduce((s,r)=>s+ (parseInt(r.amount)||0),0);
+  document.getElementById('cEarn').innerText = `Ksh ${total.toLocaleString()}`;
+  const counties = new Set(data.map(d=>d.county)).size;
+  document.getElementById('cCounties').innerText = counties || data.length;
+}
+
+window.filterTable = () => {
+  const q = document.getElementById('search').value.toLowerCase();
+  const county = document.getElementById('countyFilter').value;
+  const status = document.getElementById('statusFilter').value;
+  let filtered = allData.filter(r=>{
+    const matchQ = !q || r.name.toLowerCase().includes(q) || r.phone.includes(q) || r.code.toLowerCase().includes(q);
+    const matchCounty = !county || r.county.includes(county);
+    const matchStatus = !status || r.status.includes(status);
+    return matchQ && matchCounty && matchStatus;
+  });
+  renderTable(filtered);
 };
+
+window.exportCSV = () => {
+  let csv = "TransactionCode,SenderName,Phone,County,Product,Amount,Status,Time,IP\n";
+  allData.forEach(r=>{ csv+= `"${r.code}","${r.name}","${r.phone}","${r.county}","${r.product}","${r.amount}","${r.status}","${r.time}","${r.ip}"\n`; });
+  const blob = new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`kenya-pay-senders-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+};
+
+window.clearDemo = () => { localStorage.removeItem('kenya_pay_local'); location.reload(); };
+
+window.loadData = loadData;
+loadData();
 </script>
 </body>
 </html>
