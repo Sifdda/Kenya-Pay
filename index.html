@@ -1,0 +1,226 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kenya-Pay | Collins Letting</title>
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f1f8f4;
+  color: #173b2b;
+}
+header {
+  background: #087443;
+  color: white;
+  text-align: center;
+  padding: 25px;
+}
+main {
+  max-width: 850px;
+  margin: 25px auto;
+  padding: 15px;
+}
+.card {
+  background: white;
+  padding: 22px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px #0001;
+}
+label {
+  display: block;
+  margin-top: 12px;
+  font-weight: bold;
+}
+input, textarea {
+  width: 100%;
+  padding: 12px;
+  margin-top: 6px;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+button {
+  background: #087443;
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  margin-top: 15px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.secondary { background: #244b39; }
+.notice {
+  background: #fff4d4;
+  padding: 12px;
+  border-radius: 8px;
+  line-height: 1.5;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  padding: 9px;
+}
+.table-wrap { overflow-x: auto; }
+small { color: #555; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Kenya-Pay</h1>
+  <p>Pay simply with Safaricom M-Pesa</p>
+  <p>Administrator: Collins Letting</p>
+  <p>Contact: 0790928450</p>
+</header>
+
+<main>
+  <div class="notice">
+    <strong>DEMO VERSION:</strong> This website does not send or
+    verify real M-Pesa payments. Never enter your M-Pesa PIN here.
+    Requests are stored only in the current browser.
+  </div>
+
+  <section class="card">
+    <h2>Customer Payment Request</h2>
+    <form id="paymentForm">
+      <label for="name">Full Name</label>
+      <input id="name" required maxlength="80"
+             placeholder="Enter your full name">
+
+      <label for="phone">M-Pesa Phone Number</label>
+      <input id="phone" required
+             placeholder="07XXXXXXXX or 2547XXXXXXXX">
+
+      <label for="amount">Amount (KSh)</label>
+      <input id="amount" type="number" min="1"
+             max="500000" step="1" required>
+
+      <label for="message">Message / Reason for Payment</label>
+      <textarea id="message" maxlength="300"
+                placeholder="Write your message"></textarea>
+
+      <button type="submit">Submit Payment Request</button>
+      <p id="result" role="status"></p>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Administrator Dashboard</h2>
+    <p>Administrator: Collins Letting</p>
+    <p>Contact: 0790928450</p>
+    <p><strong>Total requests:</strong> <span id="total">0</span></p>
+
+    <button class="secondary" onclick="showRequests()">
+      Refresh Requests
+    </button>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Phone</th>
+            <th>Amount</th>
+            <th>Message</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="requests"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+const storageKey = "kenyaPayDemoRequests";
+let payments = [];
+
+try {
+  payments = JSON.parse(localStorage.getItem(storageKey) || "[]");
+  if (!Array.isArray(payments)) payments = [];
+} catch (error) {
+  payments = [];
+}
+
+document.getElementById("paymentForm").addEventListener(
+  "submit", function(event) {
+    event.preventDefault();
+
+    const name = document.getElementById("name").value.trim();
+    const phone = document.getElementById("phone").value.trim()
+      .replace(/[\s-]/g, "");
+    const amount = Number(document.getElementById("amount").value);
+    const message = document.getElementById("message").value.trim();
+
+    if (!/^(?:07|01)\d{8}$|^254(?:7|1)\d{8}$/.test(phone)) {
+      document.getElementById("result").textContent =
+        "Enter a valid Kenyan mobile number.";
+      return;
+    }
+
+    if (!Number.isInteger(amount) || amount < 1 || amount > 500000) {
+      document.getElementById("result").textContent =
+        "Enter an amount between KSh 1 and KSh 500,000.";
+      return;
+    }
+
+    payments.unshift({
+      name: name,
+      phone: phone,
+      amount: amount,
+      message: message,
+      status: "Pending",
+      date: new Date().toLocaleString()
+    });
+
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(payments));
+    } catch (error) {
+      document.getElementById("result").textContent =
+        "Could not save the request in this browser.";
+      return;
+    }
+
+    document.getElementById("result").textContent =
+      "Demo request saved in this browser. No money was sent.";
+    this.reset();
+    showRequests();
+  }
+);
+
+function showRequests() {
+  const table = document.getElementById("requests");
+  table.replaceChildren();
+
+  document.getElementById("total").textContent = payments.length;
+
+  payments.forEach(function(payment) {
+    const row = document.createElement("tr");
+    [
+      payment.name,
+      payment.phone,
+      "KSh " + payment.amount,
+      payment.message || "-",
+      payment.status
+    ].forEach(function(value) {
+      const cell = document.createElement("td");
+      cell.textContent = value;
+      row.appendChild(cell);
+    });
+    table.appendChild(row);
+  });
+}
+
+showRequests();
+</script>
+
+</body>
+</html>
