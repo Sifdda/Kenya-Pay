@@ -2,426 +2,171 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kenya-Pay Betting</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kenya-Pay Sports Hub</title>
+  <style>
+    * { box-sizing: border-box; }
 
-<style>
-* { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f2f5f8;
+      color: #172b3a;
+    }
 
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f1f4f8;
-  color: #18212f;
-}
+    header {
+      background: #073b27;
+      color: white;
+      padding: 28px 15px;
+      text-align: center;
+    }
 
-header {
-  background: #073b27;
-  color: white;
-  text-align: center;
-  padding: 24px 12px;
-}
+    header h1 { margin: 0 0 10px; }
 
-header h1 { margin: 0 0 8px; }
-header p { margin: 0; }
+    nav {
+      background: #05291d;
+      padding: 14px;
+      text-align: center;
+    }
 
-.notice {
-  background: #fff3cd;
-  padding: 12px;
-  text-align: center;
-  font-size: 14px;
-}
+    nav a {
+      color: white;
+      margin: 0 10px;
+      text-decoration: none;
+    }
 
-nav {
-  background: #052d1e;
-  padding: 13px;
-  text-align: center;
-}
+    main {
+      max-width: 850px;
+      margin: 25px auto;
+      padding: 0 15px;
+    }
 
-nav a {
-  color: white;
-  text-decoration: none;
-  margin: 0 12px;
-}
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 12px #00000010;
+    }
 
-.container {
-  max-width: 850px;
-  margin: 22px auto;
-  padding: 15px;
-}
+    .partner {
+      border: 1px solid #dce4e0;
+      border-radius: 9px;
+      padding: 16px;
+      margin-top: 14px;
+    }
 
-.card {
-  background: white;
-  padding: 18px;
-  margin-bottom: 18px;
-  border-radius: 12px;
-  box-shadow: 0 3px 12px #00000010;
-}
+    .button {
+      display: inline-block;
+      padding: 12px 18px;
+      margin-top: 8px;
+      border-radius: 6px;
+      background: #087443;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
 
-.match {
-  border-bottom: 1px solid #ddd;
-  padding: 15px 0;
-}
+    .button:hover { background: #05572f; }
 
-.match:last-child { border-bottom: none; }
+    .notice {
+      background: #fff3cd;
+      color: #5b4710;
+      padding: 13px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
 
-.teams {
-  font-weight: bold;
-  margin-bottom: 12px;
-}
-
-.odds {
-  display: flex;
-  gap: 8px;
-}
-
-.odds button {
-  flex: 1;
-  padding: 12px 5px;
-  background: #e8f5ed;
-  border: 1px solid #b8d9c5;
-  border-radius: 7px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.odds button:hover,
-.odds button.selected {
-  background: #087443;
-  color: white;
-}
-
-input {
-  width: 100%;
-  padding: 12px;
-  margin: 8px 0 14px;
-  border: 1px solid #bbb;
-  border-radius: 6px;
-  font-size: 16px;
-}
-
-.action {
-  width: 100%;
-  padding: 13px;
-  border: none;
-  border-radius: 7px;
-  background: #087443;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.action:hover { background: #055a33; }
-
-.remove {
-  color: #b42318;
-  cursor: pointer;
-  border: none;
-  background: transparent;
-}
-
-#message {
-  margin-top: 12px;
-  font-weight: bold;
-}
-
-footer {
-  text-align: center;
-  background: #073b27;
-  color: white;
-  padding: 20px;
-}
-
-.small {
-  color: #667085;
-  font-size: 13px;
-}
-
-@media (max-width: 500px) {
-  nav a { margin: 0 5px; }
-  .odds button { font-size: 12px; }
-}
-</style>
+    footer {
+      background: #073b27;
+      color: white;
+      text-align: center;
+      padding: 22px;
+    }
+  </style>
 </head>
 
 <body>
+  <header>
+    <h1>⚽ Kenya-Pay Sports Hub</h1>
+    <p>Football information and official partner links</p>
+  </header>
 
-<header>
-  <h1>⚽ Kenya-Pay Betting</h1>
-  <p>Your football prediction demo</p>
-</header>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#partners">Partners</a>
+    <a href="#about">About</a>
+  </nav>
 
-<div class="notice">
-  DEMO ONLY — Virtual money, no real deposits or payouts.
-</div>
+  <main>
+    <section class="card" id="home">
+      <h2>Welcome to Kenya-Pay Sports Hub</h2>
+      <p>
+        Explore football and visit participating sports operators
+        through their official websites.
+      </p>
 
-<nav>
-  <a href="#matches">Matches</a>
-  <a href="#betslip">Bet Slip</a>
-  <a href="#about">About</a>
-</nav>
+      <div class="notice">
+        18+ only. Betting involves financial risk.
+        Never gamble with money you cannot afford to lose.
+      </div>
+    </section>
 
-<main class="container">
+    <section class="card" id="partners">
+      <h2>Our Potential Partners</h2>
+      <p>
+        These are external operator websites, not confirmed
+        commercial partnerships with Kenya-Pay.
+      </p>
 
-  <section class="card">
-    <h2>My Demo Account</h2>
-    <p>Virtual balance:
-      <strong id="balance">KSh 1,000.00</strong>
-    </p>
-    <p class="small">
-      This is a local demonstration balance, not real money.
-    </p>
-  </section>
-
-  <section class="card" id="matches">
-    <h2>⚽ Sample Football Matches</h2>
-    <p class="small">
-      These are fictional demo fixtures and odds, not live events.
-    </p>
-
-    <div id="matchList"></div>
-  </section>
-
-  <section class="card" id="betslip">
-    <h2>My Bet Slip</h2>
-    <div id="selections">
-      <p>No selections yet. Choose an outcome above.</p>
-    </div>
-
-    <label for="stake">Virtual stake (KSh)</label>
-    <input
-      id="stake"
-      type="number"
-      min="1"
-      max="1000"
-      step="1"
-      value="100"
-    >
-
-    <p>Combined odds: <strong id="totalOdds">1.00</strong></p>
-    <p>Potential demo return: <strong id="return">KSh 100.00</strong></p>
-
-    <button class="action" id="placeBet">
-      Place Demo Bet
-    </button>
-
-    <p id="message" role="status"></p>
-  </section>
-
-  <section class="card">
-    <h2>Demo Bet History</h2>
-    <div id="history">No demo bets placed.</div>
-  </section>
-
-  <section class="card" id="about">
-    <h2>About Kenya-Pay Betting</h2>
-    <p>
-      This website demonstrates how a football prediction interface
-      can work. Match selections and balances are stored only in this
-      browser session.
-    </p>
-    <p>
-      No real money is accepted, and no actual betting market is connected.
-    </p>
-  </section>
-
-</main>
-
-<footer>
-  <p>Kenya-Pay Betting</p>
-  <p>Demo website for learning and development.</p>
-</footer>
-
-<script>
-const matches = [
-  {
-    id: 1,
-    home: "Nairobi FC",
-    away: "Kisumu United",
-    odds: [1.80, 3.20, 4.00]
-  },
-  {
-    id: 2,
-    home: "Nakuru Stars",
-    away: "Mombasa FC",
-    odds: [2.10, 3.00, 3.30]
-  },
-  {
-    id: 3,
-    home: "Eldoret City",
-    away: "Thika Rangers",
-    odds: [1.95, 3.10, 3.60]
-  }
-];
-
-const outcomes = ["Home Win", "Draw", "Away Win"];
-
-let balance = 1000;
-let selections = [];
-let history = [];
-
-const money = amount =>
-  "KSh " + amount.toLocaleString("en-KE", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-
-function renderMatches() {
-  const list = document.getElementById("matchList");
-
-  list.innerHTML = matches.map(match => `
-    <div class="match">
-      <div class="teams">
-        ${match.home} vs ${match.away}
+      <div class="partner">
+        <h3>SportPesa</h3>
+        <p>Visit the operator's official website.</p>
+        <a class="button"
+           href="https://www.ke.sportpesa.com/"
+           target="_blank"
+           rel="noopener noreferrer">
+          Visit SportPesa
+        </a>
       </div>
 
-      <div class="odds">
-        ${outcomes.map((outcome, index) => {
-          const chosen = selections.some(
-            item => item.matchId === match.id &&
-                    item.outcomeIndex === index
-          );
-
-          return `
-            <button
-              class="${chosen ? "selected" : ""}"
-              data-match="${match.id}"
-              data-outcome="${index}"
-            >
-              ${outcome}<br>${match.odds[index].toFixed(2)}
-            </button>
-          `;
-        }).join("")}
+      <div class="partner">
+        <h3>betPawa Kenya</h3>
+        <p>Visit the operator's official website.</p>
+        <a class="button"
+           href="https://www.betpawa.co.ke/Help"
+           target="_blank"
+           rel="noopener noreferrer">
+          Visit betPawa
+        </a>
       </div>
-    </div>
-  `).join("");
-}
 
-function renderSlip() {
-  const area = document.getElementById("selections");
+      <p>
+        Affiliate commissions are not enabled. Replace a link only
+        after an operator approves your application and gives you
+        its authorized tracking URL.
+      </p>
+    </section>
 
-  if (selections.length === 0) {
-    area.innerHTML = "<p>No selections yet. Choose an outcome above.</p>";
-  } else {
-    area.innerHTML = selections.map(item => `
-      <div class="match">
-        <strong>${item.home} vs ${item.away}</strong>
-        <p>${outcomes[item.outcomeIndex]} @ ${item.odds.toFixed(2)}</p>
-        <button class="remove" data-remove="${item.matchId}">
-          Remove selection
-        </button>
-      </div>
-    `).join("");
-  }
+    <section class="card" id="about">
+      <h2>About Kenya-Pay</h2>
+      <p>
+        Kenya-Pay Sports Hub is a proposed sports information
+        and referral website. It does not accept deposits,
+        hold customer funds, or process bets.
+      </p>
+      <p>
+        A commercial partnership and any required regulatory
+        approvals must be completed before offering regulated
+        betting services.
+      </p>
+    </section>
+  </main>
 
-  const totalOdds = selections.reduce(
-    (total, item) => total * item.odds, 1
-  );
-
-  const stake = Number(document.getElementById("stake").value);
-
-  document.getElementById("totalOdds").textContent =
-    totalOdds.toFixed(2);
-
-  document.getElementById("return").textContent =
-    money(stake > 0 ? stake * totalOdds : 0);
-
-  document.getElementById("balance").textContent = money(balance);
-}
-
-document.getElementById("matchList").addEventListener("click", event => {
-  const button = event.target.closest("button[data-match]");
-  if (!button) return;
-
-  const matchId = Number(button.dataset.match);
-  const outcomeIndex = Number(button.dataset.outcome);
-  const match = matches.find(item => item.id === matchId);
-
-  // Only one outcome per match.
-  selections = selections.filter(item => item.matchId !== matchId);
-
-  selections.push({
-    matchId,
-    home: match.home,
-    away: match.away,
-    outcomeIndex,
-    odds: match.odds[outcomeIndex]
-  });
-
-  document.getElementById("message").textContent = "";
-  renderMatches();
-  renderSlip();
-});
-
-document.getElementById("selections").addEventListener("click", event => {
-  const button = event.target.closest("button[data-remove]");
-  if (!button) return;
-
-  const matchId = Number(button.dataset.remove);
-  selections = selections.filter(item => item.matchId !== matchId);
-
-  renderMatches();
-  renderSlip();
-});
-
-document.getElementById("stake").addEventListener("input", renderSlip);
-
-document.getElementById("placeBet").addEventListener("click", () => {
-  const stake = Number(document.getElementById("stake").value);
-  const message = document.getElementById("message");
-
-  if (selections.length === 0) {
-    message.textContent = "Please select at least one outcome.";
-    return;
-  }
-
-  if (!Number.isInteger(stake) || stake < 1 || stake > balance) {
-    message.textContent =
-      "Enter a whole-number stake within your virtual balance.";
-    return;
-  }
-
-  const odds = selections.reduce(
-    (total, item) => total * item.odds, 1
-  );
-
-  const potentialReturn = stake * odds;
-
-  history.unshift({
-    description: selections.map(item =>
-      `${item.home} vs ${item.away}: ${outcomes[item.outcomeIndex]}`
-    ).join("; "),
-    stake,
-    odds,
-    potentialReturn
-  });
-
-  balance -= stake;
-
-  document.getElementById("history").innerHTML =
-    history.map((bet, index) => `
-      <div class="match">
-        <strong>Demo bet #${index + 1}</strong>
-        <p>${bet.description}</p>
-        <p>Stake: ${money(bet.stake)}</p>
-        <p>Odds: ${bet.odds.toFixed(2)}</p>
-        <p>Potential return: ${money(bet.potentialReturn)}</p>
-      </div>
-    `).join("");
-
-  selections = [];
-  document.getElementById("stake").value = 100;
-  message.textContent =
-    "Demo bet recorded. No real bet was placed.";
-
-  renderMatches();
-  renderSlip();
-});
-
-renderMatches();
-renderSlip();
-</script>
-
+  <footer>
+    <p>Kenya-Pay Sports Hub</p>
+    <p>18+ | Bet responsibly</p>
+  </footer>
 </body>
 </html>
