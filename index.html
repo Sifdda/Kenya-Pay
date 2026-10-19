@@ -1,202 +1,427 @@
-import { useState } from "react";
-import "./PaymentMethod.css";
 
-const methods = [
-  { id: "card", label: "Credit or debit card", icon: "💳" },
-  { id: "paypal", label: "PayPal", icon: "🅿️" },
-];
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kenya-Pay Betting</title>
 
-export default function PaymentMethod() {
-  const [method, setMethod] = useState("card");
-
-  return (
-    <main className="payment-page">
-      <section className="payment-card">
-        <h1>Payment method</h1>
-        <p className="subtitle">Choose how you’d like to pay.</p>
-
-        <div className="methods">
-          {methods.map((item) => (
-            <button
-              key={item.id}
-              className={`method ${method === item.id ? "selected" : ""}`}
-              onClick={() => setMethod(item.id)}
-              type="button"
-            >
-              <span>{item.icon}</span>
-              {item.label}
-              <span className="radio">
-                {method === item.id ? "●" : "○"}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        {method === "card" && (
-          <form onSubmit={(e) => e.preventDefault()}>
-            <label>
-              Name on card
-              <input autoComplete="cc-name" placeholder="Alex Morgan" />
-            </label>
-
-            <label>
-              Card details
-              <div className="card-fields">
-                <input
-                  placeholder="Card number"
-                  autoComplete="cc-number"
-                  inputMode="numeric"
-                />
-                <input
-                  placeholder="MM/YY"
-                  autoComplete="cc-exp"
-                  inputMode="numeric"
-                />
-                <input
-                  placeholder="CVC"
-                  autoComplete="cc-csc"
-                  inputMode="numeric"
-                />
-              </div>
-            </label>
-
-            <button className="pay-button" type="submit">
-              Save payment method
-            </button>
-          </form>
-        )}
-
-        {method === "paypal" && (
-          <button className="pay-button" type="button">
-            Continue with PayPal
-          </button>
-        )}
-
-        <p className="secure-note">🔒 Your payment information is protected.</p>
-      </section>
-    </main>
-  );
-}
-      
-          
-            
-            
-          
-          /* PaymentMethod.css */
-* {
-  box-sizing: border-box;
-}
+<style>
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
-  font-family: Inter, system-ui, sans-serif;
-  color: #172033;
-  background: #f4f6fa;
+  font-family: Arial, sans-serif;
+  background: #f1f4f8;
+  color: #18212f;
 }
 
-.payment-page {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 24px;
+header {
+  background: #073b27;
+  color: white;
+  text-align: center;
+  padding: 24px 12px;
 }
 
-.payment-card {
-  width: min(100%, 460px);
-  padding: 32px;
-  background: white;
-  border: 1px solid #e7eaf0;
-  border-radius: 18px;
-  box-shadow: 0 12px 40px #17203312;
-}
+header h1 { margin: 0 0 8px; }
+header p { margin: 0; }
 
-h1 {
-  margin: 0 0 8px;
-  font-size: 25px;
-}
-
-.subtitle,
-.secure-note {
-  color: #697386;
+.notice {
+  background: #fff3cd;
+  padding: 12px;
+  text-align: center;
   font-size: 14px;
 }
 
-.methods {
-  display: grid;
-  gap: 10px;
-  margin: 24px 0;
+nav {
+  background: #052d1e;
+  padding: 13px;
+  text-align: center;
 }
 
-.method {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px;
-  border: 1px solid #dce1e9;
-  border-radius: 10px;
+nav a {
+  color: white;
+  text-decoration: none;
+  margin: 0 12px;
+}
+
+.container {
+  max-width: 850px;
+  margin: 22px auto;
+  padding: 15px;
+}
+
+.card {
   background: white;
-  text-align: left;
+  padding: 18px;
+  margin-bottom: 18px;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px #00000010;
+}
+
+.match {
+  border-bottom: 1px solid #ddd;
+  padding: 15px 0;
+}
+
+.match:last-child { border-bottom: none; }
+
+.teams {
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.odds {
+  display: flex;
+  gap: 8px;
+}
+
+.odds button {
+  flex: 1;
+  padding: 12px 5px;
+  background: #e8f5ed;
+  border: 1px solid #b8d9c5;
+  border-radius: 7px;
   cursor: pointer;
+  font-weight: bold;
 }
 
-.method.selected {
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 2px #4f46e51a;
-}
-
-.radio {
-  margin-left: auto;
-  color: #4f46e5;
-}
-
-form,
-label {
-  display: grid;
-  gap: 10px;
-}
-
-form {
-  gap: 18px;
-}
-
-label {
-  font-size: 13px;
-  font-weight: 600;
+.odds button:hover,
+.odds button.selected {
+  background: #087443;
+  color: white;
 }
 
 input {
   width: 100%;
-  min-width: 0;
   padding: 12px;
-  border: 1px solid #dce1e9;
-  border-radius: 8px;
-  font: inherit;
+  margin: 8px 0 14px;
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  font-size: 16px;
 }
 
-.card-fields {
-  display: grid;
-  grid-template-columns: 1fr 78px 64px;
-  gap: 8px;
-}
-
-.pay-button {
+.action {
   width: 100%;
-  padding: 13px 16px;
-  border: 0;
-  border-radius: 9px;
-  background: #4f46e5;
+  padding: 13px;
+  border: none;
+  border-radius: 7px;
+  background: #087443;
   color: white;
-  font: inherit;
-  font-weight: 650;
+  font-size: 16px;
   cursor: pointer;
 }
 
-.pay-button:hover {
-  background: #4338ca;
+.action:hover { background: #055a33; }
+
+.remove {
+  color: #b42318;
+  cursor: pointer;
+  border: none;
+  background: transparent;
 }
 
-.secure-note {
-  margin: 18px 0 0;
-  text-align: center;
+#message {
+  margin-top: 12px;
+  font-weight: bold;
 }
-      
+
+footer {
+  text-align: center;
+  background: #073b27;
+  color: white;
+  padding: 20px;
+}
+
+.small {
+  color: #667085;
+  font-size: 13px;
+}
+
+@media (max-width: 500px) {
+  nav a { margin: 0 5px; }
+  .odds button { font-size: 12px; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>⚽ Kenya-Pay Betting</h1>
+  <p>Your football prediction demo</p>
+</header>
+
+<div class="notice">
+  DEMO ONLY — Virtual money, no real deposits or payouts.
+</div>
+
+<nav>
+  <a href="#matches">Matches</a>
+  <a href="#betslip">Bet Slip</a>
+  <a href="#about">About</a>
+</nav>
+
+<main class="container">
+
+  <section class="card">
+    <h2>My Demo Account</h2>
+    <p>Virtual balance:
+      <strong id="balance">KSh 1,000.00</strong>
+    </p>
+    <p class="small">
+      This is a local demonstration balance, not real money.
+    </p>
+  </section>
+
+  <section class="card" id="matches">
+    <h2>⚽ Sample Football Matches</h2>
+    <p class="small">
+      These are fictional demo fixtures and odds, not live events.
+    </p>
+
+    <div id="matchList"></div>
+  </section>
+
+  <section class="card" id="betslip">
+    <h2>My Bet Slip</h2>
+    <div id="selections">
+      <p>No selections yet. Choose an outcome above.</p>
+    </div>
+
+    <label for="stake">Virtual stake (KSh)</label>
+    <input
+      id="stake"
+      type="number"
+      min="1"
+      max="1000"
+      step="1"
+      value="100"
+    >
+
+    <p>Combined odds: <strong id="totalOdds">1.00</strong></p>
+    <p>Potential demo return: <strong id="return">KSh 100.00</strong></p>
+
+    <button class="action" id="placeBet">
+      Place Demo Bet
+    </button>
+
+    <p id="message" role="status"></p>
+  </section>
+
+  <section class="card">
+    <h2>Demo Bet History</h2>
+    <div id="history">No demo bets placed.</div>
+  </section>
+
+  <section class="card" id="about">
+    <h2>About Kenya-Pay Betting</h2>
+    <p>
+      This website demonstrates how a football prediction interface
+      can work. Match selections and balances are stored only in this
+      browser session.
+    </p>
+    <p>
+      No real money is accepted, and no actual betting market is connected.
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  <p>Kenya-Pay Betting</p>
+  <p>Demo website for learning and development.</p>
+</footer>
+
+<script>
+const matches = [
+  {
+    id: 1,
+    home: "Nairobi FC",
+    away: "Kisumu United",
+    odds: [1.80, 3.20, 4.00]
+  },
+  {
+    id: 2,
+    home: "Nakuru Stars",
+    away: "Mombasa FC",
+    odds: [2.10, 3.00, 3.30]
+  },
+  {
+    id: 3,
+    home: "Eldoret City",
+    away: "Thika Rangers",
+    odds: [1.95, 3.10, 3.60]
+  }
+];
+
+const outcomes = ["Home Win", "Draw", "Away Win"];
+
+let balance = 1000;
+let selections = [];
+let history = [];
+
+const money = amount =>
+  "KSh " + amount.toLocaleString("en-KE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
+function renderMatches() {
+  const list = document.getElementById("matchList");
+
+  list.innerHTML = matches.map(match => `
+    <div class="match">
+      <div class="teams">
+        ${match.home} vs ${match.away}
+      </div>
+
+      <div class="odds">
+        ${outcomes.map((outcome, index) => {
+          const chosen = selections.some(
+            item => item.matchId === match.id &&
+                    item.outcomeIndex === index
+          );
+
+          return `
+            <button
+              class="${chosen ? "selected" : ""}"
+              data-match="${match.id}"
+              data-outcome="${index}"
+            >
+              ${outcome}<br>${match.odds[index].toFixed(2)}
+            </button>
+          `;
+        }).join("")}
+      </div>
+    </div>
+  `).join("");
+}
+
+function renderSlip() {
+  const area = document.getElementById("selections");
+
+  if (selections.length === 0) {
+    area.innerHTML = "<p>No selections yet. Choose an outcome above.</p>";
+  } else {
+    area.innerHTML = selections.map(item => `
+      <div class="match">
+        <strong>${item.home} vs ${item.away}</strong>
+        <p>${outcomes[item.outcomeIndex]} @ ${item.odds.toFixed(2)}</p>
+        <button class="remove" data-remove="${item.matchId}">
+          Remove selection
+        </button>
+      </div>
+    `).join("");
+  }
+
+  const totalOdds = selections.reduce(
+    (total, item) => total * item.odds, 1
+  );
+
+  const stake = Number(document.getElementById("stake").value);
+
+  document.getElementById("totalOdds").textContent =
+    totalOdds.toFixed(2);
+
+  document.getElementById("return").textContent =
+    money(stake > 0 ? stake * totalOdds : 0);
+
+  document.getElementById("balance").textContent = money(balance);
+}
+
+document.getElementById("matchList").addEventListener("click", event => {
+  const button = event.target.closest("button[data-match]");
+  if (!button) return;
+
+  const matchId = Number(button.dataset.match);
+  const outcomeIndex = Number(button.dataset.outcome);
+  const match = matches.find(item => item.id === matchId);
+
+  // Only one outcome per match.
+  selections = selections.filter(item => item.matchId !== matchId);
+
+  selections.push({
+    matchId,
+    home: match.home,
+    away: match.away,
+    outcomeIndex,
+    odds: match.odds[outcomeIndex]
+  });
+
+  document.getElementById("message").textContent = "";
+  renderMatches();
+  renderSlip();
+});
+
+document.getElementById("selections").addEventListener("click", event => {
+  const button = event.target.closest("button[data-remove]");
+  if (!button) return;
+
+  const matchId = Number(button.dataset.remove);
+  selections = selections.filter(item => item.matchId !== matchId);
+
+  renderMatches();
+  renderSlip();
+});
+
+document.getElementById("stake").addEventListener("input", renderSlip);
+
+document.getElementById("placeBet").addEventListener("click", () => {
+  const stake = Number(document.getElementById("stake").value);
+  const message = document.getElementById("message");
+
+  if (selections.length === 0) {
+    message.textContent = "Please select at least one outcome.";
+    return;
+  }
+
+  if (!Number.isInteger(stake) || stake < 1 || stake > balance) {
+    message.textContent =
+      "Enter a whole-number stake within your virtual balance.";
+    return;
+  }
+
+  const odds = selections.reduce(
+    (total, item) => total * item.odds, 1
+  );
+
+  const potentialReturn = stake * odds;
+
+  history.unshift({
+    description: selections.map(item =>
+      `${item.home} vs ${item.away}: ${outcomes[item.outcomeIndex]}`
+    ).join("; "),
+    stake,
+    odds,
+    potentialReturn
+  });
+
+  balance -= stake;
+
+  document.getElementById("history").innerHTML =
+    history.map((bet, index) => `
+      <div class="match">
+        <strong>Demo bet #${index + 1}</strong>
+        <p>${bet.description}</p>
+        <p>Stake: ${money(bet.stake)}</p>
+        <p>Odds: ${bet.odds.toFixed(2)}</p>
+        <p>Potential return: ${money(bet.potentialReturn)}</p>
+      </div>
+    `).join("");
+
+  selections = [];
+  document.getElementById("stake").value = 100;
+  message.textContent =
+    "Demo bet recorded. No real bet was placed.";
+
+  renderMatches();
+  renderSlip();
+});
+
+renderMatches();
+renderSlip();
+</script>
+
+</body>
+</html>
