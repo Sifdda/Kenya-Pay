@@ -199,8 +199,48 @@ firebase.initializeApp(firebaseConfig);const db=firebase.database(),auth=firebas
 
 function registerSelf(){const phone=document.getElementById('regPhone').value.trim(),name=document.getElementById('regName').value.trim(),pin=document.getElementById('regPin').value.trim();if(!phone||!name||!pin||pin.length!==4){alert('Fill phone, name, 4-digit PIN');return;}db.ref('users/'+phone).once('value').then(snap=>{if(snap.exists()){const u=snap.val();if(u.pin!==pin){alert('Wrong PIN for phone '+phone);return;}currentUser=u;currentRole='customer';localStorage.setItem('collins_full_user',JSON.stringify({...u,role:'customer'}));showCustomerView();return;}const newUser={phone,name,pin,balance:0,createdAt:new Date().toLocaleString(),role:'customer',emailUsed:false};db.ref('users/'+phone).set(newUser).then(()=>{currentUser=newUser;currentRole='customer';localStorage.setItem('collins_full_user',JSON.stringify({...newUser,role:'customer'}));showCustomerView();});});}
 function showCustomerView(){document.getElementById('loginScreen').style.display='none';document.getElementById('customerView').style.display='block';document.getElementById('adminView').style.display='none';document.getElementById('headerTitle').textContent='📱 CUSTOMER - Only Own Wallet - Cannot Access Everything';document.getElementById('roleBadge').textContent='Role: Phone Customer - Only Own';document.getElementById('roleBadge').style.background='#facc15';document.getElementById('roleBadge').style.color='#022c22';document.getElementById('loggedUser').textContent=currentUser.phone+' '+currentUser.name;document.getElementById('loggedRole').textContent='Phone Customer - Never used email - Can access ONLY own wallet Ksh '+(currentUser.balance||0)+' - Cannot access float 15000, cash 8000, withdraw';document.getElementById('userName').textContent=currentUser.name;document.getElementById('userPhone').textContent=currentUser.phone;document.getElementById('walletBalance').textContent=currentUser.balance||0;db.ref('users/'+currentUser.phone+'/balance').on('value',snap=>{const bal=snap.val()||0;currentUser.balance=bal;document.getElementById('walletBalance').textContent=bal;});lastActivity=Date.now();startAutoLogout();}
-function agentEmailLogin(){const email=document.getElementById('agentEmail').value.trim(),password=document.getElementById('agentPassword').value.trim(),pin=document.getElementById('agentPin').value.trim();if(pin!=='0790928450'&&pin!=='1234'){document.getElementById('emailError').style.display='block';document.getElementById('emailError').textContent='Wrong PIN! Need 0790928450';return;}auth.signInWithEmailAndPassword(email,password).then(()=>{currentAdminEmail=email;currentRole='admin';localStorage.setItem('collins_full_user',JSON.stringify({email,role:'admin'}));showAdminView();}).catch(e=>{document.getElementById('emailError').style.display='block';document.getElementById('emailError').textContent=e.message+' Use Test Mode PIN 0790928450';});}
-function agentEmailLoginTestMode(){const email=document.getElementById('agentEmail').value.trim()||'collins@gmail.com',pin=document.getElementById('agentPin').value.trim();if(pin!=='0790928450'&&pin!=='1234'){document.getElementById('emailError').style.display='block';document.getElementById('emailError').textContent='Wrong PIN! Need 0790928450';return;}currentAdminEmail=email;currentRole='admin';localStorage.setItem('collins_full_user',JSON.stringify({email,role:'admin'}));showAdminView();}
+function // --- SECURE LOGIN 202 - FIXED ---
+function agentEmailLogin(){
+  const email=document.getElementById('agentEmail').value.trim().toLowerCase();
+  const password=document.getElementById('agentPassword').value.trim();
+  const pin=document.getElementById('agentPin').value.trim();
+  const errorDiv=document.getElementById('emailError');
+  
+  if(!email || !password){
+    errorDiv.style.display='block';
+    errorDiv.textContent='❌ Enter email AND password! Wrong email cannot login.';
+    return;
+  }
+  if(pin!=='0790928450' && pin!=='1234'){
+    errorDiv.style.display='block';
+    errorDiv.textContent='Wrong PIN! Need 0790928450';
+    return;
+  }
+  // Firebase checks BOTH email and password from SAME user
+  auth.signInWithEmailAndPassword(email,password).then(()=>{
+    currentAdminEmail=email;
+    currentRole='admin';
+    localStorage.setItem('collins_full_user',JSON.stringify({email,role:'admin'}));
+    showAdminView();
+  }).catch(e=>{
+    errorDiv.style.display='block';
+    errorDiv.textContent='❌ Wrong email/phone or password! Cannot login with wrong email. '+e.message;
+  });
+}
+
+// --- TEST MODE DISABLED 203 - BUG FIXED ---
+function agentEmailLoginTestMode(){
+  alert('❌ Test Mode DISABLED! Wrong email blocked for security. Use real email + password + PIN 0790928450');
+  return false;
+}
+function ginTestMode(){
+  alert('❌ Test Mode DISABLED!');
+  return false;
+}
+function agentEmailLot(){
+  alert('❌ Old bypass DISABLED! Use agentEmailLogin()');
+  return false;
+}
 function showAdminView(){document.getElementById('loginScreen').style.display='none';document.getElementById('customerView').style.display='none';document.getElementById('adminView').style.display='block';document.getElementById('headerTitle').textContent='🔒 EMAIL ADMIN - Can Access Everything - Float, Cash, Withdraw';document.getElementById('roleBadge').textContent='Role: Email Admin - Access Everything';document.getElementById('roleBadge').style.background='#ef4444';document.getElementById('roleBadge').style.color='white';document.getElementById('loggedUser').textContent=currentAdminEmail;document.getElementById('loggedRole').textContent='Email Admin - You generated using email - Can access everything: Float '+floatBalance+' Cash '+cashBalance+' Withdraw All customers - Secure!';document.getElementById('adminEmailDisplay').textContent=currentAdminEmail+' - Can access everything';document.getElementById('floatBalance').textContent=floatBalance;document.getElementById('cashBalance').textContent=cashBalance;document.getElementById('tillReceived').textContent=tillReceived;const total=sends.reduce((s,x)=>s+(x.fee||3),0);document.getElementById('todayProfit').textContent='Ksh '+total;document.getElementById('todayTxCount').textContent=sends.length+' tx';document.getElementById('log').innerHTML+=`<div>✅ Email Admin ${currentAdminEmail} - You generated using email - Can access everything - Float ${floatBalance} Cash ${cashBalance} - Customer phone never used email - Only own wallet - Secure role!</div>`;lastActivity=Date.now();startAutoLogout();}
 function addMoneyStep1(){const amount=parseInt(document.getElementById('addAmount').value);if(!amount||amount<10){alert('Enter amount e.g. 203');return;}pendingAddAmount=amount;document.getElementById('addCodeDiv').style.display='block';document.getElementById('status').innerHTML=`💰 Send Ksh ${amount} to Till 0790928450 via Buy Goods → Enter code QGH... below - Your wallet only - Cannot access float`;}
 function verifyAddMoney(){const code=document.getElementById('addCode').value.trim().toUpperCase().replace(/\s/g,'');if(!code||code.length!==10){alert('Enter REAL 10-char code QGH...');return;}if(!/^[A-Z][A-Z0-9]{9}$/.test(code)){alert('Fake code');return;}db.ref('usedCodes/'+code).once('value').then(snap=>{if(snap.exists()){alert('Code already used');return;}const newBalance=(currentUser.balance||0)+pendingAddAmount;db.ref('users/'+currentUser.phone).update({balance:newBalance}).then(()=>{db.ref('usedCodes/'+code).set({code,phone:currentUser.phone,amount:pendingAddAmount,time:new Date().toLocaleString()});db.ref('tillTransactions/'+code).set({code,phone:currentUser.phone,amount:pendingAddAmount,time:new Date().toLocaleString(),verified:true});currentUser.balance=newBalance;document.getElementById('walletBalance').textContent=newBalance;document.getElementById('status').innerHTML=`✅ Added Ksh ${pendingAddAmount} to YOUR wallet only Code ${code} - Balance ${newBalance} - Cannot access float 15000 - Secure!`;document.getElementById('addCodeDiv').style.display='none';document.getElementById('addAmount').value='';document.getElementById('addCode').value='';floatBalance+=pendingAddAmount;tillReceived+=pendingAddAmount;safeSave('float_balance_full',floatBalance);safeSave('till_received_full',tillReceived);});});}
