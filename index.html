@@ -29,7 +29,7 @@ button{background:#16a34a;color:white;font-weight:bold;border:none;cursor:pointe
 <div id="loginScreen" class="lockScreen">
 <div style="background:white;padding:22px;border-radius:20px;text-align:center;max-width:400px;width:100%;">
 <h2 style="color:#16a34a;">💰 Collins-Pesa</h2>
-<div style="height:15px"></div>
+<p style="color:#333;font-size:11px;margin:6px 0;">Till 0790928450</p>
 <div class="tab">
 <button id="tabPhone" class="active" onclick="showTab('phone')">📱 Phone Customer</button>
 <button id="tabEmail" onclick="showTab('email')">🔒 Email Admin</button>
@@ -59,9 +59,9 @@ button{background:#16a34a;color:white;font-weight:bold;border:none;cursor:pointe
 </div>
 
 <header>
-<h1 id="headerTitle">🔒 EMAIL ADMIN</h1>
+<h1 id="headerTitle">💰 COLLINS - Till 0790928450</h1>
 <div>
-<span id="roleBadge" class="badge" style="background:#facc15;color:#022c22;">Role: Not logged</span>
+<span id="roleBadge" class="badge" style="background:#16a34a;color:white;">Role: Not logged</span>
 <span class="badge" style="background:#facc15;color:#022c22;">Till 0790928450</span>
 </div>
 <div style="font-size:11px;margin-top:6px;">Logged: <span id="loggedUser">Not logged</span> | Role: <span id="loggedRole">-</span></div>
@@ -77,15 +77,14 @@ button{background:#16a34a;color:white;font-weight:bold;border:none;cursor:pointe
 
 <div id="adminView" style="display:none;">
 <div class="grid"><div class="card">Float<br><b id="floatBalance">15000</b></div><div class="card">Cash<br><b id="cashBalance">8000</b></div><div class="card">Till<br><b id="tillReceived">0</b></div><div class="card">Profit<br><b id="todayProfit">Ksh 0</b></div></div>
-<div class="panel" style="border:2px solid #ef4444;"><h3>🔒 Withdraw</h3><input id="withdrawAmount" type="number" placeholder="Amount"><input id="withdrawTo" placeholder="Withdraw to YOUR M-Pesa"><input id="withdrawPin" type="password" placeholder="Confirm PIN"><button onclick="agentWithdraw()" style="background:#ef4444;">WITHDRAW</button></div>
+<div class="panel" style="border:3px solid #ef4444;"><h3>🔒 Withdraw</h3><input id="withdrawAmount" type="number" placeholder="Amount"><input id="withdrawTo" placeholder="Withdraw to YOUR M-Pesa"><input id="withdrawPin" type="password" placeholder="Confirm PIN"><button onclick="agentWithdraw()" style="background:#ef4444;">WITHDRAW</button></div>
 <div class="panel"><h3>🔥 Firebase Live</h3><div><b>Firebase:</b> <span id="firebaseStatus">Connecting...</span></div><div><b>Customers:</b> <span id="userCount">0</span></div><div><b>Pending:</b> <span id="pendingCount">0</span></div><div id="pendingList" style="background:#020617;padding:10px;border-radius:8px;margin-top:8px;max-height:120px;overflow:auto;">Listening...</div></div>
 <div class="panel"><h3>📋 Admin Log</h3><div id="log" class="log">🔒 READY</div></div>
 <button onclick="logout()" style="background:#022c22;margin-top:12px;">Logout Admin</button>
 </div>
 
 <script>
-function safeParse(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}function safeSave(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-let currentAdminEmail=null,currentUser=null,pendingAddAmount=0,currentRole=null;
+function safeParse(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}function safeSave(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}let currentAdminEmail=null,currentUser=null,pendingAddAmount=0,currentRole=null;
 function showTab(tab){document.getElementById('phoneTab').style.display=tab==='phone'?'block':'none';document.getElementById('emailTab').style.display=tab==='email'?'block':'none';document.getElementById('tabPhone').classList.toggle('active',tab==='phone');document.getElementById('tabEmail').classList.toggle('active',tab==='email');}
 let floatBalance=safeParse('float_balance_full',15000),cashBalance=safeParse('cash_balance_full',8000),tillReceived=safeParse('till_received_full',0);
 const firebaseConfig={
@@ -95,10 +94,11 @@ const firebaseConfig={
   projectId: "amazinggracecomments-e68ea",
   storageBucket: "amazinggracecomments-e68ea.firebasestorage.app",
   messagingSenderId: "1022295190612",
-  appId: "1:1022295190612:web:4d848d31adfa1d6a8e2b9e7"
+  appId: "1:1022295190612:web:4d848d31adfa1d6a8e2b9e7",
+  measurementId: "G-J2K4FL8G7R"
 };
 firebase.initializeApp(firebaseConfig);const db=firebase.database(),auth=firebase.auth();
-function registerSelf(){const phone=document.getElementById('regPhone').value.trim(),name=document.getElementById('regName').value.trim(),pin=document.getElementById('regPin').value.trim();if(!phone||!name||!pin||pin.length!==4){alert('Fill phone, name, 4-digit PIN');return;}db.ref('users/'+phone).set({phone,name,pin,balance:203,createdAt:new Date().toLocaleString(),role:'customer'}).then(()=>{currentUser={phone,name,pin,balance:203};currentRole='customer';localStorage.setItem('collins_full_user',JSON.stringify({...currentUser,role:'customer'}));showCustomerView();});}
+function registerSelf(){const phone=document.getElementById('regPhone').value.trim(),name=document.getElementById('regName').value.trim(),pin=document.getElementById('regPin').value.trim();if(!phone||!name||!pin||pin.length!==4){alert('Fill phone, name, 4-digit PIN');return;}db.ref('users/'+phone).set({phone,name,pin,balance:203,createdAt:new Date().toLocaleString(),role:'customer'}).then(()=>{currentUser={phone,name,pin,balance:203};currentRole='customer';localStorage.setItem('collins_full_user',JSON.stringify({...currentUser,role:'customer'}));showCustomerView();}).catch(e=>{alert('Firebase error: '+e.message);});}
 function showCustomerView(){document.getElementById('loginScreen').style.display='none';document.getElementById('customerView').style.display='block';document.getElementById('adminView').style.display='none';document.getElementById('headerTitle').textContent='📱 CUSTOMER';document.getElementById('loggedUser').textContent=currentUser.phone;document.getElementById('loggedRole').textContent='Phone Customer';document.getElementById('userName').textContent=currentUser.name;document.getElementById('userPhone').textContent=currentUser.phone;document.getElementById('walletBalance').textContent=currentUser.balance||203;db.ref('users/'+currentUser.phone+'/balance').on('value',snap=>{const bal=snap.val()||0;currentUser.balance=bal;document.getElementById('walletBalance').textContent=bal;});}
 function agentEmailLogin(){const email=document.getElementById('agentEmail').value.trim(),password=document.getElementById('agentPassword').value.trim(),pin=document.getElementById('agentPin').value.trim();if(pin!=='0790928450'){document.getElementById('emailError').style.display='block';document.getElementById('emailError').textContent='Wrong PIN!';return;}auth.signInWithEmailAndPassword(email,password).then(()=>{currentAdminEmail=email;currentRole='admin';localStorage.setItem('collins_full_user',JSON.stringify({email,role:'admin'}));showAdminView();}).catch(e=>{document.getElementById('emailError').style.display='block';document.getElementById('emailError').textContent=e.message;});}
 function agentEmailLoginTestMode(){const email=document.getElementById('agentEmail').value.trim()||'collins@gmail.com',pin=document.getElementById('agentPin').value.trim();if(pin!=='0790928450'){document.getElementById('emailError').style.display='block';document.getElementById('emailError').textContent='Wrong PIN!';return;}currentAdminEmail=email;currentRole='admin';localStorage.setItem('collins_full_user',JSON.stringify({email,role:'admin'}));showAdminView();}
