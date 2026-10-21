@@ -1,40 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- REAL DOWNLOAD - SAVES FILE, NOT OPEN BROWSER -->
-<div style="text-align:center; border:2px dashed #facc15; background:#0f5132; padding:14px; border-radius:14px; margin:12px 0;">
-<h3 style="color:#facc15;">📥 Download Collins-Pesa</h3>
-<button onclick="realDownload()" style="background:#facc15; color:#022c22;">📱 DOWNLOAD FILE - Save to Phone</button>
-<button onclick="installAsApp()" style="background:white; color:#022c22;">📲 INSTALL AS APP - No Browser</button>
-<button onclick="shareLink()" style="background:#16a34a;">🔗 SHARE LINK</button>
-</div>
-
 <script>
+// ===== REAL APP INSTALL - NO NEED manifest.json FILE =====
+const manifestData = {
+  "name": "Collins-Pesa Till 0790928450",
+  "short_name": "Collins-Pesa",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#022c22",
+  "theme_color": "#16a34a",
+  "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/1570/1570887.png", "sizes": "512x512", "type": "image/png" }]
+};
+const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
+const manifestURL = URL.createObjectURL(manifestBlob);
+const link = document.createElement('link');
+link.rel = 'manifest';
+link.href = manifestURL;
+document.head.appendChild(link);
+
+// Create Service Worker on the fly
+if ('serviceWorker' in navigator) {
+  const swCode = `self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(()=>{})));`;
+  const swBlob = new Blob([swCode], {type: 'application/javascript'});
+  const swURL = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swURL);
+}
+
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install banner
+  const banner = document.getElementById('installBanner');
+  if(banner) banner.style.display = 'block';
+});
+
 function realDownload(){
-  // Get current page HTML and force download as file
-  const htmlContent = document.documentElement.outerHTML;
-  const blob = new Blob([htmlContent], {type: 'text/html'});
+  const html = document.documentElement.outerHTML;
+  const blob = new Blob([html], {type: 'text/html'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = 'Collins-Pesa-Till-0790928450.html';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  a.href = url; a.download = 'Collins-Pesa.html'; a.click();
   URL.revokeObjectURL(url);
-  alert('✅ Downloaded! Check your Files/Downloads folder - Open file - It works without internet!');
 }
 
 function installAsApp(){
-  alert('To install as App:\n1. Click browser menu (3 dots)\n2. Click "Add to Home Screen" or "Install App"\n3. Now it opens like M-Pesa, not browser!');
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(choice => {
+      if(choice.outcome === 'accepted'){
+        alert('✅ App Installed! Check home screen!');
+      }
+      deferredPrompt = null;
+    });
+  } else {
+    alert('To save like APP:\n\nANDROID:\n1. Click 3 dots ⋮ top right\n2. Click "Install app" or "Add to Home screen"\n\nIPHONE:\n1. Click Share button ⬆️\n2. Click "Add to Home Screen"\n\nThen it will be like M-Pesa - No browser!');
+  }
 }
 
 function shareLink(){
   const link = 'https://sifdda.github.io/Kenya-Pay/';
   navigator.clipboard.writeText(link);
-  alert('Link copied: ' + link);
+  alert('Link copied!');
 }
 </script>
+
+<!-- INSTALL BANNER HIDDEN UNTIL READY -->
+<div id="installBanner" style="display:none; position:fixed; bottom:15px; left:12px; right:12px; background:#facc15; color:#022c22; padding:16px; border-radius:14px; text-align:center; font-weight:bold; z-index:99999; box-shadow:0 5px 20px black;">
+📲 Collins-Pesa can be installed!<br>
+<button onclick="installAsApp()" style="background:#022c22; color:white; margin-top:8px; padding:12px;">INSTALL NOW AS APP</button>
+</div>
+  <div style="text-align:center; border:2px dashed #facc15; background:#0f5132; padding:14px; border-radius:14px; margin:12px 0;">
+<h3 style="color:#facc15;">📥 Download Collins-Pesa</h3>
+<button onclick="realDownload()" style="background:#facc15; color:#022c22; margin:5px 0;">📁 DOWNLOAD FILE - Save to Phone</button>
+<button onclick="installAsApp()" style="background:white; color:#022c22; margin:5px 0;">📲 INSTALL AS APP - No Browser</button>
+<button onclick="shareLink()" style="background:#16a34a; margin:5px 0;">🔗 SHARE LINK</button>
+</div>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Collins-Pesa FULL - Email Admin Everything - Phone Customer Only Own - Till 0790928450</title>
