@@ -126,18 +126,22 @@ button{background:#16a34a;color:white;font-weight:bold;border:none;cursor:pointe
 </div>
 
 <div id="emailTab" style="display:none;">
-<div style="background:#fef2f2;padding:10px;border-radius:10px;text-align:left;font-size:11px;color:#7f1d1d;margin:8px 0;border:2px solid #ef4444;">
-<b>Email Admin - You generated using email - Can access everything:</b><br>
-- Can access Float 15000, Cash 8000, Withdraw, All customers, All requests<br>
-- Role: Admin - Everything - Secure!
-</div>
-<input id="agentEmail" type="email" placeholder="Email">
-<input id="agentPassword" type="password" placeholder="Password">
-<input id="agentPin" type="password" inputmode="numeric" placeholder="Confirm Password">
-<button onclick="agentEmailLogin()" style="background:#ef4444;">🔒 Login Email Admin - Access Everything - Float, Cash, Withdraw</button>
-<button onclick="agentEmailLoginTestMode()" style="background:#022c22;font-size:11px;">Test Mode - PIN Only - Without Firebase Auth</button>
-<p id="emailError" style="color:red;display:none;font-size:10px;margin-top:8px;background:#fee2e2;padding:8px;border-radius:8px;"></p>
-<div style="font-size:10px;color:#666;margin-top:8px;text-align:left;">To create email admin: Firebase Console → Auth → Add user → Email collins@gmail.com Password 0790928450</div>
+ <div style="background:#fef2f2;padding:10px;border-radius:10px;text-align:left;font-size:11px;color:#7f1d1d;margin:8px 0;border:2px solid #ef4444;">
+  <b>🔒 Email Admin - You generated using email - Can access everything:</b><br>
+    - Can access Float 15000, Cash 8000, Withdraw, All customers, All requests<br>
+    - Role: Admin - Everything - Secure! Wrong email BLOCKED!
+ </div>
+ <input id="agentEmail" type="email" placeholder="collins@gmail.com - Only allowed admin email">
+ <input id="agentPassword" type="password" placeholder="Password e.g. 0790928450">
+ <input id="agentPin" type="password" inputmode="numeric" placeholder="PIN 0790928450 or 1234">
+ <button onclick="agentEmailLogin()" style="background:#ef4444;font-weight:bold;font-size:14px;padding:12px;">🔒 Login Email Admin - Access Everything - Float, Cash, Withdraw</button>
+ <p id="emailError" style="color:red;display:none;font-size:11px;margin-top:8px;background:#fee2e2;padding:10px;border-radius:8px;border:2px solid #ef4444;"></p>
+ <div style="font-size:10px;color:#666;margin-top:8px;text-align:left;background:#f0fdf4;padding:8px;border-radius:8px;">
+  ✅ Secure: Wrong email BLOCKED!<br>
+  To create email admin: Firebase Console → Authentication → Users → Add user → Email: collins@gmail.com Password: 0790928450<br>
+  ✅ Right email collins@gmail.com + PIN 0790928450 = Login<br>
+  ❌ Wrong email wrong@gmail.com = BLOCKED
+ </div>
 </div>
 
 <div style="font-size:10px;color:#666;margin-top:10px;text-align:left;background:#f9fafb;padding:8px;border-radius:8px;">
