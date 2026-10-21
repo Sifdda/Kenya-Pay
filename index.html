@@ -127,19 +127,16 @@ button{background:#16a34a;color:white;font-weight:bold;border:none;cursor:pointe
 
 <div id="emailTab" style="display:none;">
  <div style="background:#fef2f2;padding:10px;border-radius:10px;text-align:left;font-size:11px;color:#7f1d1d;margin:8px 0;border:2px solid #ef4444;">
-  <b>🔒 Email Admin - You generated using email - Can access everything:</b><br>
-    - Can access Float 15000, Cash 8000, Withdraw, All requests<br>
-    - Role: Admin - Everything - Secure! Wrong email BLOCKED!
+  <b>🔒 Email Admin - Can access everything - Float 15000, Cash 8000:</b><br>
+  Role: Admin - Everything - Secure! Wrong email BLOCKED!
  </div>
- <input id="agentEmail" type="text" placeholder="collinsletting48@gmail.com" autocomplete="off" data-lpignore="true" style="margin-bottom:10px;">
+ <div style="text-align:left;margin:10px 0 4px 0;font-size:12px;font-weight:bold;color:#7f1d1d;">Admin Email:</div>
+ <input id="agentEmail" type="text" value="" placeholder="" autocomplete="off" style="margin-bottom:10px;background:white;">
+ <div style="text-align:left;margin:10px 0 4px 0;font-size:12px;font-weight:bold;color:#7f1d1d;">Admin PIN:</div>
+ <input id="agentPin" type="password" value="" placeholder="" autocomplete="off" style="margin-bottom:10px;background:white;" inputmode="numeric">
  <input id="agentPassword" type="hidden" value="0790928450">
- <input id="agentPin" type="text" inputmode="numeric" placeholder="PIN 0790928450 or 1234" autocomplete="off" data-lpignore="true" style="margin-bottom:10px;-webkit-text-security:disc;">
- <button onclick="agentEmailLogin()" style="background:#ef4444;font-weight:bold;font-size:14px;padding:12px;">🔒 Login Email Admin - Access Everything - Float, Cash, Withdraw</button>
+ <button onclick="agentEmailLogin()" style="background:#ef4444;font-weight:bold;font-size:14px;padding:12px;">🔒 Login Email Admin - Access Everything</button>
  <p id="emailError" style="color:red;display:none;font-size:11px;margin-top:8px;background:#fee2e2;padding:10px;border-radius:8px;border:2px solid #ef4444;"></p>
- <div style="font-size:10px;color:#666;margin-top:8px;text-align:left;background:#f0fdf4;padding:8px;border-radius:8px;">
-  ✅ Secure: Wrong email BLOCKED!<br>
-  ✅ Login: collinsletting48@gmail.com + PIN 0790928450 = Admin Everything
- </div>
 </div>
 
 <div style="font-size:10px;color:#666;margin-top:10px;text-align:left;background:#f9fafb;padding:8px;border-radius:8px;">
