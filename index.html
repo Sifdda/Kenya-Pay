@@ -1,13 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <div style="text-align:center; margin:15px 0;">
-<a href="index.html" download>
-<button style="background:#facc15; color:#022c22; padding:15px; font-size:16px;">
-📥 DOWNLOAD COLLINS-PESA NOW
-</button>
-</a>
+  <!-- REAL DOWNLOAD - SAVES FILE, NOT OPEN BROWSER -->
+<div style="text-align:center; border:2px dashed #facc15; background:#0f5132; padding:14px; border-radius:14px; margin:12px 0;">
+<h3 style="color:#facc15;">📥 Download Collins-Pesa</h3>
+<button onclick="realDownload()" style="background:#facc15; color:#022c22;">📱 DOWNLOAD FILE - Save to Phone</button>
+<button onclick="installAsApp()" style="background:white; color:#022c22;">📲 INSTALL AS APP - No Browser</button>
+<button onclick="shareLink()" style="background:#16a34a;">🔗 SHARE LINK</button>
 </div>
+
+<script>
+function realDownload(){
+  // Get current page HTML and force download as file
+  const htmlContent = document.documentElement.outerHTML;
+  const blob = new Blob([htmlContent], {type: 'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Collins-Pesa-Till-0790928450.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  alert('✅ Downloaded! Check your Files/Downloads folder - Open file - It works without internet!');
+}
+
+function installAsApp(){
+  alert('To install as App:\n1. Click browser menu (3 dots)\n2. Click "Add to Home Screen" or "Install App"\n3. Now it opens like M-Pesa, not browser!');
+}
+
+function shareLink(){
+  const link = 'https://sifdda.github.io/Kenya-Pay/';
+  navigator.clipboard.writeText(link);
+  alert('Link copied: ' + link);
+}
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Collins-Pesa FULL - Email Admin Everything - Phone Customer Only Own - Till 0790928450</title>
@@ -62,9 +89,9 @@ button{background:#16a34a;color:white;font-weight:bold;border:none;cursor:pointe
 - Can access Float 15000, Cash 8000, Withdraw, All customers, All requests<br>
 - Role: Admin - Everything - Secure!
 </div>
-<input id="agentEmail" type="email" placeholder="Admin Email">
-<input id="agentPassword" type="password" placeholder="Admin Password eg 123">
-<input id="agentPin" type="password" inputmode="numeric" placeholder="Admin PIN - Second layer">
+<input id="agentEmail" type="email" placeholder="Admin Email collins@gmail.com">
+<input id="agentPassword" type="password" placeholder="Admin Password 0790928450">
+<input id="agentPin" type="password" inputmode="numeric" placeholder="Admin PIN 0790928450 - Second layer">
 <button onclick="agentEmailLogin()" style="background:#ef4444;">🔒 Login Email Admin - Access Everything - Float, Cash, Withdraw</button>
 <button onclick="agentEmailLoginTestMode()" style="background:#022c22;font-size:11px;">Test Mode - PIN Only - Without Firebase Auth</button>
 <p id="emailError" style="color:red;display:none;font-size:10px;margin-top:8px;background:#fee2e2;padding:8px;border-radius:8px;"></p>
