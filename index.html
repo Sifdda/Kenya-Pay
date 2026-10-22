@@ -27,6 +27,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--amber);outline-
 #msg{position:fixed;left:0;right:0;bottom:0;z-index:9;padding:12px 16px;font-size:15px;font-weight:600;background:var(--amber);color:#fff}
 #msg:empty{display:none}
 body{padding-bottom:70px}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);padding:16px;width:min(92vw,400px)}dialog::backdrop{background:rgba(0,0,0,.5)}.sum{font-size:18px;font-weight:700;margin:6px 0}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -63,14 +64,39 @@ body{padding-bottom:70px}
     <input id="to" inputmode="numeric" placeholder="Receiver phone">
     <input id="amt" type="number" min="10" placeholder="Amount in Ksh">
     <button id="sendBtn">Send</button></div>
-  <div class="card"><h2>Recent transfers</h2><div id="hist"></div></div>
+  <div class="card"><h2>Change PIN</h2>
+    <input id="oldPin" type="password" inputmode="numeric" placeholder="Current PIN" autocomplete="current-password">
+    <input id="newPin" type="password" inputmode="numeric" placeholder="New PIN, 6 to 12 digits" autocomplete="new-password">
+    <button id="chBtn" class="alt">Change PIN</button></div>
+  <div class="card"><h2>History</h2><div id="hist"></div></div>
   <button class="alt" data-out>Sign out</button>
 </section>
 
 <section id="adminView" hidden>
+  <div class="card"><h2>Today</h2>
+    <div class="row"><span>Deposits</span><b>Ksh <span id="sDep">0</span></b></div>
+    <div class="row"><span>Transfers (not refunded)</span><b id="sTr">0</b></div>
+    <div class="row"><span>Fees earned (sent)</span><b>Ksh <span id="sFee">0</span></b></div>
+    <div class="row"><span>Reconciliation</span><b id="sRec">Not run yet</b></div>
+    <button id="recBtn" class="alt">Run check now</button></div>
+  <div class="card"><h2>Reset a customer's PIN</h2>
+    <p style="font-size:14px">Only after you have confirmed who they are.</p>
+    <input id="rPhone" inputmode="numeric" placeholder="Customer phone">
+    <input id="rPin" inputmode="numeric" placeholder="Temporary PIN, 6 to 12 digits">
+    <button id="rBtn">Set temporary PIN</button></div>
   <div class="card"><h2>Queued transfers</h2><div id="queue"></div></div>
   <button class="alt" data-out>Sign out</button>
 </section>
+
+<dialog id="confirm">
+  <h2>Confirm transfer</h2>
+  <div class="sum" id="cSum"></div>
+  <p id="cFee"></p>
+  <input id="cPin" type="password" inputmode="numeric" placeholder="Enter your PIN to confirm" autocomplete="current-password">
+  <p id="cErr" style="color:var(--red);min-height:20px;font-size:14px"></p>
+  <button id="cYes">Confirm and send</button>
+  <button id="cNo" class="alt">Cancel</button>
+</dialog>
 
 <script>
 if (typeof firebase === "undefined") {
@@ -124,7 +150,7 @@ $("loginBtn").onclick = async () => {
   const phone = $("phone").value.trim();
   if (!PHONE.test(phone)) return say("Enter a valid phone number.");
   try { await auth.signInWithEmailAndPassword(mail(phone), $("pin").value); say(""); }
-  catch (e) { say("Wrong phone or PIN."); }
+  catch (e) { say(e.code === "auth/too-many-requests" ? "Too many attempts. Wait a few minutes and try again." : "Wrong phone or PIN."); }
 };
 $("adminBtn").onclick = async () => {
   try { await auth.signInWithEmailAndPassword($("aemail").value.trim(), $("apass").value); say(""); }
@@ -136,9 +162,33 @@ $("addBtn").onclick = async () => {
   try { await call("stkPush", { amount: $("addAmt").value }); say("Check your phone and enter your M-Pesa PIN. Your balance updates automatically."); }
   catch (e) { fail(e); }
 };
-$("sendBtn").onclick = async () => {
-  try { await call("sendMoney", { to: $("to").value.trim(), amount: $("amt").value }); say("Transfer queued."); $("amt").value = ""; }
-  catch (e) { fail(e); }
+$("sendBtn").onclick = () => {
+  const to = $("to").value.trim(), amount = Number($("amt").value);
+  if (!PHONE.test(to)) return say("Enter a valid receiver phone number.");
+  if (!Number.isInteger(amount) || amount < 10) return say("Enter a whole amount of at least Ksh 10.");
+  $("cSum").textContent = `Send Ksh ${amount} to ${to}`;
+  $("cFee").textContent = `Fee Ksh 3. Total taken from your wallet: Ksh ${amount + 3}.`;
+  $("cPin").value = ""; $("cErr").textContent = "";
+  $("confirm").showModal();
+};
+$("chBtn").onclick = () => call("changePin", { oldPin: $("oldPin").value, newPin: $("newPin").value })
+  .then(() => { say("PIN changed. Sign in again with your new PIN."); return auth.signOut(); }).catch(fail);
+$("recBtn").onclick = () => call("adminReconcile")
+  .then((r) => say(r.ok ? "Books balance." : `Mismatch of Ksh ${r.diff}. Investigate before anything else.`)).catch(fail);
+$("rBtn").onclick = () => call("adminResetPin", { phone: $("rPhone").value.trim(), pin: $("rPin").value })
+  .then(() => { say("Temporary PIN set. Tell the customer to change it after signing in."); $("rPin").value = ""; }).catch(fail);
+const ageText = (t) => { const m = Math.floor((Date.now() - t.at) / 60000); return `${m > 60 ? "STUCK: " : ""}Ksh ${t.amount} to ${t.to}, ${m} min`; };
+const share = (t, when) => window.open("https://wa.me/?text=" + encodeURIComponent(t.kind === "in"
+  ? `Wallet receipt: Ksh ${t.amount} added on ${when}. Ref ${t.id}.`
+  : `Wallet receipt: Ksh ${t.amount} sent to ${t.to} on ${when}. Fee Ksh ${t.fee}. Status ${t.status}. Ref ${t.id}.`), "_blank");
+$("cNo").onclick = () => $("confirm").close();
+$("cYes").onclick = async () => {
+  $("cYes").disabled = true; $("cErr").textContent = "";
+  try {
+    await call("sendMoney", { to: $("to").value.trim(), amount: Number($("amt").value), pin: $("cPin").value });
+    $("confirm").close(); $("amt").value = ""; say("Transfer queued. It shows as Queued until it is sent.");
+  } catch (e) { $("cErr").textContent = e.message || "Could not send."; }
+  $("cYes").disabled = false;
 };
 
 auth.onAuthStateChanged(async (u) => {
@@ -148,12 +198,24 @@ auth.onAuthStateChanged(async (u) => {
   const tok = await u.getIdTokenResult(true);
   if (tok.claims.admin === true) {
     show("admin");
+    const sod = new Date(); sod.setHours(0, 0, 0, 0);
+    listen(db.ref("transfers").orderByChild("at").startAt(sod.getTime()), (s) => {
+      let n = 0, f = 0; s.forEach((c) => { const t = c.val(); if (t.status !== "REFUNDED") n++; if (t.status === "SENT") f += t.fee; });
+      $("sTr").textContent = n; $("sFee").textContent = f;
+    });
+    listen(db.ref("deposits").orderByChild("at").startAt(sod.getTime()), (s) => {
+      let d = 0; s.forEach((c) => { d += c.val().amount; }); $("sDep").textContent = d;
+    });
+    listen(db.ref("reports").limitToLast(1), (s) => s.forEach((c) => {
+      const r = c.val(); $("sRec").textContent = r.ok ? `OK (${r.day})` : `MISMATCH Ksh ${r.diff} (${r.day})`;
+      $("sRec").style.color = r.ok ? "var(--green)" : "var(--red)";
+    }));
     listen(db.ref("transfers").orderByChild("status").equalTo("QUEUED"), (s) => {
       const q = $("queue"); q.replaceChildren();
       if (!s.exists()) return q.appendChild(row("No queued transfers."));
       s.forEach((c) => {
         const t = c.val(), id = c.key;
-        q.appendChild(row(`Ksh ${t.amount} to ${t.to}`, [
+        q.appendChild(row(ageText(t), [
           btn("Sent", "", () => call("adminResolve", { id, status: "SENT" }).catch(fail)),
           btn("Refund", "danger", () => call("adminResolve", { id, status: "REFUNDED" }).catch(fail)),
         ]));
@@ -166,12 +228,19 @@ auth.onAuthStateChanged(async (u) => {
       $("who").textContent = d ? d.name + " · " + d.phone : "Setting up your wallet...";
       $("bal").textContent = d ? d.balance : 0;
     });
-    listen(db.ref("userTransfers/" + u.uid).limitToLast(10), (s) => {
+    let sent = [], got = [];
+    const draw = () => {
       const h = $("hist"); h.replaceChildren();
-      if (!s.exists()) return h.appendChild(row("No transfers yet."));
-      const items = []; s.forEach((c) => { items.unshift(c.val()); });
-      items.forEach((t) => h.appendChild(row(`Ksh ${t.amount} to ${t.to}`, [Object.assign(document.createElement("small"), { textContent: t.status })])));
-    });
+      const all = [...sent, ...got].sort((a, b) => b.at - a.at).slice(0, 30);
+      if (!all.length) return h.appendChild(row("No transactions yet."));
+      all.forEach((t) => {
+        const when = new Date(t.at).toLocaleString("en-KE", { dateStyle: "medium", timeStyle: "short" });
+        const label = t.kind === "in" ? `+ Ksh ${t.amount} added` : `- Ksh ${t.amount + t.fee} sent to ${t.to}`;
+        h.appendChild(row(`${label}, ${when} (${t.status})`, [btn("Share", "alt", () => share(t, when))]));
+      });
+    };
+    listen(db.ref("userTransfers/" + u.uid).limitToLast(30), (s) => { sent = []; s.forEach((c) => { sent.push({ ...c.val(), kind: "out", id: c.key }); }); draw(); });
+    listen(db.ref("userDeposits/" + u.uid).limitToLast(30), (s) => { got = []; s.forEach((c) => { got.push({ ...c.val(), kind: "in", status: "DONE", id: c.key }); }); draw(); });
   }
 });
 </script>
