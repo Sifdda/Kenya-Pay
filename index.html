@@ -243,6 +243,28 @@ auth.onAuthStateChanged(async (u) => {
     listen(db.ref("userDeposits/" + u.uid).limitToLast(30), (s) => { got = []; s.forEach((c) => { got.push({ ...c.val(), kind: "in", status: "DONE", id: c.key }); }); draw(); });
   }
 });
+  // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyA3rqKiUrn1Tr7gvo03VMGYEzJgG2QGqtQ",
+  authDomain: "amazinggracecomments-e68ea.firebaseapp.com",
+  databaseURL: "https://amazinggracecomments-e68ea-default-rtdb.firebaseio.com",
+  projectId: "amazinggracecomments-e68ea",
+  storageBucket: "amazinggracecomments-e68ea.firebasestorage.app",
+  messagingSenderId: "494112674814",
+  appId: "1:494112674814:web:abc6a684436bf7490b26af",
+  measurementId: "G-K9VMXZMLGX"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 </script>
 </body>
 </html>
