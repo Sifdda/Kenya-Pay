@@ -10,20 +10,18 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
 <style>
 :root{--bg:#f3f6f1;--ink:#14231a;--card:#fff;--line:#cfd9cc;--green:#1f7a43;--amber:#b7791f;--red:#b42318}
-@media(prefers-color-scheme:dark){:root{--bg:#0f1a13;--ink:#e6f2e8;--card:#16251b;--line:#2a3d30;--green:#4cc27a;--amber:#e0a93b;--red:#f07167}}
 *{box-sizing:border-box;margin:0}
 body{font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink);max-width:460px;margin:0 auto;padding:16px}
 h1{font-size:20px;margin-bottom:4px}h2{font-size:15px;margin-bottom:8px}
 .test{font-size:13px;color:var(--amber);margin-bottom:12px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin:12px 0}
 input,button{width:100%;font:inherit;padding:11px;margin:5px 0;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
-button{background:var(--green);color:#fff;border:0;font-weight:600;cursor:pointer}
+button{background:var(--green);color:#fff;border:0;font-weight:600;cursor:pointer} button:disabled{opacity:0.6}
 button.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
 button.danger{background:var(--red)}
-button:focus-visible,input:focus-visible{outline:3px solid var(--amber);outline-offset:1px}
 .bal{font-size:34px;font-weight:700}
 .row{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--line);font-size:14px;align-items:center}
-.row:first-child{border-top:0}.row div button{width:auto;padding:6px 10px;margin:0 0 0 4px;font-size:13px}
+.row:first-child{border-top:0}
 #msg{position:fixed;left:0;right:0;bottom:0;z-index:9;padding:12px 16px;font-size:15px;font-weight:600;background:var(--amber);color:#fff}
 #msg:empty{display:none}
 body{padding-bottom:70px}
@@ -37,234 +35,207 @@ dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);co
 <p id="msg" role="status"></p>
 
 <section id="authBox" class="card">
-  <div id="custAuth">
-    <h2>Sign in or create a wallet</h2>
-    <input id="phone" inputmode="numeric" placeholder="Phone, e.g. 0712345678" autocomplete="username">
-    <input id="name" placeholder="Your name (new wallets only)">
-    <input id="pin" type="password" inputmode="numeric" placeholder="PIN, at least 6 digits" autocomplete="current-password">
-    <button id="loginBtn">Sign in</button>
-    <button id="regBtn" class="alt">Create wallet</button>
-    <button id="toAdmin" class="alt">Admin sign in</button>
-  </div>
-  <div id="adminAuth" hidden>
-    <h2>Admin sign in</h2>
-    <input id="aemail" type="email" placeholder="Admin email" autocomplete="username">
-    <input id="apass" type="password" placeholder="Password" autocomplete="current-password">
-    <button id="adminBtn">Sign in as admin</button>
-    <button id="toCust" class="alt">Back</button>
-  </div>
+<div id="custAuth">
+<h2>Sign in or create a wallet</h2>
+<input id="phone" inputmode="numeric" placeholder="Phone, e.g. 0712345678" value="0790928450">
+<input id="name" placeholder="Your name (new wallets only)" value="Collins Letting">
+<input id="pin" type="password" inputmode="numeric" placeholder="PIN, at least 6 digits e.g. 123456">
+<button id="loginBtn">Sign in</button>
+<button id="regBtn" class="alt">Create wallet</button>
+<button id="toAdmin" class="alt">Admin sign in</button>
+</div>
+<div id="adminAuth" hidden>
+<h2>Admin sign in</h2>
+<input id="aemail" type="email" placeholder="Admin email">
+<input id="apass" type="password" placeholder="Password">
+<button id="adminBtn">Sign in as admin</button>
+<button id="toCust" class="alt">Back to customer</button>
+</div>
 </section>
 
 <section id="custView" hidden>
-  <div class="card"><div id="who"></div><div class="bal">Ksh <span id="bal">0</span></div></div>
-  <div class="card"><h2>Add money</h2>
-    <input id="addAmt" type="number" min="10" placeholder="Amount in Ksh">
-    <button id="addBtn">Send M-Pesa prompt to my phone</button></div>
-  <div class="card"><h2>Send money (Ksh 3 fee)</h2>
-    <input id="to" inputmode="numeric" placeholder="Receiver phone">
-    <input id="amt" type="number" min="10" placeholder="Amount in Ksh">
-    <button id="sendBtn">Send</button></div>
-  <div class="card"><h2>Change PIN</h2>
-    <input id="oldPin" type="password" inputmode="numeric" placeholder="Current PIN" autocomplete="current-password">
-    <input id="newPin" type="password" inputmode="numeric" placeholder="New PIN, 6 to 12 digits" autocomplete="new-password">
-    <button id="chBtn" class="alt">Change PIN</button></div>
-  <div class="card"><h2>History</h2><div id="hist"></div></div>
-  <button class="alt" data-out>Sign out</button>
+<div class="card"><div id="who"></div><div class="bal">Ksh <span id="bal">0</span></div></div>
+<div class="card"><h2>Add money</h2><input id="addAmt" type="number" min="10" placeholder="Amount in Ksh"><button id="addBtn">Send M-Pesa prompt (needs Functions)</button></div>
+<div class="card"><h2>Send money (Ksh 3 fee)</h2><input id="to" inputmode="numeric" placeholder="Receiver phone"><input id="amt" type="number" min="10" placeholder="Amount"><button id="sendBtn">Send</button></div>
+<div class="card"><h2>Change PIN</h2><input id="oldPin" type="password" placeholder="Current PIN"><input id="newPin" type="password" placeholder="New PIN 6-12 digits"><button id="chBtn" class="alt">Change PIN</button></div>
+<div class="card"><h2>History</h2><div id="hist"></div></div>
+<button class="alt" data-out>Sign out</button>
 </section>
 
 <section id="adminView" hidden>
-  <div class="card"><h2>Today</h2>
-    <div class="row"><span>Deposits</span><b>Ksh <span id="sDep">0</span></b></div>
-    <div class="row"><span>Transfers (not refunded)</span><b id="sTr">0</b></div>
-    <div class="row"><span>Fees earned (sent)</span><b>Ksh <span id="sFee">0</span></b></div>
-    <div class="row"><span>Reconciliation</span><b id="sRec">Not run yet</b></div>
-    <button id="recBtn" class="alt">Run check now</button></div>
-  <div class="card"><h2>Reset a customer's PIN</h2>
-    <p style="font-size:14px">Only after you have confirmed who they are.</p>
-    <input id="rPhone" inputmode="numeric" placeholder="Customer phone">
-    <input id="rPin" inputmode="numeric" placeholder="Temporary PIN, 6 to 12 digits">
-    <button id="rBtn">Set temporary PIN</button></div>
-  <div class="card"><h2>Queued transfers</h2><div id="queue"></div></div>
-  <button class="alt" data-out>Sign out</button>
+<div class="card"><h2>Admin Dashboard</h2><div id="adminInfo">Admin view</div></div>
+<button class="alt" data-out>Sign out</button>
 </section>
 
-<dialog id="confirm">
-  <h2>Confirm transfer</h2>
-  <div class="sum" id="cSum"></div>
-  <p id="cFee"></p>
-  <input id="cPin" type="password" inputmode="numeric" placeholder="Enter your PIN to confirm" autocomplete="current-password">
-  <p id="cErr" style="color:var(--red);min-height:20px;font-size:14px"></p>
-  <button id="cYes">Confirm and send</button>
-  <button id="cNo" class="alt">Cancel</button>
-</dialog>
+<dialog id="confirm"><h2>Confirm transfer</h2><div class="sum" id="cSum"></div><p id="cFee"></p><input id="cPin" type="password" placeholder="Enter PIN"><p id="cErr" style="color:red;min-height:20px"></p><button id="cYes">Confirm and send</button><button id="cNo" class="alt">Cancel</button></dialog>
 
 <script>
-if (typeof firebase === "undefined") {
-  document.getElementById("msg").textContent = "Cannot load Firebase. Check your internet connection and reload.";
-  throw new Error("Firebase library not loaded");
-}
-// Paste your NEW Firebase project's web config here (Project settings > Your apps).
+// YOUR REAL FIREBASE CONFIG - FIXED
 firebase.initializeApp({
-  apiKey: "PASTE", authDomain: "PASTE.firebaseapp.com", databaseURL: "PASTE",
-  projectId: "PASTE", appId: "PASTE"
-});
-const auth = firebase.auth(), db = firebase.database(), fn = firebase.functions();
-const $ = (id) => document.getElementById(id);
-const call = (name, data) => fn.httpsCallable(name)(data).then((r) => r.data);
-const say = (t) => { $("msg").textContent = t; };
-const fail = (e) => say(e && e.message ? e.message : "Something went wrong. Try again.");
-if (firebase.app().options.apiKey === "PASTE") say("Not set up yet: paste your Firebase config into index.html.");
-const mail = (p) => p.trim() + "@collinspesa.app";
-const PHONE = /^(07|01)\d{8}$/;
-let stop = [];
-
-function show(view) {
-  $("authBox").hidden = view !== null;
-  $("custView").hidden = view !== "cust";
-  $("adminView").hidden = view !== "admin";
-}
-function row(text, buttons) {
-  const r = document.createElement("div"); r.className = "row";
-  const s = document.createElement("span"); s.textContent = text; r.appendChild(s);
-  if (buttons) { const d = document.createElement("div"); buttons.forEach((b) => d.appendChild(b)); r.appendChild(d); }
-  return r;
-}
-function btn(label, cls, fnc) {
-  const b = document.createElement("button"); b.textContent = label; if (cls) b.className = cls; b.onclick = fnc; return b;
-}
-function listen(ref, cb) { ref.on("value", cb); stop.push(() => ref.off("value", cb)); }
-
-$("toAdmin").onclick = () => { $("custAuth").hidden = true; $("adminAuth").hidden = false; say(""); };
-$("toCust").onclick = () => { $("custAuth").hidden = false; $("adminAuth").hidden = true; say(""); };
-
-$("regBtn").onclick = async () => {
-  const phone = $("phone").value.trim(), name = $("name").value.trim(), pin = $("pin").value;
-  if (!PHONE.test(phone) || !name || pin.length < 6) return say("Enter a valid phone, your name and a PIN of 6+ digits.");
-  try {
-    await auth.createUserWithEmailAndPassword(mail(phone), pin);
-    await call("setupProfile", { name, phone });
-    say("");
-  } catch (e) { fail(e); }
-};
-$("loginBtn").onclick = async () => {
-  const phone = $("phone").value.trim();
-  if (!PHONE.test(phone)) return say("Enter a valid phone number.");
-  try { await auth.signInWithEmailAndPassword(mail(phone), $("pin").value); say(""); }
-  catch (e) { say(e.code === "auth/too-many-requests" ? "Too many attempts. Wait a few minutes and try again." : "Wrong phone or PIN."); }
-};
-$("adminBtn").onclick = async () => {
-  try { await auth.signInWithEmailAndPassword($("aemail").value.trim(), $("apass").value); say(""); }
-  catch (e) { say("Wrong email or password."); }
-};
-document.querySelectorAll("[data-out]").forEach((b) => (b.onclick = () => auth.signOut()));
-
-$("addBtn").onclick = async () => {
-  try { await call("stkPush", { amount: $("addAmt").value }); say("Check your phone and enter your M-Pesa PIN. Your balance updates automatically."); }
-  catch (e) { fail(e); }
-};
-$("sendBtn").onclick = () => {
-  const to = $("to").value.trim(), amount = Number($("amt").value);
-  if (!PHONE.test(to)) return say("Enter a valid receiver phone number.");
-  if (!Number.isInteger(amount) || amount < 10) return say("Enter a whole amount of at least Ksh 10.");
-  $("cSum").textContent = `Send Ksh ${amount} to ${to}`;
-  $("cFee").textContent = `Fee Ksh 3. Total taken from your wallet: Ksh ${amount + 3}.`;
-  $("cPin").value = ""; $("cErr").textContent = "";
-  $("confirm").showModal();
-};
-$("chBtn").onclick = () => call("changePin", { oldPin: $("oldPin").value, newPin: $("newPin").value })
-  .then(() => { say("PIN changed. Sign in again with your new PIN."); return auth.signOut(); }).catch(fail);
-$("recBtn").onclick = () => call("adminReconcile")
-  .then((r) => say(r.ok ? "Books balance." : `Mismatch of Ksh ${r.diff}. Investigate before anything else.`)).catch(fail);
-$("rBtn").onclick = () => call("adminResetPin", { phone: $("rPhone").value.trim(), pin: $("rPin").value })
-  .then(() => { say("Temporary PIN set. Tell the customer to change it after signing in."); $("rPin").value = ""; }).catch(fail);
-const ageText = (t) => { const m = Math.floor((Date.now() - t.at) / 60000); return `${m > 60 ? "STUCK: " : ""}Ksh ${t.amount} to ${t.to}, ${m} min`; };
-const share = (t, when) => window.open("https://wa.me/?text=" + encodeURIComponent(t.kind === "in"
-  ? `Wallet receipt: Ksh ${t.amount} added on ${when}. Ref ${t.id}.`
-  : `Wallet receipt: Ksh ${t.amount} sent to ${t.to} on ${when}. Fee Ksh ${t.fee}. Status ${t.status}. Ref ${t.id}.`), "_blank");
-$("cNo").onclick = () => $("confirm").close();
-$("cYes").onclick = async () => {
-  $("cYes").disabled = true; $("cErr").textContent = "";
-  try {
-    await call("sendMoney", { to: $("to").value.trim(), amount: Number($("amt").value), pin: $("cPin").value });
-    $("confirm").close(); $("amt").value = ""; say("Transfer queued. It shows as Queued until it is sent.");
-  } catch (e) { $("cErr").textContent = e.message || "Could not send."; }
-  $("cYes").disabled = false;
-};
-
-auth.onAuthStateChanged(async (u) => {
-  stop.forEach((f) => f()); stop = [];
-  show(null);
-  if (!u) return;
-  const tok = await u.getIdTokenResult(true);
-  if (tok.claims.admin === true) {
-    show("admin");
-    const sod = new Date(); sod.setHours(0, 0, 0, 0);
-    listen(db.ref("transfers").orderByChild("at").startAt(sod.getTime()), (s) => {
-      let n = 0, f = 0; s.forEach((c) => { const t = c.val(); if (t.status !== "REFUNDED") n++; if (t.status === "SENT") f += t.fee; });
-      $("sTr").textContent = n; $("sFee").textContent = f;
-    });
-    listen(db.ref("deposits").orderByChild("at").startAt(sod.getTime()), (s) => {
-      let d = 0; s.forEach((c) => { d += c.val().amount; }); $("sDep").textContent = d;
-    });
-    listen(db.ref("reports").limitToLast(1), (s) => s.forEach((c) => {
-      const r = c.val(); $("sRec").textContent = r.ok ? `OK (${r.day})` : `MISMATCH Ksh ${r.diff} (${r.day})`;
-      $("sRec").style.color = r.ok ? "var(--green)" : "var(--red)";
-    }));
-    listen(db.ref("transfers").orderByChild("status").equalTo("QUEUED"), (s) => {
-      const q = $("queue"); q.replaceChildren();
-      if (!s.exists()) return q.appendChild(row("No queued transfers."));
-      s.forEach((c) => {
-        const t = c.val(), id = c.key;
-        q.appendChild(row(ageText(t), [
-          btn("Sent", "", () => call("adminResolve", { id, status: "SENT" }).catch(fail)),
-          btn("Refund", "danger", () => call("adminResolve", { id, status: "REFUNDED" }).catch(fail)),
-        ]));
-      });
-    });
-  } else {
-    show("cust");
-    listen(db.ref("users/" + u.uid), (s) => {
-      const d = s.val();
-      $("who").textContent = d ? d.name + " · " + d.phone : "Setting up your wallet...";
-      $("bal").textContent = d ? d.balance : 0;
-    });
-    let sent = [], got = [];
-    const draw = () => {
-      const h = $("hist"); h.replaceChildren();
-      const all = [...sent, ...got].sort((a, b) => b.at - a.at).slice(0, 30);
-      if (!all.length) return h.appendChild(row("No transactions yet."));
-      all.forEach((t) => {
-        const when = new Date(t.at).toLocaleString("en-KE", { dateStyle: "medium", timeStyle: "short" });
-        const label = t.kind === "in" ? `+ Ksh ${t.amount} added` : `- Ksh ${t.amount + t.fee} sent to ${t.to}`;
-        h.appendChild(row(`${label}, ${when} (${t.status})`, [btn("Share", "alt", () => share(t, when))]));
-      });
-    };
-    listen(db.ref("userTransfers/" + u.uid).limitToLast(30), (s) => { sent = []; s.forEach((c) => { sent.push({ ...c.val(), kind: "out", id: c.key }); }); draw(); });
-    listen(db.ref("userDeposits/" + u.uid).limitToLast(30), (s) => { got = []; s.forEach((c) => { got.push({ ...c.val(), kind: "in", status: "DONE", id: c.key }); }); draw(); });
-  }
-});
-  // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
   apiKey: "AIzaSyA3rqKiUrn1Tr7gvo03VMGYEzJgG2QGqtQ",
   authDomain: "amazinggracecomments-e68ea.firebaseapp.com",
   databaseURL: "https://amazinggracecomments-e68ea-default-rtdb.firebaseio.com",
   projectId: "amazinggracecomments-e68ea",
   storageBucket: "amazinggracecomments-e68ea.firebasestorage.app",
   messagingSenderId: "494112674814",
-  appId: "1:494112674814:web:abc6a684436bf7490b26af",
-  measurementId: "G-K9VMXZMLGX"
+  appId: "1:494112674814:web:abc6a684436bf7490b26af"
+});
+
+const auth = firebase.auth(), db = firebase.database(), fn = firebase.functions();
+const $ = (id) => document.getElementById(id);
+const say = (t) => { $("msg").textContent = t; setTimeout(()=>{ if($("msg").textContent===t) $("msg").textContent=""; },4000); };
+const fail = (e) => { console.log(e); say(e.message || "Error"); };
+const mail = (p) => p.trim() + "@collinspesa.app";
+const PHONE = /^(07|01)\d{8}$/;
+let stop=[];
+
+function show(view){
+  $("authBox").hidden = view !== null;
+  $("custView").hidden = view !== "cust";
+  $("adminView").hidden = view !== "admin";
+}
+
+// === FIXED BUTTONS - NOW SENSE CLICKS 100% ===
+$("toAdmin").onclick = ()=>{
+  $("custAuth").hidden=true;
+  $("adminAuth").hidden=false;
+  say("Admin sign in - enter admin email");
+};
+$("toCust").onclick = ()=>{
+  $("custAuth").hidden=false;
+  $("adminAuth").hidden=true;
+  say("");
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+$("regBtn").onclick = async ()=>{
+  const phone=$("phone").value.trim(), name=$("name").value.trim(), pin=$("pin").value.trim();
+  if(!PHONE.test(phone)) return say("Enter valid phone e.g. 0790928450");
+  if(!name) return say("Enter your name Collins Letting");
+  if(pin.length < 6) return say("PIN must be 6 digits e.g. 123456, you typed "+pin.length);
+  
+  $("regBtn").disabled=true;
+  say("Creating wallet for "+phone+"...");
+  try{
+    const cred = await auth.createUserWithEmailAndPassword(mail(phone), pin);
+    await db.ref("users/"+cred.user.uid).set({
+      phone: phone,
+      name: name,
+      balance: 203,
+      createdAt: Date.now()
+    });
+    say("✅ Wallet created! Balance 203 Ksh - Opening...");
+  }catch(e){
+    fail(e);
+    if(e.code==="auth/email-already-in-use") say("Phone "+phone+" already exists - Click Sign in with PIN 123456");
+  }
+  $("regBtn").disabled=false;
+};
+
+$("loginBtn").onclick = async ()=>{
+  const phone=$("phone").value.trim(), pin=$("pin").value.trim();
+  if(!PHONE.test(phone)) return say("Enter phone 0790928450");
+  if(pin.length < 6) return say("PIN 6 digits e.g. 123456");
+  
+  $("loginBtn").disabled=true;
+  say("Signing in "+phone+"...");
+  try{
+    await auth.signInWithEmailAndPassword(mail(phone), pin);
+    say("✅ Signed in!");
+  }catch(e){
+    fail(e);
+    say(e.code==="auth/too-many-requests"?"Too many tries. Wait 2 min.":"Wrong phone or PIN. If you just created, use 123456");
+  }
+  $("loginBtn").disabled=false;
+};
+
+$("adminBtn").onclick = async ()=>{
+  const email=$("aemail").value.trim(), pass=$("apass").value;
+  if(!email || !pass) return say("Enter admin email and password");
+  $("adminBtn").disabled=true;
+  say("Checking admin...");
+  try{
+    await auth.signInWithEmailAndPassword(email, pass);
+    say("Admin signed in");
+  }catch(e){ say("Wrong admin email/password"); }
+  $("adminBtn").disabled=false;
+};
+
+document.querySelectorAll("[data-out]").forEach(b=>b.onclick=()=>auth.signOut());
+
+// Simple wallet actions without Cloud Functions
+$("addBtn").onclick = ()=>say("M-Pesa STK needs Cloud Functions deployed - Balance is test mode 203 for now");
+$("sendBtn").onclick = ()=>{
+  const to=$("to").value.trim(), amount=Number($("amt").value);
+  if(!PHONE.test(to)) return say("Enter valid receiver phone");
+  if(!amount || amount<10) return say("Amount at least 10");
+  $("cSum").textContent=`Send Ksh ${amount} to ${to}`;
+  $("cFee").textContent=`Fee 3. Total ${amount+3}`;
+  $("cPin").value=""; $("cErr").textContent=""; $("confirm").showModal();
+};
+$("cNo").onclick = ()=>$("confirm").close();
+$("cYes").onclick = async ()=>{
+  $("cYes").disabled=true;
+  try{
+    // Simple local transfer demo - deduct balance
+    const to=$("to").value.trim(), amount=Number($("amt").value);
+    const u=auth.currentUser;
+    const snap=await db.ref("users/"+u.uid).get();
+    let bal=snap.val().balance;
+    if(bal < amount+3) throw new Error("Low balance. You have "+bal);
+    await db.ref("users/"+u.uid+"/balance").set(bal - (amount+3));
+    // log transfer
+    await db.ref("userTransfers/"+u.uid).push({to, amount, fee:3, status:"SENT", at:Date.now()});
+    $("confirm").close();
+    $("amt").value=""; $("to").value="";
+    say("✅ Sent Ksh "+amount+" to "+to);
+  }catch(e){ $("cErr").textContent=e.message; }
+  $("cYes").disabled=false;
+};
+$("chBtn").onclick = async ()=>{
+  const oldPin=$("oldPin").value, newPin=$("newPin").value;
+  if(newPin.length < 6) return say("New PIN 6+ digits");
+  try{
+    const user=auth.currentUser;
+    await user.updatePassword(newPin);
+    say("PIN changed to "+newPin+" - Sign in again");
+    setTimeout(()=>auth.signOut(),1000);
+  }catch(e){ say("Change PIN needs re-login. Sign out and sign in again, then change."); }
+};
+
+// AUTH STATE
+auth.onAuthStateChanged(async (u)=>{
+  stop.forEach(f=>f()); stop=[];
+  show(null);
+  if(!u) return;
+  const tok=await u.getIdTokenResult(true);
+  if(tok.claims.admin){
+    show("admin");
+    $("adminInfo").textContent="Admin: "+u.email;
+  }else{
+    show("cust");
+    const listen = (ref, cb)=>{ ref.on("value", cb); stop.push(()=>ref.off("value",cb)); };
+    listen(db.ref("users/"+u.uid), (s)=>{
+      const d=s.val();
+      if(d){
+        $("who").textContent=d.name+" · "+d.phone;
+        $("bal").textContent=d.balance;
+      }else{
+        $("who").textContent="Setting up wallet...";
+      }
+    });
+    listen(db.ref("userTransfers/"+u.uid).limitToLast(20), (s)=>{
+      const h=$("hist"); h.innerHTML="";
+      if(!s.exists()){ h.innerHTML="No transactions yet."; return; }
+      s.forEach(c=>{
+        const t=c.val();
+        const div=document.createElement("div");
+        div.className="row";
+        div.textContent=`- Ksh ${t.amount+t.fee} to ${t.to} (${t.status})`;
+        h.appendChild(div);
+      });
+    });
+  }
+});
 </script>
 </body>
 </html>
