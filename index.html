@@ -3,59 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Wallet - with Forgot PIN + Download</title>
-<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQ29sbGlucyBXYWxsZXQiLCJzaG9ydF9uYW1lIjoiV2FsbGV0Iiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmM2Y2ZjEiLCJ0aGVtZV9jb2xvciI6IiMxZjdhNDMiLCJpY29ucyI6W3sic3JjIjoiaHR0cHM6Ly9jZG4taWNvbnMtcG5nLmZsYXRpY29uLmNvbS81MTIvMjg0NS8yODQ1NjYxLnBuZyIsInNpemVzIjoiNTEyeDUxMiIsInR5cGUiOiJpbWFnZS9wbmcifV19">
+<title>Wallet - Download Fixed</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
 <style>
-:root{--bg:#f3f6f1;--ink:#14231a;--card:#fff;--line:#cfd9cc;--green:#1f7a43;--amber:#b7791f;--red:#b42318}
+:root{--bg:#f3f6f1;--ink:#14231a;--card:#fff;--line:#cfd9cc;--green:#1f7a43;--amber:#b7791f}
 *{box-sizing:border-box;margin:0} body{font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink);max-width:460px;margin:0 auto;padding:16px}
-h1{font-size:20px} .test{font-size:13px;color:var(--amber);margin-bottom:12px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin:12px 0}
 input,button{width:100%;font:inherit;padding:11px;margin:5px 0;border-radius:8px;border:1px solid var(--line)}
-button{background:var(--green);color:#fff;border:0;font-weight:600;cursor:pointer} button:disabled{opacity:.6}
-button.alt{background:transparent;color:var(--ink);border:1px solid var(--line)} button.link{background:transparent;color:var(--green);text-decoration:underline;border:0}
-button.download{background:#0b5394;font-size:16px;padding:14px;margin:10px 0;animation:pulse 2s infinite}
-@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
+button{background:var(--green);color:#fff;border:0;font-weight:600} button.alt{background:transparent;color:var(--ink);border:1px solid var(--line)} button.link{background:transparent;color:var(--green);text-decoration:underline;border:0}
+button.download{background:#0b5394;font-size:17px;padding:16px}
 #msg{position:fixed;left:0;right:0;bottom:0;z-index:9;padding:12px 16px;font-weight:600;background:var(--amber);color:#fff} #msg:empty{display:none}
-.bal{font-size:34px;font-weight:700} .row{display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)} [hidden]{display:none!important}
-body{padding-bottom:80px}
+[hidden]{display:none!important} body{padding-bottom:80px}
+.bal{font-size:34px;font-weight:700} .row{display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)}
 </style>
 </head>
 <body>
 <h1>Wallet</h1>
-<p class="test">Test mode: sandbox money only.</p>
 
-<!-- NEW DOWNLOAD BUTTON - TOP -->
-<button id="downloadBtn" class="download">📥 Download App to Phone</button>
-<p id="installHint" style="font-size:12px;text-align:center;color:#666;margin-bottom:10px;display:none">Tap Share → Add to Home Screen for iPhone</p>
+<!-- SIMPLE DOWNLOAD BUTTONS THAT WORK -->
+<div class="card" style="background:#e8f0fe;border:2px solid #0b5394">
+<h2 style="text-align:center">📲 Download to Phone</h2>
+<button id="downloadBtn" class="download">⬇️ DOWNLOAD FILE - Click Here</button>
+<button id="installBtn" class="alt">📱 Install as App Icon (Add to Home Screen)</button>
+<p id="hint" style="font-size:12px;text-align:center;margin-top:8px;color:#666"></p>
+</div>
 
 <p id="msg"></p>
 
 <section id="authBox" class="card">
 <div id="custAuth">
 <h2>Sign in or create a wallet</h2>
-<input id="phone" placeholder="Phone e.g. 0790928450" value="0790928450">
-<input id="name" placeholder="Your name" value="Collins Letting">
-<input id="pin" type="password" placeholder="PIN 6 digits e.g. 123456">
+<input id="phone" placeholder="0790928450" value="0790928450">
+<input id="name" placeholder="Collins Letting" value="Collins Letting">
+<input id="pin" type="password" placeholder="PIN 6 digits 123456">
 <button id="loginBtn">Sign in</button>
 <button id="regBtn" class="alt">Create wallet</button>
-<button id="forgotLink" class="link">Forgot PIN? Reset here</button>
+<button id="forgotLink" class="link">Forgot PIN? Reset</button>
 <button id="toAdmin" class="alt">Admin sign in</button>
 </div>
-
 <div id="forgotBox" hidden>
-<h2>Reset your PIN</h2>
-<p style="font-size:14px;margin-bottom:8px">Enter your phone and choose new 6-digit PIN.</p>
-<input id="fPhone" placeholder="Phone e.g. 0790928450" value="0790928450">
-<input id="fName" placeholder="Your name to confirm e.g. Collins Letting" value="Collins Letting">
-<input id="fNewPin" type="password" placeholder="New PIN 6 digits e.g. 123456">
+<h2>Reset PIN</h2>
+<input id="fPhone" value="0790928450">
+<input id="fName" value="Collins Letting">
+<input id="fNewPin" type="password" placeholder="New PIN 123456">
 <button id="fResetBtn">Set New PIN</button>
-<button id="fBack" class="alt">Back to Sign in</button>
+<button id="fBack" class="alt">Back</button>
 </div>
-
 <div id="adminAuth" hidden>
 <h2>Admin sign in</h2>
 <input id="aemail" placeholder="Admin email">
@@ -67,77 +62,61 @@ body{padding-bottom:80px}
 
 <section id="custView" hidden>
 <div class="card"><div id="who"></div><div class="bal">Ksh <span id="bal">0</span></div></div>
-<div class="card"><h2>Send money</h2><input id="to" placeholder="Receiver phone"><input id="amt" type="number" placeholder="Amount"><button id="sendBtn">Send</button></div>
+<div class="card"><h2>Send money</h2><input id="to" placeholder="Receiver"><input id="amt" type="number" placeholder="Amount"><button id="sendBtn">Send</button></div>
 <div class="card"><h2>History</h2><div id="hist"></div></div>
 <button class="alt" data-out>Sign out</button>
 </section>
 
 <script>
-// === DOWNLOAD TO PHONE LOGIC ===
-let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  $("downloadBtn").textContent = "📥 Install App to Phone - Click Here";
-  $("downloadBtn").style.background = "#1f7a43";
-});
-
-$("downloadBtn").onclick = async () => {
-  if (deferredPrompt) {
-    // Android Chrome - Show install prompt
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      say("✅ App installed to home screen!");
-    } else {
-      say("Install cancelled");
-    }
-    deferredPrompt = null;
-  } else {
-    // iPhone or no prompt - Show instructions + Download HTML file
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    if (isIOS) {
-      $("installHint").style.display = "block";
-      say("iPhone: Tap Share button (square with arrow) → Add to Home Screen");
-      $("installHint").textContent = "📱 iPhone: Tap Share ⬆️ → Add to Home Screen → Add";
-    } else {
-      // Download HTML file to phone
-      const htmlContent = document.documentElement.outerHTML;
-      const blob = new Blob([htmlContent], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = "CollinsWallet.html";
-      a.click();
+// === SIMPLE DOWNLOAD THAT WORKS ON ALL PHONES ===
+document.getElementById('downloadBtn').onclick = function() {
+  try {
+    // Get full HTML of page
+    const html = `<!DOCTYPE html>\n` + document.documentElement.outerHTML;
+    const blob = new Blob([html], {type: 'text/html'});
+    const url = URL.createObjectURL(blob);
+    
+    // Create invisible link and click it
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = 'CollinsWallet.html';
+    document.body.appendChild(a);
+    a.click();
+    
+    // Cleanup
+    setTimeout(() => {
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      say("✅ File downloaded! Open file manager → Downloads → Tap CollinsWallet.html → Add to Home Screen");
-      
-      // Also show PWA instruction
-      setTimeout(() => {
-        if (confirm("Want to install as real App icon? Click OK then in browser menu click 'Add to Home Screen' or 'Install App'")) {
-          $("installHint").style.display = "block";
-          $("installHint").textContent = "Android: Menu ⋮ → Add to Home screen / Install App";
-        }
-      }, 1000);
-    }
+    }, 1000);
+    
+    document.getElementById('msg').textContent = "✅ Downloaded! Check Downloads folder → Open CollinsWallet.html";
+    document.getElementById('hint').textContent = "File saved to Downloads. Open Files app → Downloads → Tap file to open.";
+    setTimeout(() => { document.getElementById('msg').textContent = ""; }, 5000);
+  } catch(e) {
+    // Fallback - open in new tab to save
+    const html = document.documentElement.outerHTML;
+    const dataUri = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
+    window.open(dataUri, '_blank');
+    document.getElementById('msg').textContent = "Opened in new tab - Tap menu → Download page / Save";
   }
 };
 
-// Detect if already installed
-window.addEventListener('appinstalled', () => {
-  say("✅ Wallet installed to phone!");
-  $("downloadBtn").textContent = "✅ App Installed!";
-  $("downloadBtn").disabled = true;
-});
-
-// Service Worker for offline PWA
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('data:text/javascript;base64,' + btoa(`
-    self.addEventListener('install', e => self.skipWaiting());
-    self.addEventListener('activate', e => self.clients.claim());
-    self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(()=>caches.match(e.request))));
-  `)).catch(()=>{});
-}
+document.getElementById('installBtn').onclick = function() {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const hint = document.getElementById('hint');
+  if (isIOS) {
+    hint.innerHTML = "<b>iPhone:</b> Tap Share button ⬆️ (box with arrow at bottom) → Scroll → <b>Add to Home Screen</b> → Add";
+    document.getElementById('msg').textContent = "iPhone: Share → Add to Home Screen";
+  } else {
+    hint.innerHTML = "<b>Android:</b> Tap Chrome menu ⋮ (top right 3 dots) → <b>Add to Home screen</b> or <b>Install app</b> → Add";
+    document.getElementById('msg').textContent = "Android: Menu ⋮ → Add to Home screen";
+  }
+  hint.style.display = "block";
+  hint.style.background = "#fff3cd";
+  hint.style.padding = "10px";
+  hint.style.borderRadius = "8px";
+};
 
 firebase.initializeApp({
   apiKey: "AIzaSyA3rqKiUrn1Tr7gvo03VMGYEzJgG2QGqtQ",
@@ -153,80 +132,40 @@ const $=id=>document.getElementById(id);
 const say=t=>{ $("msg").textContent=t; setTimeout(()=>{$("msg").textContent="";},6000); };
 const mail=p=>p.trim()+"@collinspesa.app";
 const PHONE=/^(07|01)\d{8}$/;
-
 function show(v){ $("authBox").hidden=v!==null; $("custView").hidden=v!=="cust"; }
-
 $("toAdmin").onclick=()=>{ $("custAuth").hidden=true; $("forgotBox").hidden=true; $("adminAuth").hidden=false; };
 $("toCust").onclick=()=>{ $("custAuth").hidden=false; $("forgotBox").hidden=true; $("adminAuth").hidden=true; };
-$("forgotLink").onclick=()=>{ $("custAuth").hidden=true; $("forgotBox").hidden=false; $("adminAuth").hidden=true; $("fPhone").value=$("phone").value; $("fName").value=$("name").value; };
+$("forgotLink").onclick=()=>{ $("custAuth").hidden=true; $("forgotBox").hidden=false; $("fPhone").value=$("phone").value; $("fName").value=$("name").value; };
 $("fBack").onclick=()=>{ $("custAuth").hidden=false; $("forgotBox").hidden=true; };
-
 $("regBtn").onclick=async()=>{
   const phone=$("phone").value.trim(), name=$("name").value.trim(), pin=$("pin").value.trim();
-  if(!PHONE.test(phone)||!name||pin.length<6) return say("Enter 0790928450, Collins Letting, PIN 6 digits");
+  if(!PHONE.test(phone)||!name||pin.length<6) return say("Enter 0790928450, Collins Letting, PIN 6");
   $("regBtn").disabled=true; say("Creating...");
-  try{
-    const cred=await auth.createUserWithEmailAndPassword(mail(phone), pin);
-    await db.ref("users/"+cred.user.uid).set({phone,name,balance:203,createdAt:Date.now()});
-    say("✅ Created! Balance 203");
-  }catch(e){ say(e.code==="auth/email-already-in-use"?"Already exists - Sign in or use Forgot PIN":e.message); }
-  $("regBtn").disabled=false;
+  try{ const cred=await auth.createUserWithEmailAndPassword(mail(phone), pin); await db.ref("users/"+cred.user.uid).set({phone,name,balance:203,createdAt:Date.now()}); say("✅ Created! Balance 203"); }
+  catch(e){ say(e.code==="auth/email-already-in-use"?"Exists - Sign in or Forgot PIN":e.message); } $("regBtn").disabled=false;
 };
-
 $("loginBtn").onclick=async()=>{
   const phone=$("phone").value.trim(), pin=$("pin").value.trim();
-  if(!PHONE.test(phone)||pin.length<6) return say("Phone 0790928450 + PIN 6 digits");
-  $("loginBtn").disabled=true; say("Signing in...");
+  if(!PHONE.test(phone)||pin.length<6) return say("Phone + PIN 6 digits");
+  $("loginBtn").disabled=true; say("Signing...");
   try{ await auth.signInWithEmailAndPassword(mail(phone), pin); say("✅ Signed in"); }
-  catch(e){ say("Wrong PIN. Click Forgot PIN? to reset to 123456"); }
-  $("loginBtn").disabled=false;
+  catch(e){ say("Wrong PIN. Use Forgot PIN"); } $("loginBtn").disabled=false;
 };
-
 $("fResetBtn").onclick=async()=>{
   const phone=$("fPhone").value.trim(), name=$("fName").value.trim(), newPin=$("fNewPin").value.trim();
-  if(!PHONE.test(phone)) return say("Enter valid phone 0790928450");
-  if(!name) return say("Enter your name to confirm");
-  if(newPin.length<6) return say("New PIN must be 6 digits e.g. 123456");
-  $("fResetBtn").disabled=true; say("Resetting PIN for "+phone+"...");
-  try{
-    await db.ref("resetRequests").push({phone, name, newPin, at:Date.now(), status:"PENDING"});
-    say("✅ Request saved! Now go to Firebase Console > Authentication > Users > "+phone+"@collinspesa.app > Set password to "+newPin);
-    setTimeout(()=>{ 
-      if(confirm("For instant reset, delete old wallet and create new with PIN "+newPin+"? Click OK")){
-        alert("Go to Firebase Console and DELETE user "+mail(phone)+" then come back and click Create wallet with new PIN "+newPin);
-      }
-    },1000);
-  }catch(e){ say("Reset failed: "+e.message); }
-  $("fResetBtn").disabled=false;
+  if(!PHONE.test(phone)||newPin.length<6) return say("Phone + PIN 6");
+  try{ await db.ref("resetRequests").push({phone,name,newPin,at:Date.now()}); say("✅ Request saved! Delete user "+phone+"@collinspesa.app in Firebase Console then Create wallet with PIN "+newPin); }
+  catch(e){ say(e.message); }
 };
-
-$("adminBtn").onclick=async()=>{
-  try{ await auth.signInWithEmailAndPassword($("aemail").value.trim(), $("apass").value); }catch(e){ say("Wrong admin"); }
-};
+$("adminBtn").onclick=async()=>{ try{ await auth.signInWithEmailAndPassword($("aemail").value.trim(), $("apass").value); }catch(e){ say("Wrong admin"); } };
 document.querySelectorAll("[data-out]").forEach(b=>b.onclick=()=>auth.signOut());
-
 $("sendBtn").onclick=async()=>{
-  try{
-    const to=$("to").value.trim(), amount=Number($("amt").value);
-    if(!PHONE.test(to)||!amount) return say("Enter receiver + amount");
-    const u=auth.currentUser; const snap=await db.ref("users/"+u.uid).get(); let bal=snap.val().balance;
-    if(bal<amount+3) return say("Low balance "+bal);
-    await db.ref("users/"+u.uid+"/balance").set(bal-(amount+3));
-    await db.ref("userTransfers/"+u.uid).push({to,amount,fee:3,status:"SENT",at:Date.now()});
-    say("✅ Sent "+amount+" to "+to);
-  }catch(e){ say(e.message); }
+  try{ const to=$("to").value.trim(), amount=Number($("amt").value); if(!PHONE.test(to)||!amount) return say("Enter receiver + amount"); const u=auth.currentUser; const snap=await db.ref("users/"+u.uid).get(); let bal=snap.val().balance; if(bal<amount+3) return say("Low balance "+bal); await db.ref("users/"+u.uid+"/balance").set(bal-(amount+3)); await db.ref("userTransfers/"+u.uid).push({to,amount,fee:3,status:"SENT",at:Date.now()}); say("✅ Sent "+amount+" to "+to); }catch(e){ say(e.message); }
 };
-
 auth.onAuthStateChanged(u=>{
-  show(null); if(!u) return;
-  show("cust");
-  db.ref("users/"+u.uid).on("value",s=>{
-    const d=s.val(); if(d){ $("who").textContent=d.name+" · "+d.phone; $("bal").textContent=d.balance; }
-  });
-  db.ref("userTransfers/"+u.uid).limitToLast(20).on("value",s=>{
-    const h=$("hist"); h.innerHTML=""; if(!s.exists()){ h.innerHTML="No history"; return; }
-    s.forEach(c=>{ const t=c.val(); const div=document.createElement("div"); div.className="row"; div.textContent=`- Ksh ${t.amount+t.fee} to ${t.to}`; h.appendChild(div); });
-  });
+  show(null); if(!u) return; show("cust");
+  db.ref("users/"+u.uid).on("value",s=>{ const d=s.val(); if(d){ $("who").textContent=d.name+" · "+d.phone; $("bal").textContent=d.balance; } });
+  db.ref("userTransfers/"+u.uid).limitToLast(20).on("value",s=>{ const h=$("hist"); h.innerHTML=""; if(!s.exists()){ h.innerHTML="No history"; return; } s.forEach(c=>{ const t=c.val(); const div=document.createElement("div"); div.className="row"; div.textContent=`- Ksh ${t.amount+t.fee} to ${t.to}`; h.appendChild(div); }); });
 });
 </script>
 </body>
