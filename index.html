@@ -37,113 +37,16 @@ dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);co
 <p id="msg" role="status"></p>
 
 <section id="authBox" class="card">
-<div id="custAuth">
-<h2>Sign in or create a wallet</h2>
-<input id="phone" value="0790928450" placeholder="Phone">
-<input id="name" value="Collins Letting" placeholder="Your name">
-<input id="pin" type="password" placeholder="PIN 6 digits e.g. 123456">
-<p id="msgBox" style="color:red;font-weight:bold;padding:10px"></p>
-
-<button onclick="createWalletFix()" style="background:#1a8d1a;color:white;padding:15px;width:100%;border:0;border-radius:8px;margin:5px 0;font-size:16px;font-weight:bold">Sign in</button>
-
-<button onclick="createWalletFix()" style="padding:15px;width:100%;border:1px solid #ccc;border-radius:8px;margin:5px 0">Create wallet</button>
-
-<button onclick="alert('Admin test: 0790928450 / 123456')" style="padding:15px;width:100%;border:1px solid #ccc;border-radius:8px">Admin sign in</button>
-</div>
-</section>
-
-<script>
-function createWalletFix(){
-  var phone = document.getElementById('phone').value.trim();
-  var name = document.getElementById('name').value.trim();
-  var pin = document.getElementById('pin').value.trim();
-  var msg = document.getElementById('msgBox');
-  
-  if(!phone){ msg.innerHTML='❌ Enter phone 0790928450'; return; }
-  if(pin.length < 6){ msg.innerHTML='❌ PIN must be 6 digits! You have '+pin.length+' digits. Type 123456'; return; }
-  
-  // Save wallet
-  localStorage.setItem('wallet_'+phone, JSON.stringify({phone:phone, name:name, pin:pin, balance:203}));
-  msg.innerHTML='✅ CREATED! Phone:'+phone+' PIN:'+pin+'<br>Now click Sign in again - it will login';
-}
-
-function signInFix(){
-  var phone = document.getElementById('phone').value.trim();
-  var pin = document.getElementById('pin').value.trim();
-  var msg = document.getElementById('msgBox');
-  
-  if(pin.length < 6){ msg.innerHTML='❌ PIN 6 digits needed, e.g. 123456'; return; }
-  
-  var data = localStorage.getItem('wallet_'+phone);
-  if(!data){ msg.innerHTML='❌ No wallet found for '+phone+'. Click Create wallet first'; return; }
-  
-  var w = JSON.parse(data);
-  if(w.pin !== pin){ msg.innerHTML='❌ Wrong PIN. Your saved PIN is '+w.pin; return; }
-  
-  msg.innerHTML='✅ SUCCESS! Welcome '+w.name+'<br>Balance: '+w.balance+' Ksh<br>YOU ARE LOGGED IN';
-  // hide authBox and show wallet page
-  // document.getElementById('authBox').style.display='none';
-}
-
-// Make both buttons work - first click creates, second click logs in
-function createWalletFix(){
-  var phone = document.getElementById('phone').value.trim();
-  var name = document.getElementById('name').value.trim() || 'Collins Letting';
-  var pin = document.getElementById('pin').value.trim();
-  var msg = document.getElementById('msgBox');
-  
-  if(pin.length < 6){ msg.innerHTML='❌ PIN 6 digits! Example 123456. You typed '+pin.length; return; }
-  
-  var existing = localStorage.getItem('wallet_'+phone);
-  if(existing){
-    // Already exists -> try login
-    signInFix();
-  } else {
-    // Create new
-    localStorage.setItem('wallet_'+phone, JSON.stringify({phone:phone, name:name, pin:pin, balance:203}));
-    msg.innerHTML='✅ Wallet created for '+phone+'<br>Click again to Sign in';
-  }
-}
-</script>
-
-<script>
-// WAIT for page to load then attach buttons
-window.onload = function(){
-  const msg = document.getElementById('msg');
-  
-  document.getElementById('regBtn').onclick = function(){
-    let phone = document.getElementById('phone').value.trim();
-    let name = document.getElementById('name').value.trim() || 'Collins';
-    let pin = document.getElementById('pin').value.trim();
-    
-    if(phone.length < 10){ msg.innerText='❌ Phone must be 0790928450'; return; }
-    if(pin.length < 6){ msg.innerText='❌ PIN must be 6 digits e.g. 123456 you typed '+pin; return; }
-    
-    localStorage.setItem('wallet_'+phone, JSON.stringify({phone:phone, name:name, pin:pin, balance:203}));
-    msg.innerText = '✅ Wallet CREATED for '+phone+' with PIN '+pin+' - Now click Sign in';
-  };
-  
-  document.getElementById('loginBtn').onclick = function(){
-    let phone = document.getElementById('phone').value.trim();
-    let pin = document.getElementById('pin').value.trim();
-    
-    if(pin.length < 6){ msg.innerText='❌ PIN 6 digits needed'; return; }
-    
-    let data = localStorage.getItem('wallet_'+phone);
-    if(!data){ msg.innerText='❌ No wallet for '+phone+' Click Create wallet first'; return; }
-    
-    let w = JSON.parse(data);
-    if(w.pin !== pin){ msg.innerText='❌ Wrong PIN. Saved is '+w.pin; return; }
-    
-    msg.innerText='✅ SUCCESS! Welcome '+w.name+' Balance: '+w.balance+' Ksh. YOU ARE LOGGED IN!';
-    // After login, show dashboard: document.getElementById('authBox').style.display='none';
-  };
-  
-  document.getElementById('toAdmin').onclick = function(){
-    msg.innerText='Admin: use phone 0790928450 and PIN 123456 for test';
-  };
-};
-</script>
+  <div id="custAuth">
+    <h2>Sign in or create a wallet</h2>
+    <input id="phone" inputmode="numeric" placeholder="Phone, e.g. 0712345678" autocomplete="username">
+    <input id="name" placeholder="Your name (new wallets only)">
+    <input id="pin" type="password" inputmode="numeric" placeholder="PIN, at least 6 digits" autocomplete="current-password">
+    <button id="loginBtn">Sign in</button>
+    <button id="regBtn" class="alt">Create wallet</button>
+    <button id="toAdmin" class="alt">Admin sign in</button>
+  </div>
+  <div id="adminAuth" hidden>
     <h2>Admin sign in</h2>
     <input id="aemail" type="email" placeholder="Admin email" autocomplete="username">
     <input id="apass" type="password" placeholder="Password" autocomplete="current-password">
