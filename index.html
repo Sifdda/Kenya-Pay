@@ -1,243 +1,179 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>
-// ===== REAL APP INSTALL - NO NEED manifest.json FILE =====
-const manifestData = {
-  "name": "Collins-Pesa Till 0790928450",
-  "short_name": "Collins-Pesa",
-  "start_url": "./",
-  "display": "standalone",
-  "background_color": "#022c22",
-  "theme_color": "#16a34a",
-  "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/1570/1570887.png", "sizes": "512x512", "type": "image/png" }]
-};
-const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
-const manifestURL = URL.createObjectURL(manifestBlob);
-const link = document.createElement('link');
-link.rel = 'manifest';
-link.href = manifestURL;
-document.head.appendChild(link);
-
-// Create Service Worker on the fly
-if ('serviceWorker' in navigator) {
-  const swCode = `self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(()=>{})));`;
-  const swBlob = new Blob([swCode], {type: 'application/javascript'});
-  const swURL = URL.createObjectURL(swBlob);
-  navigator.serviceWorker.register(swURL);
-}
-
-let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  // Show install banner
-  const banner = document.getElementById('installBanner');
-  if(banner) banner.style.display = 'block';
-});
-
-function realDownload(){
-  const html = document.documentElement.outerHTML;
-  const blob = new Blob([html], {type: 'text/html'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'Collins-Pesa.html'; a.click();
-  URL.revokeObjectURL(url);
-}
-
-function installAsApp(){
-  if(deferredPrompt){
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(choice => {
-      if(choice.outcome === 'accepted'){
-        alert('✅ App Installed! Check home screen!');
-      }
-      deferredPrompt = null;
-    });
-  } else {
-    alert('To save like APP:\n\nANDROID:\n1. Click 3 dots ⋮ top right\n2. Click "Install app" or "Add to Home screen"\n\nIPHONE:\n1. Click Share button ⬆️\n2. Click "Add to Home Screen"\n\nThen it will be like M-Pesa - No browser!');
-  }
-}
-
-function shareLink(){
-  const link = 'https://sifdda.github.io/Kenya-Pay/';
-  navigator.clipboard.writeText(link);
-  alert('Link copied!');
-}
-</script>
-
-<!-- INSTALL BANNER HIDDEN UNTIL READY -->
-<div id="installBanner" style="display:none; position:fixed; bottom:15px; left:12px; right:12px; background:#facc15; color:#022c22; padding:16px; border-radius:14px; text-align:center; font-weight:bold; z-index:99999; box-shadow:0 5px 20px black;">
-📲 Collins-Pesa can be installed!<br>
-<button onclick="installAsApp()" style="background:#022c22; color:white; margin-top:8px; padding:12px;">INSTALL NOW AS APP</button>
-</div>
-  <div style="text-align:center; border:2px dashed #facc15; background:#0f5132; padding:14px; border-radius:14px; margin:12px 0;">
-<h3 style="color:#facc15;">📥 Download Collins-Pesa</h3>
-<button onclick="realDownload()" style="background:#facc15; color:#022c22; margin:5px 0;">📁 DOWNLOAD FILE - Save to Phone</button>
-<button onclick="installAsApp()" style="background:white; color:#022c22; margin:5px 0;">📲 INSTALL AS APP - No Browser</button>
-<button onclick="shareLink()" style="background:#16a34a; margin:5px 0;">🔗 SHARE LINK</button>
-</div>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Collins-Pesa FULL - Email Admin Everything - Phone Customer Only Own - Till 0790928450</title>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<title>Wallet (test mode)</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Arial}
-body{background:#022c22;color:#eafff0;padding:12px;max-width:520px;margin:0 auto}
-header{background:#16a34a;padding:14px;border-radius:16px;text-align:center}
-.badge{padding:5px 12px;border-radius:20px;font-weight:bold;font-size:11px;margin:3px;display:inline-block}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
-.card{background:#0f5132;padding:12px;border-radius:14px;margin:12px 0;border:2px solid #16a34a}
-.panel{background:#0f2a1f;padding:14px;border-radius:14px;margin:12px 0;border:1px solid #14532d}
-input,button{width:100%;padding:13px;margin:7px 0;border-radius:12px;border:2px solid #14532d;font-size:15px}
-button{background:#16a34a;color:white;font-weight:bold;border:none;cursor:pointer}
-.log{background:#020617;padding:10px;border-radius:10px;max-height:200px;overflow:auto;font-size:12px}
-.lockScreen{position:fixed;top:0;left:0;right:0;bottom:0;background:#022c22;z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
-.tab{display:flex;gap:8px;margin:12px 0}
-.tab button{flex:1;padding:10px;font-size:13px;border-radius:10px}
-.tab button.active{background:#facc15;color:#022c22}
+:root{--bg:#f3f6f1;--ink:#14231a;--card:#fff;--line:#cfd9cc;--green:#1f7a43;--amber:#b7791f;--red:#b42318}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1a13;--ink:#e6f2e8;--card:#16251b;--line:#2a3d30;--green:#4cc27a;--amber:#e0a93b;--red:#f07167}}
+*{box-sizing:border-box;margin:0}
+body{font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink);max-width:460px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin-bottom:4px}h2{font-size:15px;margin-bottom:8px}
+.test{font-size:13px;color:var(--amber);margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin:12px 0}
+input,button{width:100%;font:inherit;padding:11px;margin:5px 0;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+button{background:var(--green);color:#fff;border:0;font-weight:600;cursor:pointer}
+button.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button.danger{background:var(--red)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--amber);outline-offset:1px}
+.bal{font-size:34px;font-weight:700}
+.row{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--line);font-size:14px;align-items:center}
+.row:first-child{border-top:0}.row div button{width:auto;padding:6px 10px;margin:0 0 0 4px;font-size:13px}
+#msg{position:fixed;left:0;right:0;bottom:0;z-index:9;padding:12px 16px;font-size:15px;font-weight:600;background:var(--amber);color:#fff}
+#msg:empty{display:none}
+body{padding-bottom:70px}
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
+<h1>Wallet</h1>
+<p class="test">Test mode: sandbox money only. Not licensed for real customers.</p>
+<p id="msg" role="status"></p>
 
-<div id="loginScreen" class="lockScreen">
-<div style="background:white;padding:22px;border-radius:20px;text-align:center;max-width:400px;width:100%;">
-<h2 style="color:#16a34a;">💰 Collins-Pesa FULL CODE</h2>
-<p style="color:#333;font-size:11px;margin:6px 0;">One file - Role-based - Till 0790928450<br>Generated By Collins Letting = Can access everything<br>Customer never used email = Only own wallet</p>
-<div class="tab">
-<button id="tabPhone" class="active" onclick="showTab('phone')">📱 Phone Customer - Only Own Wallet</button>
-<button id="tabEmail" onclick="showTab('email')">🔒 Email Admin - Access Everything</button>
-</div>
+<section id="authBox" class="card">
+  <div id="custAuth">
+    <h2>Sign in or create a wallet</h2>
+    <input id="phone" inputmode="numeric" placeholder="Phone, e.g. 0712345678" autocomplete="username">
+    <input id="name" placeholder="Your name (new wallets only)">
+    <input id="pin" type="password" inputmode="numeric" placeholder="PIN, at least 6 digits" autocomplete="current-password">
+    <button id="loginBtn">Sign in</button>
+    <button id="regBtn" class="alt">Create wallet</button>
+    <button id="toAdmin" class="alt">Admin sign in</button>
+  </div>
+  <div id="adminAuth" hidden>
+    <h2>Admin sign in</h2>
+    <input id="aemail" type="email" placeholder="Admin email" autocomplete="username">
+    <input id="apass" type="password" placeholder="Password" autocomplete="current-password">
+    <button id="adminBtn">Sign in as admin</button>
+    <button id="toCust" class="alt">Back</button>
+  </div>
+</section>
 
-<div id="phoneTab">
-<div style="background:#f0fdf4;padding:10px;border-radius:10px;text-align:left;font-size:11px;color:#022c22;margin:8px 0;">
-<b>Customer - Phone Register - Never used email:</b><br>
+<section id="custView" hidden>
+  <div class="card"><div id="who"></div><div class="bal">Ksh <span id="bal">0</span></div></div>
+  <div class="card"><h2>Add money</h2>
+    <input id="addAmt" type="number" min="10" placeholder="Amount in Ksh">
+    <button id="addBtn">Send M-Pesa prompt to my phone</button></div>
+  <div class="card"><h2>Send money (Ksh 3 fee)</h2>
+    <input id="to" inputmode="numeric" placeholder="Receiver phone">
+    <input id="amt" type="number" min="10" placeholder="Amount in Ksh">
+    <button id="sendBtn">Send</button></div>
+  <div class="card"><h2>Recent transfers</h2><div id="hist"></div></div>
+  <button class="alt" data-out>Sign out</button>
+</section>
 
-</div>
-<input id="regPhone" placeholder="Your phone 0712..." value="0790928450">
-<input id="regName" placeholder="Your name e.g. John" value="Collins Letting">
-<input id="regPin" type="password" inputmode="numeric" maxlength="4" placeholder="Create 4-digit PIN">
-<button onclick="registerSelf()" style="background:#16a34a;">📱 Register Phone - Only Own Wallet - No Email</button>
-<div style="font-size:10px;color:#666;margin-top:6px;">Login with phone + PIN - Can access only own wallet - Secure - No email needed</div>
-</div>
-
-<div id="emailTab" style="display:none;">
- <div style="background:#fef2f2;padding:10px;border-radius:10px;text-align:left;font-size:11px;color:#7f1d1d;margin:8px 0;border:2px solid #ef4444;">
-  <b>🔒 Email Admin - Can access everything - Float 15000, Cash 8000:</b><br>
-  Role: Admin - Everything - Secure! Wrong email BLOCKED!
- </div>
- <div style="text-align:left;margin:10px 0 4px 0;font-size:12px;font-weight:bold;color:#7f1d1d;">Admin Email:</div>
- <input id="agentEmail" type="text" value="" placeholder="" autocomplete="off" style="margin-bottom:10px;background:white;">
- <div style="text-align:left;margin:10px 0 4px 0;font-size:12px;font-weight:bold;color:#7f1d1d;">Admin PIN:</div>
- <input id="agentPin" type="password" value="" placeholder="" autocomplete="off" style="margin-bottom:10px;background:white;" inputmode="numeric">
- <input id="agentPassword" type="hidden" value="0790928450">
- <button onclick="agentEmailLogin()" style="background:#ef4444;font-weight:bold;font-size:14px;padding:12px;">🔒 Login Email Admin - Access Everything</button>
- <p id="emailError" style="color:red;display:none;font-size:11px;margin-top:8px;background:#fee2e2;padding:10px;border-radius:8px;border:2px solid #ef4444;"></p>
-</div>
-
-<div style="font-size:10px;color:#666;margin-top:10px;text-align:left;background:#f9fafb;padding:8px;border-radius:8px;">
-<b>Full Code - One File - GitHub - Role-based:</b><br>
-
-- Customer: Never used email while registering → Phone 0712 + PIN 1234 → Can access ONLY own wallet balance → Cannot access everything → Secure!
-</div>
-</div>
-</div>
-
-<header>
-<h1 id="headerTitle">💰 COLLINS FULL - Till 0790928450</h1>
-<div>
-<span id="roleBadge" class="badge" style="background:#16a34a;color:white;">Role: Not logged</span>
-<span class="badge" style="background:#facc15;color:#022c22;">Till 0790928450</span>
-<span class="badge" style="background:#25D366;color:white;">3 Bob Fee</span>
-</div>
-<div style="font-size:11px;margin-top:6px;">Logged: <span id="loggedUser">Not logged</span> | Role: <span id="loggedRole">-</span></div>
-</header>
-
-<div id="customerView" style="display:none;">
-<div class="card" style="border:3px solid #facc15;background:#14532d;"><h3>👋 Hello <span id="userName"></span></h3><p>Phone <span id="userPhone"></span> - Role: Phone Customer - Only Own Wallet - Cannot access everything</p><div style="background:#022c22;padding:14px;border-radius:12px;margin:10px 0;text-align:center;"><div style="font-size:12px;">YOUR Wallet Balance - Private - Only You - Cannot access float 15000</div><div style="font-size:32px;font-weight:bold;color:#facc15;">Ksh <span id="walletBalance">0</span></div></div><div style="font-size:11px;background:#020617;padding:8px;border-radius:8px;">🔒 You CANNOT see Collins float 15000, cash 8000, withdraw - Only own wallet - Secure! You never used email while registering!</div></div>
-<div class="card" style="border:2px solid #facc15;"><h3>💰 Add Money - From YOUR M-Pesa to Till 0790928450 - No Cash to Agent!</h3><input id="addAmount" type="number" placeholder="Amount to add e.g. 203"><button onclick="addMoneyStep1()" style="background:#facc15;color:#022c22;">1️⃣ I Sent Ksh to Till 0790928450 - Enter Code</button><div id="addCodeDiv" style="display:none;"><input id="addCode" placeholder="Enter REAL M-Pesa code QGH..."><button onclick="verifyAddMoney()">2️⃣ Verify Code - Add to MY Wallet</button></div></div>
-<div class="card" style="border:2px solid #16a34a;"><h3>📤 Send to Receiver - From YOUR Wallet - No Cash to Agent!</h3><input id="sendTo" placeholder="Receiver 0722..."><input id="sendAmount" type="number" placeholder="Amount e.g. 200"><button onclick="sendDirect()" style="background:#16a34a;font-size:17px;">🤖 SEND Ksh to Receiver Direct - From MY Wallet</button></div>
-<div id="status" class="log">Customer secure - Phone register - Only own wallet - Cannot access everything</div>
-<button onclick="logout()" style="background:#ef4444;margin-top:12px;">Logout</button>
-</div>
-
-<div id="adminView" style="display:none;">
-<div style="background:#16a34a;color:white;padding:12px;border-radius:12px;text-align:center;font-weight:bold;margin:10px 0;border:3px solid #facc15;">🔒 EMAIL ADMIN: You generated using email - Can access everything - Float 15000, Cash 8000, Withdraw, All customers - Customer phone never used email - Only own wallet - Secure!</div>
-<div class="grid"><div class="card">Float<br><b id="floatBalance">15000</b><br><small id="floatStatus">Admin Only</small></div><div class="card">Cash<br><b id="cashBalance">8000</b></div><div class="card">Till<br><b id="tillReceived">0</b></div><div class="card">Profit<br><b id="todayProfit">Ksh 0</b><br><small id="todayTxCount">0 tx</small></div></div>
-<div class="panel" style="border:3px solid #ef4444;background:#1a0f0f;"><h3>🔒 Withdraw Savings - Email Admin Only - Triple Protected - Customer Cannot!</h3><input id="withdrawAmount" type="number" placeholder="Amount to withdraw e.g. 1000"><input id="withdrawTo" placeholder="Withdraw to YOUR M-Pesa 0712..."><input id="withdrawPin" type="password" placeholder="Confirm PIN 0790928450"><button onclick="agentWithdraw()" style="background:#ef4444;">🔒 WITHDRAW - Email Admin Only - Can Access Everything</button><div style="font-size:10px;margin-top:8px;background:#020617;padding:8px;border-radius:8px;">🔒 Role: You email generated → Can access everything → Float 15000 Cash 8000 Withdraw All<br>🔓 Customer phone never used email → Only own wallet 203 → Cannot access everything → Secure!</div></div>
-<div class="panel" style="border:2px solid #facc15;"><h3>🔥 Firebase Live - Phone Customers - Cannot Access Everything - Secure</h3><div style="background:#020617;padding:10px;border-radius:8px;font-size:12px;"><div><b>Firebase:</b> <span id="firebaseStatus">Connecting...</span></div><div><b>Admin:</b> <span id="adminEmailDisplay">-</span> - Can access everything</div><div><b>Customers Phone:</b> <span id="userCount">0</span> - Only own wallet - Cannot access everything</div><div><b>Pending:</b> <span id="pendingCount">0</span> - Admin auto 3 sec</div></div><div id="pendingList" style="background:#020617;padding:10px;border-radius:8px;margin-top:8px;max-height:120px;overflow:auto;">Listening...</div></div>
-<div class="panel"><h3>📋 Admin Log - Access Everything - Float Secure</h3><div id="log" class="log">🔒 EMAIL ADMIN READY - Can access everything - Customer phone only own wallet<br></div></div>
-<button onclick="logout()" style="background:#022c22;margin-top:12px;">Logout Admin - Lock</button>
-</div>
-
-<div id="receiptSection" style="display:none;background:white;color:#022c22;padding:20px;border-radius:16px;margin:15px 0;border:3px solid #16a34a;"><div style="text-align:center;border-bottom:2px dashed #16a34a;padding-bottom:10px;"><h2>🧾 COLLINS FULL RECEIPT</h2><p>Till 0790928450 | <span id="receiptMode">FULL CODE</span> | Role-based Secure</p></div><div id="receiptContent" style="font-size:14px;line-height:1.9;"></div><div style="text-align:center;margin:10px 0;"><canvas id="receiptQR" width="150" height="150" style="border:2px solid #16a34a;"></canvas><p style="font-size:10px;">Receipt <span id="receiptNo"></span></p></div><div style="display:flex;gap:8px;"><button onclick="shareReceipt()" style="flex:1;background:#25D366;">WA</button><button onclick="printReceipt()" style="flex:1;background:#022c22;">Print</button><button onclick="autoSendToReceiver(lastReceiptData)" style="flex:1;background:#16a34a;">🤖 Re-Send to Receiver</button></div></div>
-<audio id="beepSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
+<section id="adminView" hidden>
+  <div class="card"><h2>Queued transfers</h2><div id="queue"></div></div>
+  <button class="alt" data-out>Sign out</button>
+</section>
 
 <script>
-function safeParse(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}function safeSave(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}let lastActivity=Date.now(),pinLockTimer,currentAdminEmail=null,currentUser=null,pendingAddAmount=0,currentRole=null;
-function showTab(tab){document.getElementById('phoneTab').style.display=tab==='phone'?'block':'none';document.getElementById('emailTab').style.display=tab==='email'?'block':'none';document.getElementById('tabPhone').classList.toggle('active',tab==='phone');document.getElementById('tabEmail').classList.toggle('active',tab==='email');}
-function startAutoLogout(){clearInterval(pinLockTimer);pinLockTimer=setInterval(()=>{if(Date.now()-lastActivity>300000){document.getElementById('loginScreen').style.display='flex';clearInterval(pinLockTimer);}},10000);}['click','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,()=>lastActivity=Date.now()));
-let sends=safeParse('3bob_send_full',[]),usedCodes=safeParse('used_mpesa_codes_full',[]),floatBalance=safeParse('float_balance_full',15000),cashBalance=safeParse('cash_balance_full',8000),tillReceived=safeParse('till_received_full',0),lastReceiptData=null;
+if (typeof firebase === "undefined") {
+  document.getElementById("msg").textContent = "Cannot load Firebase. Check your internet connection and reload.";
+  throw new Error("Firebase library not loaded");
+}
+// Paste your NEW Firebase project's web config here (Project settings > Your apps).
+firebase.initializeApp({
+  apiKey: "PASTE", authDomain: "PASTE.firebaseapp.com", databaseURL: "PASTE",
+  projectId: "PASTE", appId: "PASTE"
+});
+const auth = firebase.auth(), db = firebase.database(), fn = firebase.functions();
+const $ = (id) => document.getElementById(id);
+const call = (name, data) => fn.httpsCallable(name)(data).then((r) => r.data);
+const say = (t) => { $("msg").textContent = t; };
+const fail = (e) => say(e && e.message ? e.message : "Something went wrong. Try again.");
+if (firebase.app().options.apiKey === "PASTE") say("Not set up yet: paste your Firebase config into index.html.");
+const mail = (p) => p.trim() + "@collinspesa.app";
+const PHONE = /^(07|01)\d{8}$/;
+let stop = [];
 
-const firebaseConfig={ apiKey: "AIzaSyA3rqKiUrn1Tr7gvo03VMGYEzJgG2QGqtQ", authDomain: "amazinggracecomments-e68ea.firebaseapp.com", databaseURL: "https://amazinggracecomments-e68ea-default-rtdb.firebaseio.com", projectId: "amazinggracecomments-e68ea", storageBucket: "amazinggracecomments-e68ea.firebasestorage.app", messagingSenderId: "494112674814", appId: "1:494112674814:web:c31db229b6ed459d0b26af", measurementId: "G-0PPXDFKYVZ" }; 
-firebase.initializeApp(firebaseConfig);const db=firebase.database(),auth=firebase.auth(); 
-function registerSelf(){const phone=document.getElementById('regPhone').value.trim(),name=document.getElementById('regName').value.trim(),pin=document.getElementById('regPin').value.trim();if(!phone||!name||!pin||pin.length!==4){alert('Fill phone, name, 4-digit PIN');return;}db.ref('users/'+phone).once('value').then(snap=>{if(snap.exists()){const u=snap.val();if(u.pin!==pin){alert('Wrong PIN for phone '+phone);return;}currentUser=u;currentRole='customer';localStorage.setItem('collins_full_user',JSON.stringify({...u,role:'customer'}));showCustomerView();return;}const newUser={phone,name,pin,balance:0,createdAt:new Date().toLocaleString(),role:'customer',emailUsed:false};db.ref('users/'+phone).set(newUser).then(()=>{currentUser=newUser;currentRole='customer';localStorage.setItem('collins_full_user',JSON.stringify({...newUser,role:'customer'}));showCustomerView();});});} 
-function showCustomerView(){document.getElementById('loginScreen').style.display='none';document.getElementById('customerView').style.display='block';document.getElementById('adminView').style.display='none';document.getElementById('headerTitle').textContent='📱 CUSTOMER - Only Own Wallet - Cannot Access Everything';document.getElementById('roleBadge').textContent='Role: Phone Customer - Only Own';document.getElementById('roleBadge').style.background='#facc15';document.getElementById('roleBadge').style.color='#022c22';document.getElementById('loggedUser').textContent=currentUser.phone+' '+currentUser.name;document.getElementById('loggedRole').textContent='Phone Customer - Never used email - Can access ONLY own wallet Ksh '+(currentUser.balance||0)+' - Cannot access float 15000, cash 8000, withdraw';document.getElementById('userName').textContent=currentUser.name;document.getElementById('userPhone').textContent=currentUser.phone;document.getElementById('walletBalance').textContent=currentUser.balance||0;db.ref('users/'+currentUser.phone+'/balance').on('value',snap=>{const bal=snap.val()||0;currentUser.balance=bal;document.getElementById('walletBalance').textContent=bal;});lastActivity=Date.now();startAutoLogout();} 
+function show(view) {
+  $("authBox").hidden = view !== null;
+  $("custView").hidden = view !== "cust";
+  $("adminView").hidden = view !== "admin";
+}
+function row(text, buttons) {
+  const r = document.createElement("div"); r.className = "row";
+  const s = document.createElement("span"); s.textContent = text; r.appendChild(s);
+  if (buttons) { const d = document.createElement("div"); buttons.forEach((b) => d.appendChild(b)); r.appendChild(d); }
+  return r;
+}
+function btn(label, cls, fnc) {
+  const b = document.createElement("button"); b.textContent = label; if (cls) b.className = cls; b.onclick = fnc; return b;
+}
+function listen(ref, cb) { ref.on("value", cb); stop.push(() => ref.off("value", cb)); }
 
-// ✅ SECURE - BLOCKS WRONG EMAIL
-function agentEmailLogin(){
-  const email=document.getElementById('agentEmail').value.trim().toLowerCase();
-  const password=document.getElementById('agentPassword').value.trim();
-  const pin=document.getElementById('agentPin').value.trim();
-  const err=document.getElementById('emailError');
-  if(!email||!password){
-    err.style.display='block';
-    err.textContent='❌ Enter email AND password! Wrong email cannot login!';
-    alert('❌ BLOCKED! Enter correct email and password');
-    return;
+$("toAdmin").onclick = () => { $("custAuth").hidden = true; $("adminAuth").hidden = false; say(""); };
+$("toCust").onclick = () => { $("custAuth").hidden = false; $("adminAuth").hidden = true; say(""); };
+
+$("regBtn").onclick = async () => {
+  const phone = $("phone").value.trim(), name = $("name").value.trim(), pin = $("pin").value;
+  if (!PHONE.test(phone) || !name || pin.length < 6) return say("Enter a valid phone, your name and a PIN of 6+ digits.");
+  try {
+    await auth.createUserWithEmailAndPassword(mail(phone), pin);
+    await call("setupProfile", { name, phone });
+    say("");
+  } catch (e) { fail(e); }
+};
+$("loginBtn").onclick = async () => {
+  const phone = $("phone").value.trim();
+  if (!PHONE.test(phone)) return say("Enter a valid phone number.");
+  try { await auth.signInWithEmailAndPassword(mail(phone), $("pin").value); say(""); }
+  catch (e) { say("Wrong phone or PIN."); }
+};
+$("adminBtn").onclick = async () => {
+  try { await auth.signInWithEmailAndPassword($("aemail").value.trim(), $("apass").value); say(""); }
+  catch (e) { say("Wrong email or password."); }
+};
+document.querySelectorAll("[data-out]").forEach((b) => (b.onclick = () => auth.signOut()));
+
+$("addBtn").onclick = async () => {
+  try { await call("stkPush", { amount: $("addAmt").value }); say("Check your phone and enter your M-Pesa PIN. Your balance updates automatically."); }
+  catch (e) { fail(e); }
+};
+$("sendBtn").onclick = async () => {
+  try { await call("sendMoney", { to: $("to").value.trim(), amount: $("amt").value }); say("Transfer queued."); $("amt").value = ""; }
+  catch (e) { fail(e); }
+};
+
+auth.onAuthStateChanged(async (u) => {
+  stop.forEach((f) => f()); stop = [];
+  show(null);
+  if (!u) return;
+  const tok = await u.getIdTokenResult(true);
+  if (tok.claims.admin === true) {
+    show("admin");
+    listen(db.ref("transfers").orderByChild("status").equalTo("QUEUED"), (s) => {
+      const q = $("queue"); q.replaceChildren();
+      if (!s.exists()) return q.appendChild(row("No queued transfers."));
+      s.forEach((c) => {
+        const t = c.val(), id = c.key;
+        q.appendChild(row(`Ksh ${t.amount} to ${t.to}`, [
+          btn("Sent", "", () => call("adminResolve", { id, status: "SENT" }).catch(fail)),
+          btn("Refund", "danger", () => call("adminResolve", { id, status: "REFUNDED" }).catch(fail)),
+        ]));
+      });
+    });
+  } else {
+    show("cust");
+    listen(db.ref("users/" + u.uid), (s) => {
+      const d = s.val();
+      $("who").textContent = d ? d.name + " · " + d.phone : "Setting up your wallet...";
+      $("bal").textContent = d ? d.balance : 0;
+    });
+    listen(db.ref("userTransfers/" + u.uid).limitToLast(10), (s) => {
+      const h = $("hist"); h.replaceChildren();
+      if (!s.exists()) return h.appendChild(row("No transfers yet."));
+      const items = []; s.forEach((c) => { items.unshift(c.val()); });
+      items.forEach((t) => h.appendChild(row(`Ksh ${t.amount} to ${t.to}`, [Object.assign(document.createElement("small"), { textContent: t.status })])));
+    });
   }
-  if(pin!=='0790928450'&&pin!=='1234'){
-    err.style.display='block';
-    err.textContent='Wrong PIN! Need 0790928450';
-    return;
-  }
-  auth.signInWithEmailAndPassword(email,password).then(()=>{
-    currentAdminEmail=email;currentRole='admin';
-    localStorage.setItem('collins_full_user',JSON.stringify({email,role:'admin'}));
-    showAdminView();
-  }).catch(e=>{
-    err.style.display='block';
-    err.textContent='❌ Wrong email or password! Cannot login with wrong email: '+e.message;
-    alert('❌ BLOCKED! Wrong email cannot login: '+e.message);
-  });
-} 
-
-// ✅ FIXED - TEST MODE DISABLED - THIS WAS THE BUG!
-function agentEmailLoginTestMode(){
-  const err=document.getElementById('emailError');
-  err.style.display='block';
-  err.textContent='❌ TestMode DISABLED! Wrong email BLOCKED for security!';
-  alert('❌ TestMode DISABLED! Wrong email BLOCKED! Use real email + password + PIN');
-  return false;
-} 
-
-function showAdminView(){document.getElementById('loginScreen').style.display='none';document.getElementById('customerView').style.display='none';document.getElementById('adminView').style.display='block';document.getElementById('headerTitle').textContent='🔒 EMAIL ADMIN - Can Access Everything - Float, Cash, Withdraw';document.getElementById('roleBadge').textContent='Role: Email Admin - Access Everything';document.getElementById('roleBadge').style.background='#ef4444';document.getElementById('roleBadge').style.color='white';document.getElementById('loggedUser').textContent=currentAdminEmail;document.getElementById('loggedRole').textContent='Email Admin - You generated using email - Can access everything: Float '+floatBalance+' Cash '+cashBalance+' Withdraw All customers - Secure!';document.getElementById('adminEmailDisplay').textContent=currentAdminEmail+' - Can access everything';document.getElementById('floatBalance').textContent=floatBalance;document.getElementById('cashBalance').textContent=cashBalance;document.getElementById('tillReceived').textContent=tillReceived;const total=sends.reduce((s,x)=>s+(x.fee||3),0);document.getElementById('todayProfit').textContent='Ksh '+total;document.getElementById('todayTxCount').textContent=sends.length+' tx';document.getElementById('log').innerHTML+=`<div>✅ Email Admin ${currentAdminEmail} - You generated using email - Can access everything - Float ${floatBalance} Cash ${cashBalance} - Customer phone never used email - Only own wallet - Secure role!</div>`;lastActivity=Date.now();startAutoLogout();} 
-function addMoneyStep1(){const amount=parseInt(document.getElementById('addAmount').value);if(!amount||amount<10){alert('Enter amount e.g. 203');return;}pendingAddAmount=amount;document.getElementById('addCodeDiv').style.display='block';document.getElementById('status').innerHTML=`💰 Send Ksh ${amount} to Till 0790928450 via Buy Goods → Enter code QGH... below - Your wallet only - Cannot access float`;} 
-function verifyAddMoney(){const code=document.getElementById('addCode').value.trim().toUpperCase().replace(/\s/g,'');if(!code||code.length!==10){alert('Enter REAL 10-char code QGH...');return;}if(!/^[A-Z][A-Z0-9]{9}$/.test(code)){alert('Fake code');return;}db.ref('usedCodes/'+code).once('value').then(snap=>{if(snap.exists()){alert('Code already used');return;}const newBalance=(currentUser.balance||0)+pendingAddAmount;db.ref('users/'+currentUser.phone).update({balance:newBalance}).then(()=>{db.ref('usedCodes/'+code).set({code,phone:currentUser.phone,amount:pendingAddAmount,time:new Date().toLocaleString()});db.ref('tillTransactions/'+code).set({code,phone:currentUser.phone,amount:pendingAddAmount,time:new Date().toLocaleString(),verified:true});currentUser.balance=newBalance;document.getElementById('walletBalance').textContent=newBalance;document.getElementById('status').innerHTML=`✅ Added Ksh ${pendingAddAmount} to YOUR wallet only Code ${code} - Balance ${newBalance} - Cannot access float 15000 - Secure!`;document.getElementById('addCodeDiv').style.display='none';document.getElementById('addAmount').value='';document.getElementById('addCode').value='';floatBalance+=pendingAddAmount;tillReceived+=pendingAddAmount;safeSave('float_balance_full',floatBalance);safeSave('till_received_full',tillReceived);});});} 
-function sendDirect(){const to=document.getElementById('sendTo').value.trim(),amount=parseInt(document.getElementById('sendAmount').value);if(!to||!amount){alert('Enter receiver and amount');return;}if((currentUser.balance||0)<amount){alert(`Balance low ${currentUser.balance} need ${amount} - Cannot access float 15000 - Only own wallet - Secure!`);return;}const requestId='REQ_'+Date.now()+'_'+Math.random().toString(36).substring(2,5),mpesaCode='QGH'+Math.random().toString(36).substring(2,9).toUpperCase(),newBalance=currentUser.balance-amount;db.ref('users/'+currentUser.phone).update({balance:newBalance}).then(()=>{const requestData={from:currentUser.phone,fromName:currentUser.name,to:to,amount:amount,mpesaCode:mpesaCode,requestId:requestId,time:new Date().toLocaleString(),status:'PENDING',type:'SEND_TO_RECEIVER_FULL',walletDeducted:true,role:'customer',emailUsed:false};db.ref('requests/'+requestId).set(requestData).then(()=>{document.getElementById('status').innerHTML=`⏳ Sending Ksh ${amount} to ${to} - Your wallet only ${newBalance} - Cannot access float - Auto 3 sec`;db.ref('requests/'+requestId).on('value',snap=>{const data=snap.val();if(data&&data.status==='COMPLETED'){document.getElementById('status').innerHTML=`✅ COMPLETED Ksh ${amount} to ${to} Receipt ${data.receiptNo} Balance ${newBalance} - Only own wallet - Cannot access everything - Secure!`;}});setTimeout(()=>{db.ref('requests/'+requestId).once('value').then(snap=>{const d=snap.val();if(d&&d.status==='PENDING'){const receiptNo='CP-'+Date.now().toString().slice(-6);db.ref('requests/'+requestId).update({status:'COMPLETED',receiptNo:receiptNo,mode:'SELF_SERVICE_CUSTOMER_ONLY_OWN'});}});},10000);});});} 
-function agentWithdraw(){const amount=parseInt(document.getElementById('withdrawAmount').value),pin=document.getElementById('withdrawPin').value.trim(),to=document.getElementById('withdrawTo').value.trim();if(currentRole!=='admin'||!currentAdminEmail){alert('Not Email Admin! Only you generated using email can access everything and withdraw - Customer phone cannot!');return;}if(pin!=='0790928450'&&pin!=='1234'){alert('Wrong PIN! Only email admin '+currentAdminEmail+' can withdraw - Customer phone cannot access everything!');return;}if(!amount||amount>floatBalance){alert(`Float low ${floatBalance}`);return;}if(!to||!to.startsWith('07')){alert('Enter your M-Pesa 07...');return;}if(!confirm(`Withdraw Ksh ${amount} from float ${floatBalance} to ${to}? Admin ${currentAdminEmail} - Can access everything`))return;floatBalance-=amount;safeSave('float_balance_full',floatBalance);document.getElementById('floatBalance').textContent=floatBalance;document.getElementById('log').innerHTML+=`<div>🔒 WITHDRAW Ksh ${amount} to ${to} - Admin ${currentAdminEmail} - Can access everything - Customer phone cannot! Float now ${floatBalance}</div>`;const ussd=`*334*1*${to}*${amount}#`;if(confirm(`Open dialer ${ussd}? Admin can access everything`)){window.location.href=`tel:${encodeURIComponent(ussd)}`;}document.getElementById('withdrawAmount').value='';document.getElementById('withdrawPin').value='';document.getElementById('withdrawTo').value='';} 
-function autoSendToReceiver(data){if(!data)return;const receiver=data.to,amount=data.amount;document.getElementById('log').innerHTML+=`<div style="color:#4ade80;">🤖 AUTO-SENDING Ksh ${amount} to ${receiver} - Admin ${currentAdminEmail||'auto'}</div>`;try{document.getElementById('beepSound').play();}catch(e){}const ussd=`*334*1*${receiver}*${amount}#`;setTimeout(()=>{if(confirm(`Send Ksh ${amount} to ${receiver}? USSD ${ussd}`)){window.location.href=`tel:${encodeURIComponent(ussd)}`;}},500);} 
-function generateReceipt(data){lastReceiptData=data;const div=document.getElementById('receiptSection'),content=document.getElementById('receiptContent'),receiptNo='CP-FULL-'+Date.now().toString().slice(-6);document.getElementById('receiptNo').textContent=receiptNo;document.getElementById('receiptMode').textContent=data.mode||'FULL CODE - Role-based';const now=new Date().toLocaleString('en-KE');content.innerHTML=`<div><b>Receipt:</b> ${receiptNo}</div><div><b>Role:</b> ${currentRole} ${currentAdminEmail||currentUser.phone}</div><div><b>From:</b> ${data.from}</div><div><b>To:</b> ${data.to}</div><div><b>Amount:</b> Ksh ${data.amount}</div><div><b>Code:</b> ${data.mpesaCode}</div>`;const canvas=document.getElementById('receiptQR'),ctx=canvas.getContext('2d');ctx.fillStyle='white';ctx.fillRect(0,0,150,150);ctx.fillStyle='#022c22';ctx.font='bold 11px monospace';ctx.fillText(receiptNo,10,15);div.style.display='block';} 
-function shareReceipt(){if(!lastReceiptData)return;const rn=document.getElementById('receiptNo').textContent;window.open(`https://wa.me/?text=Collins Full Receipt ${rn} From ${lastReceiptData.from} To ${lastReceiptData.to} Amount ${lastReceiptData.amount}`,'_blank');} 
-function printReceipt(){window.print();} 
-function logout(){localStorage.removeItem('collins_full_user');location.reload();} 
-db.ref('.info/connected').on('value',snap=>{document.getElementById('firebaseStatus').textContent=snap.val()?'✅ Connected - Amazing Grace amazinggracecomments-e68ea - Email Admin can access everything, Phone Customer only own':'❌ Offline - Create Database!';}); 
-db.ref('users').on('value',snap=>{document.getElementById('userCount').textContent=snap.numChildren()+' - Phone only own - Cannot access everything';}); 
-db.ref('requests').on('value',snap=>{const all=snap.val()||{},pending=Object.values(all).filter(r=>r.status==='PENDING'&&r.type!=='ADD_MONEY');document.getElementById('pendingCount').textContent=pending.length;const listEl=document.getElementById('pendingList');if(!pending.length){listEl.innerHTML='No pending - Email Admin can access everything, Phone Customer only own wallet - Secure';return;}listEl.innerHTML=pending.slice(-10).reverse().map(p=>`<div style="background:#1a0f0f;padding:6px;border-radius:6px;margin:4px 0;"><b>${p.from} → ${p.to} Ksh ${p.amount}</b> - ${p.role||'customer'} - Only own wallet</div>`).join('');}); 
-db.ref('requests').on('child_added',snap=>{const data=snap.val();if(!data||data.status!=='PENDING')return;if(data.type&&data.type==='ADD_MONEY')return;if(currentRole!=='admin')return;document.getElementById('log').innerHTML+=`<div style="color:#facc15;">🔥 Request ${data.from} → ${data.to} Ksh ${data.amount} - Phone Customer only own - Admin ${currentAdminEmail} can access everything - Auto 3 sec</div>`;try{document.getElementById('beepSound').play();}catch(e){}if(usedCodes.includes(data.mpesaCode)){db.ref('requests/'+data.requestId).update({status:'FAILED'});return;}if(floatBalance<data.amount){db.ref('requests/'+data.requestId).update({status:'FAILED',reason:'Float low'});return;}setTimeout(()=>{usedCodes.push(data.mpesaCode);safeSave('used_mpesa_codes_full',usedCodes.slice(-1000));floatBalance-=data.amount;safeSave('float_balance_full',floatBalance);document.getElementById('floatBalance').textContent=floatBalance;const receiptNo='CP-FULL-'+Date.now().toString().slice(-6),sendData={from:data.from,fromName:data.fromName,to:data.to,amount:data.amount,fee:3,mpesaCode:data.mpesaCode,time:new Date().toLocaleString(),status:'FULL CODE - Email Admin Everything - Phone Only Own'};sends.push(sendData);safeSave('3bob_send_full',sends);db.ref('requests/'+data.requestId).update({status:'COMPLETED',receiptNo:receiptNo,adminEmail:currentAdminEmail});document.getElementById('log').innerHTML+=`<div style="color:#4ade80;">✅ Auto-completed ${data.from} → ${data.to} Ksh ${data.amount} Receipt ${receiptNo} Float now ${floatBalance} - Admin can access everything, Customer only own</div>`;generateReceipt(sendData);autoSendToReceiver(sendData);},3000);}); 
-const saved=localStorage.getItem('collins_full_user');if(saved){try{const u=JSON.parse(saved);if(u.role==='admin'){currentAdminEmail=u.email;currentRole='admin';showAdminView();}else{currentUser=u;currentRole='customer';db.ref('users/'+u.phone).once('value').then(snap=>{if(snap.exists()){currentUser=snap.val();showCustomerView();}});}}catch(e){}} 
-</script> 
-</body> 
+});
+</script>
+</body>
 </html>
