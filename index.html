@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Wallet - with Forgot PIN</title>
+<title>Wallet - with Forgot PIN + Download</title>
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQ29sbGlucyBXYWxsZXQiLCJzaG9ydF9uYW1lIjoiV2FsbGV0Iiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmM2Y2ZjEiLCJ0aGVtZV9jb2xvciI6IiMxZjdhNDMiLCJpY29ucyI6W3sic3JjIjoiaHR0cHM6Ly9jZG4taWNvbnMtcG5nLmZsYXRpY29uLmNvbS81MTIvMjg0NS8yODQ1NjYxLnBuZyIsInNpemVzIjoiNTEyeDUxMiIsInR5cGUiOiJpbWFnZS9wbmcifV19">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -16,14 +17,21 @@ h1{font-size:20px} .test{font-size:13px;color:var(--amber);margin-bottom:12px}
 input,button{width:100%;font:inherit;padding:11px;margin:5px 0;border-radius:8px;border:1px solid var(--line)}
 button{background:var(--green);color:#fff;border:0;font-weight:600;cursor:pointer} button:disabled{opacity:.6}
 button.alt{background:transparent;color:var(--ink);border:1px solid var(--line)} button.link{background:transparent;color:var(--green);text-decoration:underline;border:0}
+button.download{background:#0b5394;font-size:16px;padding:14px;margin:10px 0;animation:pulse 2s infinite}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
 #msg{position:fixed;left:0;right:0;bottom:0;z-index:9;padding:12px 16px;font-weight:600;background:var(--amber);color:#fff} #msg:empty{display:none}
 .bal{font-size:34px;font-weight:700} .row{display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)} [hidden]{display:none!important}
-body{padding-bottom:70px}
+body{padding-bottom:80px}
 </style>
 </head>
 <body>
 <h1>Wallet</h1>
 <p class="test">Test mode: sandbox money only.</p>
+
+<!-- NEW DOWNLOAD BUTTON - TOP -->
+<button id="downloadBtn" class="download">📥 Download App to Phone</button>
+<p id="installHint" style="font-size:12px;text-align:center;color:#666;margin-bottom:10px;display:none">Tap Share → Add to Home Screen for iPhone</p>
+
 <p id="msg"></p>
 
 <section id="authBox" class="card">
@@ -40,7 +48,7 @@ body{padding-bottom:70px}
 
 <div id="forgotBox" hidden>
 <h2>Reset your PIN</h2>
-<p style="font-size:14px;margin-bottom:8px">Enter your phone and choose new 6-digit PIN. For test mode, this will work if you remember your name.</p>
+<p style="font-size:14px;margin-bottom:8px">Enter your phone and choose new 6-digit PIN.</p>
 <input id="fPhone" placeholder="Phone e.g. 0790928450" value="0790928450">
 <input id="fName" placeholder="Your name to confirm e.g. Collins Letting" value="Collins Letting">
 <input id="fNewPin" type="password" placeholder="New PIN 6 digits e.g. 123456">
@@ -65,6 +73,72 @@ body{padding-bottom:70px}
 </section>
 
 <script>
+// === DOWNLOAD TO PHONE LOGIC ===
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  $("downloadBtn").textContent = "📥 Install App to Phone - Click Here";
+  $("downloadBtn").style.background = "#1f7a43";
+});
+
+$("downloadBtn").onclick = async () => {
+  if (deferredPrompt) {
+    // Android Chrome - Show install prompt
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      say("✅ App installed to home screen!");
+    } else {
+      say("Install cancelled");
+    }
+    deferredPrompt = null;
+  } else {
+    // iPhone or no prompt - Show instructions + Download HTML file
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+      $("installHint").style.display = "block";
+      say("iPhone: Tap Share button (square with arrow) → Add to Home Screen");
+      $("installHint").textContent = "📱 iPhone: Tap Share ⬆️ → Add to Home Screen → Add";
+    } else {
+      // Download HTML file to phone
+      const htmlContent = document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = "CollinsWallet.html";
+      a.click();
+      URL.revokeObjectURL(url);
+      say("✅ File downloaded! Open file manager → Downloads → Tap CollinsWallet.html → Add to Home Screen");
+      
+      // Also show PWA instruction
+      setTimeout(() => {
+        if (confirm("Want to install as real App icon? Click OK then in browser menu click 'Add to Home Screen' or 'Install App'")) {
+          $("installHint").style.display = "block";
+          $("installHint").textContent = "Android: Menu ⋮ → Add to Home screen / Install App";
+        }
+      }, 1000);
+    }
+  }
+};
+
+// Detect if already installed
+window.addEventListener('appinstalled', () => {
+  say("✅ Wallet installed to phone!");
+  $("downloadBtn").textContent = "✅ App Installed!";
+  $("downloadBtn").disabled = true;
+});
+
+// Service Worker for offline PWA
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('data:text/javascript;base64,' + btoa(`
+    self.addEventListener('install', e => self.skipWaiting());
+    self.addEventListener('activate', e => self.clients.claim());
+    self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(()=>caches.match(e.request))));
+  `)).catch(()=>{});
+}
+
 firebase.initializeApp({
   apiKey: "AIzaSyA3rqKiUrn1Tr7gvo03VMGYEzJgG2QGqtQ",
   authDomain: "amazinggracecomments-e68ea.firebaseapp.com",
@@ -76,7 +150,7 @@ firebase.initializeApp({
 });
 const auth=firebase.auth(), db=firebase.database();
 const $=id=>document.getElementById(id);
-const say=t=>{ $("msg").textContent=t; setTimeout(()=>{$("msg").textContent="";},5000); };
+const say=t=>{ $("msg").textContent=t; setTimeout(()=>{$("msg").textContent="";},6000); };
 const mail=p=>p.trim()+"@collinspesa.app";
 const PHONE=/^(07|01)\d{8}$/;
 
@@ -108,50 +182,20 @@ $("loginBtn").onclick=async()=>{
   $("loginBtn").disabled=false;
 };
 
-// === NEW FORGOT PIN RESET - WORKS IN TEST MODE ===
 $("fResetBtn").onclick=async()=>{
   const phone=$("fPhone").value.trim(), name=$("fName").value.trim(), newPin=$("fNewPin").value.trim();
   if(!PHONE.test(phone)) return say("Enter valid phone 0790928450");
   if(!name) return say("Enter your name to confirm");
   if(newPin.length<6) return say("New PIN must be 6 digits e.g. 123456");
-  
   $("fResetBtn").disabled=true; say("Resetting PIN for "+phone+"...");
   try{
-    // 1. Try to find user in database to confirm name
-    // 2. For test mode: delete old auth user via sign in attempt? Instead we use admin trick:
-    // We create a temporary auth to reset - Simplest: ask user to delete in console, but we try automatic:
-    
-    // Try to sign in anonymously to get permission to request reset
-    // For sandbox, we directly try to update password by signing in with old? No old forgotten.
-    // So we use a workaround: Create reset request and admin (you) can set temporary PIN via Functions or Console
-    
-    // WORKING METHOD FOR NOW: If name matches, we allow overwrite in RTDB and tell user to reset password in Console
-    // Better: Use Firebase Admin via Cloud Function if deployed, else manual
-    
-    // For immediate fix for Collins: Delete and recreate user with new PIN
-    // This requires you to be signed out, then create new user? But email already in use blocks.
-    // So we tell Firebase to send reset via custom method: use secondary app
-    
-    // Simple client-side reset: Try to delete old user by signing in as admin? Not possible without function.
-    
-    // FINAL SIMPLE FIX: Store new PIN in resetRequests and also try to sign in with any PIN to verify name
     await db.ref("resetRequests").push({phone, name, newPin, at:Date.now(), status:"PENDING"});
-    
-    // Try to brute reset by deleting user from Auth if we are admin? For test, we do this:
-    // We will delete the old auth user by using admin SDK? Not possible client side, so we show instructions
-    
-    say("✅ Request saved! Now go to Firebase Console > Authentication > Users > "+phone+"@collinspesa.app > Set password to "+newPin+" > Then Sign in with new PIN");
-    
-    // If you deploy the function adminResetPin, it would auto-reset. For now manual step needed once.
-    // To make it fully automatic in test mode, we can sign out and allow re-creation after admin deletes:
-    // Provide direct link
+    say("✅ Request saved! Now go to Firebase Console > Authentication > Users > "+phone+"@collinspesa.app > Set password to "+newPin);
     setTimeout(()=>{ 
-      if(confirm("For instant reset, I will delete old wallet and let you create new with PIN "+newPin+"? Click OK to delete local data and try Create wallet again.")){
-        // Delete local cache and prompt to delete in console
+      if(confirm("For instant reset, delete old wallet and create new with PIN "+newPin+"? Click OK")){
         alert("Go to Firebase Console and DELETE user "+mail(phone)+" then come back and click Create wallet with new PIN "+newPin);
       }
     },1000);
-    
   }catch(e){ say("Reset failed: "+e.message); }
   $("fResetBtn").disabled=false;
 };
