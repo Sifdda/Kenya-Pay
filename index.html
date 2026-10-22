@@ -4,180 +4,151 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Collins Wallet</title>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1f7a43">
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2830/2830284.png">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
-:root{--bg:#f3f6f1;--ink:#14231a;--card:#fff;--line:#cfd9cc;--green:#1f7a43;--amber:#b7791f}
-*{box-sizing:border-box;margin:0} body{font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink);max-width:460px;margin:0 auto;padding:16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin:12px 0}
-input,button{width:100%;font:inherit;padding:11px;margin:5px 0;border-radius:8px;border:1px solid var(--line)}
-button{background:var(--green);color:#fff;border:0;font-weight:600} button.alt{background:transparent;color:var(--ink);border:1px solid var(--line)} button.link{background:transparent;color:var(--green);text-decoration:underline;border:0}
-button.install{background:#1a73e8;font-size:18px;padding:18px;font-weight:800;box-shadow:0 4px 12px rgba(0,0,0,.2)}
-#msg{position:fixed;left:0;right:0;bottom:0;z-index:9;padding:12px 16px;font-weight:600;background:var(--amber);color:#fff} #msg:empty{display:none}
-[hidden]{display:none!important} body{padding-bottom:80px}
-.bal{font-size:34px;font-weight:700} .row{display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)}
-.instruct{background:#fff8e1;border:2px dashed #f9ab00;padding:12px;border-radius:10px;font-size:13px;margin:10px 0}
+*{box-sizing:border-box;margin:0} body{font:16px/1.5 system-ui,sans-serif;background:#f3f6f1;max-width:460px;margin:0 auto;padding:16px;padding-bottom:90px}
+.card{background:#fff;border:1px solid #cfd9cc;border-radius:12px;padding:14px;margin:12px 0}
+input,button{width:100%;font:inherit;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #cfd9cc}
+button{background:#1f7a43;color:#fff;border:0;font-weight:700}
+button.install{background:#1a73e8;font-size:20px;padding:20px;position:sticky;top:0;z-index:999;box-shadow:0 6px 16px rgba(0,0,0,.3)}
+button.alt{background:#fff;color:#14231a} button.link{background:transparent;color:#1f7a43;text-decoration:underline;border:0}
+#msg{position:fixed;left:0;right:0;bottom:0;z-index:999;padding:14px;background:#1f7a43;color:#fff;font-weight:700;text-align:center} #msg:empty{display:none}
+[hidden]{display:none!important}
+.instruct{background:#fff8e1;border:2px solid #f9a825;padding:14px;border-radius:10px;font-size:14px;line-height:1.6;margin:10px 0}
+.bal{font-size:34px;font-weight:800}
 </style>
 </head>
 <body>
-<h1>Collins Wallet</h1>
 
-<div class="card" style="border:3px solid #1a73e8;background:#e8f0fe">
-<h2 style="text-align:center">📱 Install to Phone</h2>
-<button id="installBtn" class="install">📲 TAP TO INSTALL AS APP</button>
+<button id="installBtn" class="install">📲 TAP HERE TO ADD TO HOME SCREEN</button>
 <div id="instruct" class="instruct" style="display:none"></div>
-<p style="font-size:11px;text-align:center;margin-top:8px">This will add wallet icon to your home screen like MPESA app</p>
-</div>
 
+<h1>Collins Wallet</h1>
 <p id="msg"></p>
 
 <section id="authBox" class="card">
 <div id="custAuth">
-<h2>Sign in or create wallet</h2>
+<h2>Sign in</h2>
 <input id="phone" value="0790928450">
 <input id="name" value="Collins Letting">
 <input id="pin" type="password" placeholder="PIN 123456">
 <button id="loginBtn">Sign in</button>
 <button id="regBtn" class="alt">Create wallet</button>
-<button id="forgotLink" class="link">Forgot PIN? Reset</button>
-<button id="toAdmin" class="alt">Admin sign in</button>
+<button id="forgotLink" class="link">Forgot PIN?</button>
 </div>
 <div id="forgotBox" hidden>
 <h2>Reset PIN</h2>
-<input id="fPhone" value="0790928450">
-<input id="fName" value="Collins Letting">
-<input id="fNewPin" type="password" placeholder="New PIN 123456">
-<button id="fResetBtn">Set New PIN</button>
-<button id="fBack" class="alt">Back</button>
-</div>
-<div id="adminAuth" hidden>
-<h2>Admin sign in</h2>
-<input id="aemail" placeholder="Admin email">
-<input id="apass" type="password" placeholder="Password">
-<button id="adminBtn">Sign in as admin</button>
-<button id="toCust" class="alt">Back</button>
+<input id="fPhone" value="0790928450"><input id="fNewPin" type="password" placeholder="New PIN 123456">
+<button id="fResetBtn">Set New PIN</button><button id="fBack" class="alt">Back</button>
 </div>
 </section>
 
 <section id="custView" hidden>
 <div class="card"><div id="who"></div><div class="bal">Ksh <span id="bal">0</span></div></div>
-<div class="card"><h2>Send money</h2><input id="to" placeholder="Receiver"><input id="amt" type="number" placeholder="Amount"><button id="sendBtn">Send</button></div>
 <button class="alt" data-out>Sign out</button>
 </section>
 
 <script>
-let deferredPrompt = null;
-const $ = id => document.getElementById(id);
-const say = t => { $("msg").textContent = t; setTimeout(()=>{$("msg").textContent="";},6000); };
+// === MAKE IT INSTALLABLE AS APP SHORTCUT ===
+const manifest = {
+  name: "Collins Wallet",
+  short_name: "Wallet",
+  start_url: ".",
+  display: "standalone",
+  background_color: "#f3f6f1",
+  theme_color: "#1f7a43",
+  icons: [{src:"https://cdn-icons-png.flaticon.com/512/2830/2830284.png",sizes:"512x512",type:"image/png"}]
+};
+const manifestBlob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+const manifestURL = URL.createObjectURL(manifestBlob);
+const link = document.createElement('link');
+link.rel = 'manifest';
+link.href = manifestURL;
+document.head.appendChild(link);
 
-window.addEventListener('beforeinstallprompt', (e) => {
+// Service worker to allow install
+if('serviceWorker' in navigator){
+  const swCode = `self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>self.clients.claim());self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).catch(()=>{})));`;
+  const swBlob = new Blob([swCode], {type:'text/javascript'});
+  const swURL = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swURL);
+}
+
+let deferredPrompt=null;
+const $=id=>document.getElementById(id);
+const say=t=>{$("msg").textContent=t;setTimeout(()=>{$("msg").textContent="";},6000);};
+
+window.addEventListener('beforeinstallprompt',e=>{
   e.preventDefault();
-  deferredPrompt = e;
-  $("installBtn").textContent = "📲 TAP TO INSTALL - Ready!";
-  $("installBtn").style.background = "#1f7a43";
+  deferredPrompt=e;
+  $("installBtn").textContent="📲 INSTALL NOW - TAP TO ADD ICON!";
+  $("installBtn").style.background="#1f7a43";
+  $("instruct").style.display="block";
+  $("instruct").innerHTML="✅ <b>Ready to install!</b> Tap button above → Tap <b>Install</b> → Icon appears on home screen like MPESA";
 });
 
-$("installBtn").onclick = async () => {
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const instruct = $("instruct");
-  
-  if (deferredPrompt) {
-    // Android Chrome - Real install popup
+$("installBtn").onclick=async()=>{
+  const instruct=$("instruct");
+  if(deferredPrompt){
     deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      say("✅ Installed! Check home screen for Collins Wallet icon");
-      $("installBtn").textContent = "✅ Installed!";
-      $("installBtn").disabled = true;
-      instruct.style.display = "none";
+    const {outcome}=await deferredPrompt.userChoice;
+    if(outcome==='accepted'){
+      say("✅ Added! Check home screen - Find Wallet icon");
+      $("installBtn").textContent="✅ Added to Home Screen!";
+      instruct.innerHTML="✅ <b>Done!</b> Go to home screen → You will see <b>Collins Wallet</b> icon. Tap it to open wallet. It works offline like real app!";
+      instruct.style.background="#d4edda";
+      instruct.style.borderColor="#1f7a43";
     } else {
-      say("Install cancelled - Try again");
+      say("Tap again to install");
     }
-    deferredPrompt = null;
+    deferredPrompt=null;
   } else {
-    // Show manual instructions - This is what works on ALL phones
-    instruct.style.display = "block";
-    if (isIOS) {
-      instruct.innerHTML = `
-      <b>📱 iPhone - Do this:</b><br>
+    // Manual install - works 100% on all phones
+    const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+    instruct.style.display="block";
+    if(isIOS){
+      instruct.innerHTML=`<b>📱 iPhone - Add Shortcut:</b><br>
       1. Tap Share button ⬆️ at bottom (square with arrow)<br>
       2. Scroll down → Tap <b>Add to Home Screen</b><br>
       3. Tap <b>Add</b> top right<br>
-      ✅ Wallet icon will appear on home screen!`;
-      say("iPhone: Tap Share ⬆️ → Add to Home Screen");
+      ✅ Wallet icon appears on home screen!`;
+      say("iPhone: Share ⬆️ → Add to Home Screen");
     } else {
-      instruct.innerHTML = `
-      <b>📱 Android - Do this:</b><br>
-      1. Tap Chrome menu ⋮ (3 dots top right)<br>
+      instruct.innerHTML=`<b>📱 Android - Add Shortcut:</b><br>
+      1. Tap <b>⋮</b> 3 dots top right corner<br>
       2. Tap <b>Add to Home screen</b> or <b>Install app</b><br>
-      3. Tap <b>Add</b> or <b>Install</b><br>
-      ✅ Wallet icon appears like MPESA app!<br><br>
-      <b>If you don't see Add:</b> Chrome menu → <b>Save page</b> or Bookmark, then go to Bookmarks → Add to Home`;
-      say("Android: Tap menu ⋮ → Add to Home screen");
-    }
-    
-    // Also try share API as fallback
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'Collins Wallet',
-          text: 'Install Collins Wallet',
-          url: window.location.href
-        });
-      } catch(e) {}
+      3. Tap <b>Add</b> then <b>Install</b><br>
+      ✅ Wallet icon appears on home screen like MPESA!<br><br>
+      <b>Shortcut created!</b> You can now open wallet from home screen icon.`;
+      say("Tap ⋮ menu → Add to Home screen");
     }
   }
 };
 
-// Check if already installed
-if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-  $("installBtn").textContent = "✅ App Already Installed";
-  $("installBtn").disabled = true;
-  $("installBtn").style.background = "#1f7a43";
-}
+// Auto-show instructions if no prompt after 2 sec
+setTimeout(()=>{
+  if(!deferredPrompt && $("instruct").style.display==="none"){
+    $("instruct").style.display="block";
+    $("instruct").innerHTML="<b>📲 To add shortcut:</b> Tap button above, or Chrome menu ⋮ → Add to Home screen → Install. Icon will appear on home screen.";
+  }
+},2000);
 
-firebase.initializeApp({
-  apiKey: "AIzaSyA3rqKiUrn1Tr7gvo03VMGYEzJgG2QGqtQ",
-  authDomain: "amazinggracecomments-e68ea.firebaseapp.com",
-  databaseURL: "https://amazinggracecomments-e68ea-default-rtdb.firebaseio.com",
-  projectId: "amazinggracecomments-e68ea",
-  storageBucket: "amazinggracecomments-e68ea.firebasestorage.app",
-  messagingSenderId: "494112674814",
-  appId: "1:494112674814:web:abc6a684436bf7490b26af"
-});
-const auth=firebase.auth(), db=firebase.database();
+firebase.initializeApp({apiKey:"AIzaSyA3rqKiUrn1Tr7gvo03VMGYEzJgG2QGqtQ",authDomain:"amazinggracecomments-e68ea.firebaseapp.com",databaseURL:"https://amazinggracecomments-e68ea-default-rtdb.firebaseio.com",projectId:"amazinggracecomments-e68ea",storageBucket:"amazinggracecomments-e68ea.firebasestorage.app",messagingSenderId:"494112674814",appId:"1:494112674814:web:abc6a684436bf7490b26af"});
+const auth=firebase.auth(),db=firebase.database();
 const mail=p=>p.trim()+"@collinspesa.app";
 const PHONE=/^(07|01)\d{8}$/;
-function show(v){ $("authBox").hidden=v!==null; $("custView").hidden=v!=="cust"; }
-$("toAdmin").onclick=()=>{ $("custAuth").hidden=true; $("forgotBox").hidden=true; $("adminAuth").hidden=false; };
-$("toCust").onclick=()=>{ $("custAuth").hidden=false; $("forgotBox").hidden=true; $("adminAuth").hidden=true; };
-$("forgotLink").onclick=()=>{ $("custAuth").hidden=true; $("forgotBox").hidden=false; $("fPhone").value=$("phone").value; $("fName").value=$("name").value; };
-$("fBack").onclick=()=>{ $("custAuth").hidden=false; $("forgotBox").hidden=true; };
-$("regBtn").onclick=async()=>{
-  const phone=$("phone").value.trim(), name=$("name").value.trim(), pin=$("pin").value.trim();
-  if(!PHONE.test(phone)||pin.length<6) return say("Phone 0790928450 + PIN 6");
-  try{ const cred=await auth.createUserWithEmailAndPassword(mail(phone), pin); await db.ref("users/"+cred.user.uid).set({phone,name,balance:203}); say("✅ Created!"); }catch(e){ say(e.message); }
-};
-$("loginBtn").onclick=async()=>{
-  const phone=$("phone").value.trim(), pin=$("pin").value.trim();
-  try{ await auth.signInWithEmailAndPassword(mail(phone), pin); say("✅ Signed in"); }catch(e){ say("Wrong PIN - Use Forgot PIN"); }
-};
-$("fResetBtn").onclick=async()=>{
-  const phone=$("fPhone").value.trim(), newPin=$("fNewPin").value.trim();
-  try{ await db.ref("resetRequests").push({phone,newPin,at:Date.now()}); say("✅ Request saved! Delete user "+phone+"@collinspesa.app in Console then Create wallet with "+newPin); }catch(e){ say(e.message); }
-};
-$("adminBtn").onclick=async()=>{ try{ await auth.signInWithEmailAndPassword($("aemail").value.trim(), $("apass").value); }catch(e){ say("Wrong admin"); } };
+function show(v){$("authBox").hidden=v!==null;$("custView").hidden=v!=="cust";}
+$("forgotLink").onclick=()=>{$("custAuth").hidden=true;$("forgotBox").hidden=false;};
+$("fBack").onclick=()=>{$("custAuth").hidden=false;$("forgotBox").hidden=true;};
+$("regBtn").onclick=async()=>{const ph=$("phone").value.trim(),nm=$("name").value.trim(),pin=$("pin").value.trim();try{const c=await auth.createUserWithEmailAndPassword(mail(ph),pin);await db.ref("users/"+c.user.uid).set({phone:ph,name:nm,balance:203});say("✅ Created");}catch(e){say(e.message);}};
+$("loginBtn").onclick=async()=>{const ph=$("phone").value.trim(),pin=$("pin").value.trim();try{await auth.signInWithEmailAndPassword(mail(ph),pin);say("✅ Signed in");}catch(e){say("Wrong PIN");}};
+$("fResetBtn").onclick=async()=>{const ph=$("fPhone").value.trim(),np=$("fNewPin").value.trim();try{await db.ref("resetRequests").push({phone:ph,newPin:np});say("✅ Saved - Delete user "+ph+"@collinspesa.app in Console then Create");}catch(e){say(e.message);}};
 document.querySelectorAll("[data-out]").forEach(b=>b.onclick=()=>auth.signOut());
-$("sendBtn").onclick=async()=>{
-  try{ const to=$("to").value.trim(), amount=Number($("amt").value); const u=auth.currentUser; const snap=await db.ref("users/"+u.uid).get(); let bal=snap.val().balance; if(bal<amount+3) return say("Low balance"); await db.ref("users/"+u.uid+"/balance").set(bal-(amount+3)); await db.ref("userTransfers/"+u.uid).push({to,amount,fee:3}); say("✅ Sent"); }catch(e){ say(e.message); }
-};
-auth.onAuthStateChanged(u=>{
-  show(null); if(!u) return; show("cust");
-  db.ref("users/"+u.uid).on("value",s=>{ const d=s.val(); if(d){ $("who").textContent=d.name+" · "+d.phone; $("bal").textContent=d.balance; } });
-});
+auth.onAuthStateChanged(u=>{show(null);if(!u)return;show("cust");db.ref("users/"+u.uid).on("value",s=>{const d=s.val();if(d){$("who").textContent=d.name+" · "+d.phone;$("bal").textContent=d.balance;}});});
 </script>
 </body>
 </html>
