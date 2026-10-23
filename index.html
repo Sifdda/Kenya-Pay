@@ -95,6 +95,17 @@ td,th{padding:7px 4px;border-bottom:1px solid #8884;text-align:left}
     <p style="font-size:18px">Total saved: <b>KES <span id="mdSaved">0</span></b></p>
     <div id="mdHist" style="font-size:13px;margin-bottom:10px"></div>
     <p style="font-size:13px;color:var(--mut)">Your payment is confirmed by the chama admin once it is received.</p>
+    <h4 style="margin:18px 0 4px">My chama members (<span id="cmCount">0</span>/<span class="max"></span>)</h4>
+    <input id="cName" placeholder="Member full name">
+    <input id="cPhone" type="tel" placeholder="Phone 07xx xxx xxx" style="margin-top:6px">
+    <input id="cId" inputmode="numeric" placeholder="National ID number" style="margin-top:6px">
+    <button id="btnAdd" style="margin-top:8px">Add member</button>
+    <div id="mAdd" class="msg"></div>
+    <p style="font-size:13px;color:var(--mut)">Each member pays KES <span class="fee"></span> registration. The admin confirms it.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Name</th><th>Phone</th><th>ID</th><th>Saved</th><th>Status</th></tr></thead>
+      <tbody id="cmBody"></tbody>
+    </table></div>
     <button class="alt" onclick="logout()">Logout</button>
   </div>
 
@@ -103,7 +114,7 @@ td,th{padding:7px 4px;border-bottom:1px solid #8884;text-align:left}
     <h3 style="margin:0">Admin — All Registrations</h3>
     <p id="adCount" style="font-size:14px"></p>
     <div class="scroll"><table>
-      <thead><tr><th>Name</th><th>Phone</th><th>ID</th><th>Saved</th><th>Status</th></tr></thead>
+      <thead><tr><th>Name</th><th>Phone</th><th>ID</th><th>Saved</th><th>Status</th><th>Leader</th></tr></thead>
       <tbody id="adBody"></tbody>
     </table></div>
     <button onclick="exportCSV()">Download CSV</button>
@@ -119,6 +130,7 @@ td,th{padding:7px 4px;border-bottom:1px solid #8884;text-align:left}
 const CHAMA_NAME   = "Amazing Grace Chama";
 const REG_FEE      = 200;                    // KES
 const PAY_TO       = "07XX XXX XXX";         // your M-Pesa number / Till
+const MAX_MEMBERS  = 15;                     // max members per chama leader
 const ADMIN_EMAILS = ["youradmin@email.com"]; // these emails see the admin page
 const firebaseConfig = {                     // paste from Firebase Console > Project settings
   apiKey: "AIzaSyA3rqKiUrn1Tr7gvo03VMGYEzJgG2QGqtQ",
@@ -145,6 +157,7 @@ const auth = firebase.auth(), db = firebase.firestore();
 document.title = CHAMA_NAME; $("appName").textContent = CHAMA_NAME;
 document.querySelectorAll(".fee").forEach(e => e.textContent = REG_FEE);
 $("payTo").textContent = PAY_TO;
+document.querySelectorAll(".max").forEach(e => e.textContent = MAX_MEMBERS);
 
 function show(id){
   ["vRegister","vLogin","vForgot","vMember","vAdmin"].forEach(v => $(v).classList.toggle("hide", v !== id));
@@ -183,6 +196,28 @@ $("btnReg").onclick = async () => {
   $("btnReg").disabled = false;
 };
 
+/* LEADER ADDS MEMBERS */
+let myMembers = [];
+$("btnAdd").onclick = async () => {
+  const name = $("cName").value.trim(), phone = $("cPhone").value.replace(/\s/g,""), idNo = $("cId").value.trim();
+  if (myMembers.length >= MAX_MEMBERS) return say("mAdd","Limit reached: " + MAX_MEMBERS + " members per chama.");
+  if (name.length < 3) return say("mAdd","Enter the member's full name.");
+  if (!/^(07|01|\+?2547|\+?2541)\d{7,8}$/.test(phone)) return say("mAdd","Enter a valid Kenyan phone number.");
+  if (!/^\d{6,9}$/.test(idNo)) return say("mAdd","Enter a valid ID number.");
+  if (myMembers.some(m => m.idNo === idNo || m.phone === phone)) return say("mAdd","This member is already registered.");
+  $("btnAdd").disabled = true;
+  try {
+    const u = auth.currentUser;
+    await db.collection("members").add({
+      name, phone, idNo, ownerUid: u.uid, ownerName: u.email, amount: REG_FEE,
+      status: "pending", createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    ["cName","cPhone","cId"].forEach(i => $(i).value = "");
+    say("mAdd", name + " registered.", true);
+  } catch (e) { say("mAdd", nice(e)); }
+  $("btnAdd").disabled = false;
+};
+
 /* LOGIN */
 $("btnLogin").onclick = async () => {
   $("btnLogin").disabled = true;
@@ -206,10 +241,11 @@ $("btnForgot").onclick = async () => {
 function logout(){ auth.signOut(); }
 
 /* SESSION ROUTING */
-let unsub = null, unsubHist = null;
+let unsub = null, unsubHist = null, unsubMine = null;
 auth.onAuthStateChanged(async user => {
   if (unsub) { unsub(); unsub = null; }
   if (unsubHist) { unsubHist(); unsubHist = null; }
+  if (unsubMine) { unsubMine(); unsubMine = null; }
   if (!user) return show("vRegister");
   if (ADMIN_EMAILS.includes(user.email)) {
     show("vAdmin");
@@ -219,16 +255,26 @@ auth.onAuthStateChanged(async user => {
       $("adBody").innerHTML = rows.map(r =>
         `<tr><td>${esc(r.name)}</td><td>${esc(r.phone)}</td><td>${esc(r.idNo)}</td>
          <td>${Number(r.saved || 0)}</td><td>${r.status === "confirmed" ? `<span class="badge confirmed">Paid</span> <button style="margin:4px 0 0;padding:6px" onclick="addSavings('${r.id}')">+ Save</button>`
-           : `<button style="margin:0;padding:6px" onclick="confirmPay('${r.id}')">Confirm</button>`}</td></tr>`).join("");
+           : `<button style="margin:0;padding:6px" onclick="confirmPay('${r.id}')">Confirm</button>`}</td><td>${esc(r.ownerName || "Self")}</td></tr>`).join("");
     });
   } else {
     show("vMember");
+    $("mdName").textContent = user.email;
+    unsubMine = db.collection("members").where("ownerUid", "==", user.uid).onSnapshot(s => {
+      myMembers = s.docs.map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => ((a.createdAt && a.createdAt.seconds) || 0) - ((b.createdAt && b.createdAt.seconds) || 0));
+      $("cmCount").textContent = myMembers.length;
+      $("cmBody").innerHTML = myMembers.map(m =>
+        `<tr><td>${esc(m.name)}</td><td>${esc(m.phone)}</td><td>${esc(m.idNo)}</td><td>${Number(m.saved || 0)}</td>
+         <td><span class="badge ${m.status === "confirmed" ? "confirmed" : "pending"}">${m.status === "confirmed" ? "Paid" : "Pending"}</span></td></tr>`).join("");
+    });
     unsubHist = db.collection("members").doc(user.uid).collection("savings").orderBy("createdAt","desc").limit(20)
       .onSnapshot(s => {
         $("mdHist").innerHTML = s.docs.map(d => { const x = d.data(); return `<div>KES ${x.amount} — ${esc(x.note || "Savings")}</div>`; }).join("") || "No savings yet.";
       });
     unsub = db.collection("members").doc(user.uid).onSnapshot(d => {
-      const m = d.data(); if (!m) return;
+      const m = d.data();
+      if (!m) { $("mdPhone").textContent = "—"; $("mdStatus").textContent = "No fee record"; $("mdStatus").className = "badge pending"; return; }
       $("mdName").textContent = m.name; $("mdPhone").textContent = m.phone;
       const s = $("mdStatus"); s.textContent = m.status === "confirmed" ? "Confirmed" : "Pending confirmation";
       s.className = "badge " + m.status;
@@ -251,8 +297,8 @@ async function addSavings(id){
 }
 function confirmPay(id){ db.collection("members").doc(id).update({ status: "confirmed" }); }
 function exportCSV(){
-  const head = ["Name","Phone","ID","Email","Fee","Saved","Status"];
-  const lines = rows.map(r => [r.name,r.phone,r.idNo,r.email,r.amount,r.saved || 0,r.status].map(v => '"' + String(v ?? "").replace(/"/g,'""') + '"').join(","));
+  const head = ["Name","Phone","ID","Email","Fee","Saved","Status","Leader"];
+  const lines = rows.map(r => [r.name,r.phone,r.idNo,r.email,r.amount,r.saved || 0,r.status,r.ownerName || "Self"].map(v => '"' + String(v ?? "").replace(/"/g,'""') + '"').join(","));
   const blob = new Blob([[head.join(","), ...lines].join("\n")], { type: "text/csv" });
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "chama-members.csv"; a.click();
 }
