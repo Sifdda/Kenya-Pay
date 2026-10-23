@@ -2,153 +2,258 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Collins Wallet</title>
-<meta name="theme-color" content="#1f7a43">
-<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2830/2830284.png">
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chama Registration</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%230b6b3a'/%3E%3Ccircle cx='50' cy='50' r='38' fill='none' stroke='%23f5b800' stroke-width='5'/%3E%3Ctext x='50' y='64' font-size='42' font-weight='bold' text-anchor='middle' fill='%23fff' font-family='Arial'%3EC%3C/text%3E%3C/svg%3E">
 <style>
-*{box-sizing:border-box;margin:0} body{font:16px/1.5 system-ui,sans-serif;background:#f3f6f1;max-width:460px;margin:0 auto;padding:16px;padding-bottom:90px}
-.card{background:#fff;border:1px solid #cfd9cc;border-radius:12px;padding:14px;margin:12px 0}
-input,button{width:100%;font:inherit;padding:12px;margin:6px 0;border-radius:8px;border:1px solid #cfd9cc}
-button{background:#1f7a43;color:#fff;border:0;font-weight:700}
-button.install{background:#1a73e8;font-size:20px;padding:20px;position:sticky;top:0;z-index:999;box-shadow:0 6px 16px rgba(0,0,0,.3)}
-button.alt{background:#fff;color:#14231a} button.link{background:transparent;color:#1f7a43;text-decoration:underline;border:0}
-#msg{position:fixed;left:0;right:0;bottom:0;z-index:999;padding:14px;background:#1f7a43;color:#fff;font-weight:700;text-align:center} #msg:empty{display:none}
-[hidden]{display:none!important}
-.instruct{background:#fff8e1;border:2px solid #f9a825;padding:14px;border-radius:10px;font-size:14px;line-height:1.6;margin:10px 0}
-.bal{font-size:34px;font-weight:800}
+:root{--g:#0b6b3a;--y:#f5b800;--bg:#f3f6f4;--t:#16231c;--card:#fff;--mut:#667}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1713;--t:#e8f1ec;--card:#18241e;--mut:#9ab}}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,Arial,sans-serif;background:var(--bg);color:var(--t);padding:16px}
+.wrap{max-width:440px;margin:0 auto}
+.logo{text-align:center;margin:8px 0 14px}
+.logo h1{margin:6px 0 0;font-size:22px;color:var(--g)}
+.logo p{margin:2px 0;color:var(--mut);font-size:14px}
+.card{background:var(--card);border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+label{display:block;font-size:13px;margin:12px 0 4px;font-weight:600}
+input{width:100%;padding:12px;border:1px solid #9aa;border-radius:9px;font-size:16px;background:transparent;color:var(--t)}
+button{width:100%;padding:13px;margin-top:16px;border:0;border-radius:9px;background:var(--g);color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+button.alt{background:var(--y);color:#222}
+button:disabled{opacity:.6}
+a.lnk{display:block;text-align:center;margin-top:14px;color:var(--g);font-size:14px;cursor:pointer;text-decoration:underline}
+.msg{margin-top:12px;padding:10px;border-radius:8px;font-size:14px;display:none}
+.msg.err{background:#fde8e8;color:#8a1c1c;display:block}
+.msg.ok{background:#e3f6ea;color:#0b5a2e;display:block}
+.pay{background:#fff8dc;color:#4a3b00;border-left:4px solid var(--y);padding:10px;border-radius:8px;font-size:14px;margin-top:12px}
+.hide{display:none}
+.badge{display:inline-block;padding:3px 9px;border-radius:12px;font-size:12px;font-weight:700}
+.pending{background:#fff1c2;color:#6b5200}.confirmed{background:#cdeedb;color:#0b5a2e}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 4px;border-bottom:1px solid #8884;text-align:left}
+.scroll{overflow-x:auto}
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<button id="installBtn" class="install">📲 TAP HERE TO ADD TO HOME SCREEN</button>
-<div id="instruct" class="instruct" style="display:none"></div>
+  <div class="logo">
+    <!-- APP LOGO (inline SVG) -->
+    <svg width="84" height="84" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="Chama logo">
+      <circle cx="50" cy="50" r="48" fill="#0b6b3a"/>
+      <circle cx="50" cy="50" r="38" fill="none" stroke="#f5b800" stroke-width="5"/>
+      <circle cx="30" cy="40" r="7" fill="#fff"/><circle cx="50" cy="32" r="7" fill="#fff"/><circle cx="70" cy="40" r="7" fill="#fff"/>
+      <path d="M20 66c0-9 7-14 10-14s7 2 10 2 7-2 10-2 7 2 10 2 7-2 10-2 10 5 10 14v6H20z" fill="#f5b800"/>
+    </svg>
+    <h1 id="appName">Chama Registration</h1>
+    <p>Save together. Grow together.</p>
+  </div>
 
-<h1>Collins Wallet</h1>
-<p id="msg"></p>
+  <!-- REGISTER -->
+  <div id="vRegister" class="card">
+    <h3 style="margin:0">Join the Chama</h3>
+    <label>Full name</label><input id="rName" autocomplete="name">
+    <label>Phone number (M-Pesa)</label><input id="rPhone" type="tel" placeholder="07xx xxx xxx">
+    <label>National ID number</label><input id="rId" inputmode="numeric">
+    <label>Email (used to reset your PIN)</label><input id="rEmail" type="email" autocomplete="email">
+    <label>Create 6-digit PIN</label><input id="rPin" type="password" inputmode="numeric" maxlength="6">
+    <label>Confirm PIN</label><input id="rPin2" type="password" inputmode="numeric" maxlength="6">
+    <div class="pay">
+      <b>Registration fee: KES <span class="fee"></span></b><br>
+      After registering, send the fee via M-Pesa to <b id="payTo"></b> using the phone number you registered with. The admin will confirm your payment.
+    </div>
+    <button id="btnReg">Register</button>
+    <div id="mReg" class="msg"></div>
+    <a class="lnk" onclick="show('vLogin')">Already registered? Login</a>
+  </div>
 
-<section id="authBox" class="card">
-<div id="custAuth">
-<h2>Sign in</h2>
-<input id="phone" value="0790928450">
-<input id="name" value="Collins Letting">
-<input id="pin" type="password" placeholder="PIN 123456">
-<button id="loginBtn">Sign in</button>
-<button id="regBtn" class="alt">Create wallet</button>
-<button id="forgotLink" class="link">Forgot PIN?</button>
+  <!-- LOGIN -->
+  <div id="vLogin" class="card hide">
+    <h3 style="margin:0">Login</h3>
+    <label>Email</label><input id="lEmail" type="email" autocomplete="email">
+    <label>PIN</label><input id="lPin" type="password" inputmode="numeric" maxlength="6">
+    <button id="btnLogin">Login</button>
+    <div id="mLogin" class="msg"></div>
+    <a class="lnk" onclick="show('vForgot')">Forgot PIN?</a>
+    <a class="lnk" onclick="show('vRegister')">New member? Register</a>
+  </div>
+
+  <!-- FORGOT PIN -->
+  <div id="vForgot" class="card hide">
+    <h3 style="margin:0">Reset your PIN</h3>
+    <p style="font-size:14px;color:var(--mut)">Enter your registered email. We will send you a link to set a new PIN.</p>
+    <label>Email</label><input id="fEmail" type="email">
+    <button id="btnForgot">Send reset link</button>
+    <div id="mForgot" class="msg"></div>
+    <a class="lnk" onclick="show('vLogin')">Back to login</a>
+  </div>
+
+  <!-- MEMBER DASHBOARD -->
+  <div id="vMember" class="card hide">
+    <h3 style="margin:0">Welcome, <span id="mdName"></span></h3>
+    <p>Phone: <b id="mdPhone"></b></p>
+    <p>Registration fee: KES <span class="fee"></span> — <span id="mdStatus" class="badge"></span></p>
+    <p style="font-size:18px">Total saved: <b>KES <span id="mdSaved">0</span></b></p>
+    <div id="mdHist" style="font-size:13px;margin-bottom:10px"></div>
+    <p style="font-size:13px;color:var(--mut)">Your payment is confirmed by the chama admin once it is received.</p>
+    <button class="alt" onclick="logout()">Logout</button>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="vAdmin" class="card hide">
+    <h3 style="margin:0">Admin — All Registrations</h3>
+    <p id="adCount" style="font-size:14px"></p>
+    <div class="scroll"><table>
+      <thead><tr><th>Name</th><th>Phone</th><th>ID</th><th>Saved</th><th>Status</th></tr></thead>
+      <tbody id="adBody"></tbody>
+    </table></div>
+    <button onclick="exportCSV()">Download CSV</button>
+    <button class="alt" onclick="logout()">Logout</button>
+  </div>
 </div>
-<div id="forgotBox" hidden>
-<h2>Reset PIN</h2>
-<input id="fPhone" value="0790928450"><input id="fNewPin" type="password" placeholder="New PIN 123456">
-<button id="fResetBtn">Set New PIN</button><button id="fBack" class="alt">Back</button>
-</div>
-</section>
 
-<section id="custView" hidden>
-<div class="card"><div id="who"></div><div class="bal">Ksh <span id="bal">0</span></div></div>
-<button class="alt" data-out>Sign out</button>
-</section>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-auth-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-firestore-compat.min.js"></script>
 <script>
-// === MAKE IT INSTALLABLE AS APP SHORTCUT ===
-const manifest = {
-  name: "Collins Wallet",
-  short_name: "Wallet",
-  start_url: ".",
-  display: "standalone",
-  background_color: "#f3f6f1",
-  theme_color: "#1f7a43",
-  icons: [{src:"https://cdn-icons-png.flaticon.com/512/2830/2830284.png",sizes:"512x512",type:"image/png"}]
+/* ============ SETTINGS — EDIT THESE ============ */
+const CHAMA_NAME   = "Amazing Grace Chama";
+const REG_FEE      = 200;                    // KES
+const PAY_TO       = "07XX XXX XXX";         // your M-Pesa number / Till
+const ADMIN_EMAILS = ["youradmin@email.com"]; // these emails see the admin page
+const firebaseConfig = {                     // paste from Firebase Console > Project settings
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT",
+  appId: "YOUR_APP_ID"
 };
-const manifestBlob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
-const manifestURL = URL.createObjectURL(manifestBlob);
-const link = document.createElement('link');
-link.rel = 'manifest';
-link.href = manifestURL;
-document.head.appendChild(link);
+/* ================================================ */
 
-// Service worker to allow install
-if('serviceWorker' in navigator){
-  const swCode = `self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>self.clients.claim());self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).catch(()=>{})));`;
-  const swBlob = new Blob([swCode], {type:'text/javascript'});
-  const swURL = URL.createObjectURL(swBlob);
-  navigator.serviceWorker.register(swURL);
+const $ = id => document.getElementById(id);
+if (typeof firebase === "undefined") {
+  document.querySelector(".wrap").insertAdjacentHTML("afterbegin",
+    '<div class="msg err">Could not load Firebase. Check your internet connection and refresh.</div>');
+  throw new Error("Firebase failed to load");
+}
+if (firebaseConfig.apiKey === "YOUR_API_KEY") {
+  document.querySelector(".wrap").insertAdjacentHTML("afterbegin",
+    '<div class="msg err">Setup needed: paste your Firebase config in the SETTINGS block of this file.</div>');
+}
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth(), db = firebase.firestore();
+document.title = CHAMA_NAME; $("appName").textContent = CHAMA_NAME;
+document.querySelectorAll(".fee").forEach(e => e.textContent = REG_FEE);
+$("payTo").textContent = PAY_TO;
+
+function show(id){
+  ["vRegister","vLogin","vForgot","vMember","vAdmin"].forEach(v => $(v).classList.toggle("hide", v !== id));
+  document.querySelectorAll(".msg").forEach(m => { m.className = "msg"; m.textContent = ""; });
+}
+function say(id, text, ok){ const m = $(id); m.textContent = text; m.className = "msg " + (ok ? "ok" : "err"); }
+function nice(e){
+  const c = e.code || "";
+  if (c.includes("email-already")) return "This email is already registered. Please login.";
+  if (c.includes("invalid-credential") || c.includes("wrong-password") || c.includes("user-not-found")) return "Wrong email or PIN.";
+  if (c.includes("invalid-email")) return "Enter a valid email.";
+  if (c.includes("too-many")) return "Too many attempts. Try again later.";
+  if (c.includes("network")) return "Cannot reach the server. Make sure your Firebase settings are filled in and open this file in your browser (not the Claude preview).";
+  if (c.includes("api-key")) return "Firebase API key is invalid. Paste your real Firebase config in the settings block.";
+  return e.message || "Something went wrong.";
 }
 
-let deferredPrompt=null;
-const $=id=>document.getElementById(id);
-const say=t=>{$("msg").textContent=t;setTimeout(()=>{$("msg").textContent="";},6000);};
-
-window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault();
-  deferredPrompt=e;
-  $("installBtn").textContent="📲 INSTALL NOW - TAP TO ADD ICON!";
-  $("installBtn").style.background="#1f7a43";
-  $("instruct").style.display="block";
-  $("instruct").innerHTML="✅ <b>Ready to install!</b> Tap button above → Tap <b>Install</b> → Icon appears on home screen like MPESA";
-});
-
-$("installBtn").onclick=async()=>{
-  const instruct=$("instruct");
-  if(deferredPrompt){
-    deferredPrompt.prompt();
-    const {outcome}=await deferredPrompt.userChoice;
-    if(outcome==='accepted'){
-      say("✅ Added! Check home screen - Find Wallet icon");
-      $("installBtn").textContent="✅ Added to Home Screen!";
-      instruct.innerHTML="✅ <b>Done!</b> Go to home screen → You will see <b>Collins Wallet</b> icon. Tap it to open wallet. It works offline like real app!";
-      instruct.style.background="#d4edda";
-      instruct.style.borderColor="#1f7a43";
-    } else {
-      say("Tap again to install");
-    }
-    deferredPrompt=null;
-  } else {
-    // Manual install - works 100% on all phones
-    const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
-    instruct.style.display="block";
-    if(isIOS){
-      instruct.innerHTML=`<b>📱 iPhone - Add Shortcut:</b><br>
-      1. Tap Share button ⬆️ at bottom (square with arrow)<br>
-      2. Scroll down → Tap <b>Add to Home Screen</b><br>
-      3. Tap <b>Add</b> top right<br>
-      ✅ Wallet icon appears on home screen!`;
-      say("iPhone: Share ⬆️ → Add to Home Screen");
-    } else {
-      instruct.innerHTML=`<b>📱 Android - Add Shortcut:</b><br>
-      1. Tap <b>⋮</b> 3 dots top right corner<br>
-      2. Tap <b>Add to Home screen</b> or <b>Install app</b><br>
-      3. Tap <b>Add</b> then <b>Install</b><br>
-      ✅ Wallet icon appears on home screen like MPESA!<br><br>
-      <b>Shortcut created!</b> You can now open wallet from home screen icon.`;
-      say("Tap ⋮ menu → Add to Home screen");
-    }
-  }
+/* REGISTER */
+$("btnReg").onclick = async () => {
+  const name = $("rName").value.trim(), phone = $("rPhone").value.replace(/\s/g,""),
+        idNo = $("rId").value.trim(), email = $("rEmail").value.trim().toLowerCase(),
+        pin = $("rPin").value, pin2 = $("rPin2").value;
+  if (name.length < 3) return say("mReg","Enter your full name.");
+  if (!/^(07|01|\+?2547|\+?2541)\d{7,8}$/.test(phone)) return say("mReg","Enter a valid Kenyan phone number.");
+  if (!/^\d{6,9}$/.test(idNo)) return say("mReg","Enter a valid ID number.");
+  if (!/^\d{6}$/.test(pin)) return say("mReg","PIN must be exactly 6 digits.");
+  if (pin !== pin2) return say("mReg","PINs do not match.");
+  $("btnReg").disabled = true;
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, pin);
+    await db.collection("members").doc(cred.user.uid).set({
+      name, phone, idNo, email, amount: REG_FEE,
+      status: "pending", createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch (e) { say("mReg", nice(e)); }
+  $("btnReg").disabled = false;
 };
 
-// Auto-show instructions if no prompt after 2 sec
-setTimeout(()=>{
-  if(!deferredPrompt && $("instruct").style.display==="none"){
-    $("instruct").style.display="block";
-    $("instruct").innerHTML="<b>📲 To add shortcut:</b> Tap button above, or Chrome menu ⋮ → Add to Home screen → Install. Icon will appear on home screen.";
-  }
-},2000);
+/* LOGIN */
+$("btnLogin").onclick = async () => {
+  $("btnLogin").disabled = true;
+  try { await auth.signInWithEmailAndPassword($("lEmail").value.trim().toLowerCase(), $("lPin").value); }
+  catch (e) { say("mLogin", nice(e)); }
+  $("btnLogin").disabled = false;
+};
 
-firebase.initializeApp({apiKey:"AIzaSyA3rqKiUrn1Tr7gvo03VMGYEzJgG2QGqtQ",authDomain:"amazinggracecomments-e68ea.firebaseapp.com",databaseURL:"https://amazinggracecomments-e68ea-default-rtdb.firebaseio.com",projectId:"amazinggracecomments-e68ea",storageBucket:"amazinggracecomments-e68ea.firebasestorage.app",messagingSenderId:"494112674814",appId:"1:494112674814:web:abc6a684436bf7490b26af"});
-const auth=firebase.auth(),db=firebase.database();
-const mail=p=>p.trim()+"@collinspesa.app";
-const PHONE=/^(07|01)\d{8}$/;
-function show(v){$("authBox").hidden=v!==null;$("custView").hidden=v!=="cust";}
-$("forgotLink").onclick=()=>{$("custAuth").hidden=true;$("forgotBox").hidden=false;};
-$("fBack").onclick=()=>{$("custAuth").hidden=false;$("forgotBox").hidden=true;};
-$("regBtn").onclick=async()=>{const ph=$("phone").value.trim(),nm=$("name").value.trim(),pin=$("pin").value.trim();try{const c=await auth.createUserWithEmailAndPassword(mail(ph),pin);await db.ref("users/"+c.user.uid).set({phone:ph,name:nm,balance:203});say("✅ Created");}catch(e){say(e.message);}};
-$("loginBtn").onclick=async()=>{const ph=$("phone").value.trim(),pin=$("pin").value.trim();try{await auth.signInWithEmailAndPassword(mail(ph),pin);say("✅ Signed in");}catch(e){say("Wrong PIN");}};
-$("fResetBtn").onclick=async()=>{const ph=$("fPhone").value.trim(),np=$("fNewPin").value.trim();try{await db.ref("resetRequests").push({phone:ph,newPin:np});say("✅ Saved - Delete user "+ph+"@collinspesa.app in Console then Create");}catch(e){say(e.message);}};
-document.querySelectorAll("[data-out]").forEach(b=>b.onclick=()=>auth.signOut());
-auth.onAuthStateChanged(u=>{show(null);if(!u)return;show("cust");db.ref("users/"+u.uid).on("value",s=>{const d=s.val();if(d){$("who").textContent=d.name+" · "+d.phone;$("bal").textContent=d.balance;}});});
+/* FORGOT PIN — Firebase emails a secure reset link */
+$("btnForgot").onclick = async () => {
+  const email = $("fEmail").value.trim().toLowerCase();
+  if (!email) return say("mForgot","Enter your email.");
+  $("btnForgot").disabled = true;
+  try {
+    await auth.sendPasswordResetEmail(email);
+    say("mForgot","Reset link sent. Check your email (and spam), then set a new 6-digit PIN.", true);
+  } catch (e) { say("mForgot", nice(e)); }
+  $("btnForgot").disabled = false;
+};
+
+function logout(){ auth.signOut(); }
+
+/* SESSION ROUTING */
+let unsub = null, unsubHist = null;
+auth.onAuthStateChanged(async user => {
+  if (unsub) { unsub(); unsub = null; }
+  if (unsubHist) { unsubHist(); unsubHist = null; }
+  if (!user) return show("vRegister");
+  if (ADMIN_EMAILS.includes(user.email)) {
+    show("vAdmin");
+    unsub = db.collection("members").orderBy("createdAt","desc").onSnapshot(snap => {
+      rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      $("adCount").textContent = rows.length + " registered • " + rows.filter(r => r.status === "confirmed").length + " confirmed • Total saved: KES " + rows.reduce((s, r) => s + (r.saved || 0), 0);
+      $("adBody").innerHTML = rows.map(r =>
+        `<tr><td>${esc(r.name)}</td><td>${esc(r.phone)}</td><td>${esc(r.idNo)}</td>
+         <td>${Number(r.saved || 0)}</td><td>${r.status === "confirmed" ? `<span class="badge confirmed">Paid</span> <button style="margin:4px 0 0;padding:6px" onclick="addSavings('${r.id}')">+ Save</button>`
+           : `<button style="margin:0;padding:6px" onclick="confirmPay('${r.id}')">Confirm</button>`}</td></tr>`).join("");
+    });
+  } else {
+    show("vMember");
+    unsubHist = db.collection("members").doc(user.uid).collection("savings").orderBy("createdAt","desc").limit(20)
+      .onSnapshot(s => {
+        $("mdHist").innerHTML = s.docs.map(d => { const x = d.data(); return `<div>KES ${x.amount} — ${esc(x.note || "Savings")}</div>`; }).join("") || "No savings yet.";
+      });
+    unsub = db.collection("members").doc(user.uid).onSnapshot(d => {
+      const m = d.data(); if (!m) return;
+      $("mdName").textContent = m.name; $("mdPhone").textContent = m.phone;
+      const s = $("mdStatus"); s.textContent = m.status === "confirmed" ? "Confirmed" : "Pending confirmation";
+      s.className = "badge " + m.status;
+      $("mdSaved").textContent = Number(m.saved || 0);
+    });
+  }
+});
+
+/* ADMIN HELPERS */
+let rows = [];
+function esc(s){ return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+async function addSavings(id){
+  const a = Number(prompt("Amount saved (KES):"));
+  if (!a || a < 1) return;
+  const note = prompt("Note (optional, e.g. October contribution):") || "Savings";
+  const ref = db.collection("members").doc(id), batch = db.batch();
+  batch.update(ref, { saved: firebase.firestore.FieldValue.increment(a) });
+  batch.set(ref.collection("savings").doc(), { amount: a, note, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+  try { await batch.commit(); } catch (e) { alert(nice(e)); }
+}
+function confirmPay(id){ db.collection("members").doc(id).update({ status: "confirmed" }); }
+function exportCSV(){
+  const head = ["Name","Phone","ID","Email","Fee","Saved","Status"];
+  const lines = rows.map(r => [r.name,r.phone,r.idNo,r.email,r.amount,r.saved || 0,r.status].map(v => '"' + String(v ?? "").replace(/"/g,'""') + '"').join(","));
+  const blob = new Blob([[head.join(","), ...lines].join("\n")], { type: "text/csv" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "chama-members.csv"; a.click();
+}
 </script>
 </body>
 </html>
