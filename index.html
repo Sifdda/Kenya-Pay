@@ -31,6 +31,9 @@ a.lnk{display:block;text-align:center;margin-top:14px;color:var(--g);font-size:1
 table{width:100%;border-collapse:collapse;font-size:13px}
 td,th{padding:7px 4px;border-bottom:1px solid #8884;text-align:left}
 .scroll{overflow-x:auto}
+.mini{width:70px;padding:6px;font-size:13px;display:inline-block}
+button.sm{width:auto;margin:4px 0 0;padding:6px 10px;font-size:13px}
+button.del{background:#b3261e}
 </style>
 </head>
 <body>
@@ -94,6 +97,13 @@ td,th{padding:7px 4px;border-bottom:1px solid #8884;text-align:left}
     <p>Registration fee: KES <span class="fee"></span> — <span id="mdStatus" class="badge"></span></p>
     <p style="font-size:18px">Total saved: <b>KES <span id="mdSaved">0</span></b></p>
     <div id="mdHist" style="font-size:13px;margin-bottom:10px"></div>
+
+    <label>Record amount received (KES)</label>
+    <input id="sAmt" type="number" inputmode="numeric" min="1" placeholder="e.g. 500">
+    <input id="sNote" placeholder="Note (optional, e.g. October contribution)" style="margin-top:6px">
+    <button id="btnSave">Record amount</button>
+    <div id="mSave" class="msg"></div>
+
     <p style="font-size:13px;color:var(--mut)">Your payment is confirmed by the chama admin once it is received.</p>
     <h4 style="margin:18px 0 4px">My chama members (<span id="cmCount">0</span>/<span class="max"></span>)</h4>
     <input id="cName" placeholder="Member full name">
@@ -103,7 +113,7 @@ td,th{padding:7px 4px;border-bottom:1px solid #8884;text-align:left}
     <div id="mAdd" class="msg"></div>
     <p style="font-size:13px;color:var(--mut)">Each member pays KES <span class="fee"></span> registration. The admin confirms it.</p>
     <div class="scroll"><table>
-      <thead><tr><th>Name</th><th>Phone</th><th>ID</th><th>Saved</th><th>Status</th></tr></thead>
+      <thead><tr><th>Name</th><th>Phone</th><th>ID</th><th>Saved</th><th>Status</th><th>Action</th></tr></thead>
       <tbody id="cmBody"></tbody>
     </table></div>
     <button class="alt" onclick="logout()">Logout</button>
@@ -264,9 +274,15 @@ auth.onAuthStateChanged(async user => {
       myMembers = s.docs.map(d => ({ id: d.id, ...d.data() }))
         .sort((a, b) => ((a.createdAt && a.createdAt.seconds) || 0) - ((b.createdAt && b.createdAt.seconds) || 0));
       $("cmCount").textContent = myMembers.length;
+      const full = myMembers.length >= MAX_MEMBERS;
       $("cmBody").innerHTML = myMembers.map(m =>
         `<tr><td>${esc(m.name)}</td><td>${esc(m.phone)}</td><td>${esc(m.idNo)}</td><td>${Number(m.saved || 0)}</td>
-         <td><span class="badge ${m.status === "confirmed" ? "confirmed" : "pending"}">${m.status === "confirmed" ? "Paid" : "Pending"}</span></td></tr>`).join("");
+         <td><span class="badge ${m.status === "confirmed" ? "confirmed" : "pending"}">${m.status === "confirmed" ? "Paid" : "Pending"}</span></td>
+         <td style="white-space:nowrap">
+           <input class="mini" id="amt_${m.id}" type="number" min="1" placeholder="KES">
+           <button class="sm" onclick="recordFor('${m.id}')">Record</button>
+           ${full ? `<button class="sm del" onclick="removeMember('${m.id}')">Remove</button>` : ""}
+         </td></tr>`).join("");
     });
     unsubHist = db.collection("members").doc(user.uid).collection("savings").orderBy("createdAt","desc").limit(20)
       .onSnapshot(s => {
@@ -286,15 +302,47 @@ auth.onAuthStateChanged(async user => {
 /* ADMIN HELPERS */
 let rows = [];
 function esc(s){ return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
-async function addSavings(id){
+
+async function recordSavings(id, a, note){
+  const ref = db.collection("members").doc(id), batch = db.batch();
+  batch.update(ref, { saved: firebase.firestore.FieldValue.increment(a) });
+  batch.set(ref.collection("savings").doc(), { amount: a, note: note || "Savings", createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+  await batch.commit();
+}
+
+async function addSavings(id){            // admin button
   const a = Number(prompt("Amount saved (KES):"));
   if (!a || a < 1) return;
   const note = prompt("Note (optional, e.g. October contribution):") || "Savings";
-  const ref = db.collection("members").doc(id), batch = db.batch();
-  batch.update(ref, { saved: firebase.firestore.FieldValue.increment(a) });
-  batch.set(ref.collection("savings").doc(), { amount: a, note, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-  try { await batch.commit(); } catch (e) { alert(nice(e)); }
+  try { await recordSavings(id, a, note); } catch (e) { alert(nice(e)); }
 }
+
+$("btnSave").onclick = async () => {      // leader records own savings
+  const a = Number($("sAmt").value);
+  if (!a || a < 1) return say("mSave", "Enter a valid amount.");
+  $("btnSave").disabled = true;
+  try {
+    await recordSavings(auth.currentUser.uid, a, $("sNote").value.trim());
+    $("sAmt").value = ""; $("sNote").value = "";
+    say("mSave", "KES " + a + " recorded.", true);
+  } catch (e) { say("mSave", nice(e)); }
+  $("btnSave").disabled = false;
+};
+
+async function recordFor(id){             // leader records for a member
+  const a = Number($("amt_" + id).value);
+  if (!a || a < 1) return say("mAdd", "Enter a valid amount.");
+  try { await recordSavings(id, a, "Savings"); say("mAdd", "KES " + a + " recorded.", true); }
+  catch (e) { say("mAdd", nice(e)); }
+}
+
+async function removeMember(id){
+  const m = myMembers.find(x => x.id === id);
+  if (!m || !confirm("Remove " + m.name + " from your chama? This cannot be undone.")) return;
+  try { await db.collection("members").doc(id).delete(); say("mAdd", m.name + " removed.", true); }
+  catch (e) { say("mAdd", nice(e)); }
+}
+
 function confirmPay(id){ db.collection("members").doc(id).update({ status: "confirmed" }); }
 function exportCSV(){
   const head = ["Name","Phone","ID","Email","Fee","Saved","Status","Leader"];
