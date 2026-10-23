@@ -3,309 +3,304 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Amazing Grace Chama - Download App</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0b6b3a">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕊️</text></svg>">
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<title>Chama Registration</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%230b6b3a'/%3E%3Ccircle cx='50' cy='50' r='38' fill='none' stroke='%23f5b800' stroke-width='5'/%3E%3Ctext x='50' y='64' font-size='42' font-weight='bold' text-anchor='middle' fill='%23fff' font-family='Arial'%3EC%3C/text%3E%3C/svg%3E">
 <style>
-:root{--bg:#f3f6f1;--ink:#14231a;--card:#fff;--line:#cfd9cc;--brand:#0b6b3a;--brand-2:#0f8b4a;--muted:#5a6b5e;--warn:#8a5d00;--ok:#1f7a43;--danger:#b42318}
-*{box-sizing:border-box} body{margin:0;font:16px/1.5 system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--ink);max-width:900px;margin:0 auto;padding:16px 16px 90px}
-h1,h2{margin:8px 0 12px} .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0;box-shadow:0 1px 0 rgba(0,0,0,.02)}
-input,button,textarea{width:100%;font:inherit;border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff}
-button{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:700;cursor:pointer}
-button:disabled{opacity:.6;cursor:not-allowed} button.alt{background:#fff;color:var(--ink)} button.link{background:transparent;border-color:transparent;color:var(--brand);text-decoration:underline;padding:6px 0;width:auto}
-button.install{background:#1a73e8;font-size:19px;padding:18px;position:sticky;top:0;z-index:999;box-shadow:0 6px 18px rgba(0,0,0,.25);display:block!important;margin-bottom:10px}
-button.download{background:#0b6b3a;border:2px solid #0b6b3a;font-size:18px;padding:16px}
-.badge{display:inline-block;font-size:12px;padding:4px 8px;border-radius:999px;background:#e8f5e9;color:#1b5e20;border:1px solid #c8e6c9}
-.grid{display:grid;gap:12px} .grid.cols-2{grid-template-columns:1fr 1fr}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap} .muted{color:var(--muted)} .ok{color:var(--ok);font-weight:700} .warn{color:var(--warn);font-weight:700}
-#msg{position:fixed;left:0;right:0;bottom:0;z-index:1000;padding:14px 16px;background:#0b6b3a;color:#fff;font-weight:700;text-align:center} #msg:empty{display:none}
-[hidden]{display:none!important}
-table{width:100%;border-collapse:collapse} th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left}
-.instruct{background:#fff8e1;border:2px dashed #f9a825;padding:12px;border-radius:10px;font-size:14px;line-height:1.6;margin:10px 0}
+:root{--g:#0b6b3a;--y:#f5b800;--bg:#f3f6f4;--t:#16231c;--card:#fff;--mut:#667}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1713;--t:#e8f1ec;--card:#18241e;--mut:#9ab}}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,Arial,sans-serif;background:var(--bg);color:var(--t);padding:16px}
+.wrap{max-width:440px;margin:0 auto}
+.logo{text-align:center;margin:8px 0 14px}
+.logo h1{margin:6px 0 0;font-size:22px;color:var(--g)}
+.logo p{margin:2px 0;color:var(--mut);font-size:14px}
+.card{background:var(--card);border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+label{display:block;font-size:13px;margin:12px 0 4px;font-weight:600}
+input{width:100%;padding:12px;border:1px solid #9aa;border-radius:9px;font-size:16px;background:transparent;color:var(--t)}
+button{width:100%;padding:13px;margin-top:16px;border:0;border-radius:9px;background:var(--g);color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+button.alt{background:var(--y);color:#222}
+button:disabled{opacity:.6}
+a.lnk{display:block;text-align:center;margin-top:14px;color:var(--g);font-size:14px;cursor:pointer;text-decoration:underline}
+.msg{margin-top:12px;padding:10px;border-radius:8px;font-size:14px;display:none}
+.msg.err{background:#fde8e8;color:#8a1c1c;display:block}
+.msg.ok{background:#e3f6ea;color:#0b5a2e;display:block}
+.pay{background:#fff8dc;color:#4a3b00;border-left:4px solid var(--y);padding:10px;border-radius:8px;font-size:14px;margin-top:12px}
+.hide{display:none}
+.badge{display:inline-block;padding:3px 9px;border-radius:12px;font-size:12px;font-weight:700}
+.pending{background:#fff1c2;color:#6b5200}.confirmed{background:#cdeedb;color:#0b5a2e}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 4px;border-bottom:1px solid #8884;text-align:left}
+.scroll{overflow-x:auto}
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<!-- DOWNLOAD TO PHONE BUTTONS - ALWAYS VISIBLE -->
-<button id="installBtn" class="install">📲 TAP TO INSTALL APP TO PHONE</button>
-<div class="card" style="border:2px solid #1a73e8;background:#e8f0fe">
-<div class="grid cols-2">
-<button id="downloadBtn" class="download">⬇️ DOWNLOAD FILE</button>
-<button id="howBtn" class="alt">❓ How to Install?</button>
-</div>
-<div id="instruct" class="instruct" style="display:none"></div>
-<p class="muted" style="font-size:12px;text-align:center;margin-top:6px">Install = App icon appears like MPESA, works offline. Download = Save file to phone.</p>
+  <div class="logo">
+    <!-- APP LOGO (inline SVG) -->
+    <svg width="84" height="84" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="Chama logo">
+      <circle cx="50" cy="50" r="48" fill="#0b6b3a"/>
+      <circle cx="50" cy="50" r="38" fill="none" stroke="#f5b800" stroke-width="5"/>
+      <circle cx="30" cy="40" r="7" fill="#fff"/><circle cx="50" cy="32" r="7" fill="#fff"/><circle cx="70" cy="40" r="7" fill="#fff"/>
+      <path d="M20 66c0-9 7-14 10-14s7 2 10 2 7-2 10-2 7 2 10 2 7-2 10-2 10 5 10 14v6H20z" fill="#f5b800"/>
+    </svg>
+    <h1 id="appName">Chama Registration</h1>
+    <p>Save together. Grow together.</p>
+  </div>
+
+  <!-- REGISTER -->
+  <div id="vRegister" class="card">
+    <h3 style="margin:0">Join the Chama</h3>
+    <label>Full name</label><input id="rName" autocomplete="name">
+    <label>Phone number (M-Pesa)</label><input id="rPhone" type="tel" placeholder="07xx xxx xxx">
+    <label>National ID number</label><input id="rId" inputmode="numeric">
+    <label>Email (used to reset your PIN)</label><input id="rEmail" type="email" autocomplete="email">
+    <label>Create 6-digit PIN</label><input id="rPin" type="password" inputmode="numeric" maxlength="6">
+    <label>Confirm PIN</label><input id="rPin2" type="password" inputmode="numeric" maxlength="6">
+    <div class="pay">
+      <b>Registration fee: KES <span class="fee"></span></b><br>
+      After registering, send the fee via M-Pesa to <b id="payTo"></b> using the phone number you registered with. The admin will confirm your payment.
+    </div>
+    <button id="btnReg">Register</button>
+    <div id="mReg" class="msg"></div>
+    <a class="lnk" onclick="show('vLogin')">Already registered? Login</a>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="vLogin" class="card hide">
+    <h3 style="margin:0">Login</h3>
+    <label>Email</label><input id="lEmail" type="email" autocomplete="email">
+    <label>PIN</label><input id="lPin" type="password" inputmode="numeric" maxlength="6">
+    <button id="btnLogin">Login</button>
+    <div id="mLogin" class="msg"></div>
+    <a class="lnk" onclick="show('vForgot')">Forgot PIN?</a>
+    <a class="lnk" onclick="show('vRegister')">New member? Register</a>
+  </div>
+
+  <!-- FORGOT PIN -->
+  <div id="vForgot" class="card hide">
+    <h3 style="margin:0">Reset your PIN</h3>
+    <p style="font-size:14px;color:var(--mut)">Enter your registered email. We will send you a link to set a new PIN.</p>
+    <label>Email</label><input id="fEmail" type="email">
+    <button id="btnForgot">Send reset link</button>
+    <div id="mForgot" class="msg"></div>
+    <a class="lnk" onclick="show('vLogin')">Back to login</a>
+  </div>
+
+  <!-- MEMBER DASHBOARD -->
+  <div id="vMember" class="card hide">
+    <h3 style="margin:0">Welcome, <span id="mdName"></span></h3>
+    <p>Phone: <b id="mdPhone"></b></p>
+    <p>Registration fee: KES <span class="fee"></span> — <span id="mdStatus" class="badge"></span></p>
+    <p style="font-size:18px">Total saved: <b>KES <span id="mdSaved">0</span></b></p>
+    <div id="mdHist" style="font-size:13px;margin-bottom:10px"></div>
+    <p style="font-size:13px;color:var(--mut)">Your payment is confirmed by the chama admin once it is received.</p>
+    <h4 style="margin:18px 0 4px">My chama members (<span id="cmCount">0</span>/<span class="max"></span>)</h4>
+    <input id="cName" placeholder="Member full name">
+    <input id="cPhone" type="tel" placeholder="Phone 07xx xxx xxx" style="margin-top:6px">
+    <input id="cId" inputmode="numeric" placeholder="National ID number" style="margin-top:6px">
+    <button id="btnAdd" style="margin-top:8px">Add member</button>
+    <div id="mAdd" class="msg"></div>
+    <p style="font-size:13px;color:var(--mut)">Each member pays KES <span class="fee"></span> registration. The admin confirms it.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Name</th><th>Phone</th><th>ID</th><th>Saved</th><th>Status</th></tr></thead>
+      <tbody id="cmBody"></tbody>
+    </table></div>
+    <button class="alt" onclick="logout()">Logout</button>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="vAdmin" class="card hide">
+    <h3 style="margin:0">Admin — All Registrations</h3>
+    <p id="adCount" style="font-size:14px"></p>
+    <div class="scroll"><table>
+      <thead><tr><th>Name</th><th>Phone</th><th>ID</th><th>Saved</th><th>Status</th><th>Leader</th></tr></thead>
+      <tbody id="adBody"></tbody>
+    </table></div>
+    <button onclick="exportCSV()">Download CSV</button>
+    <button class="alt" onclick="logout()">Logout</button>
+  </div>
 </div>
 
-<h1>🕊️ Amazing Grace Chama</h1>
-<p id="whoLine" class="muted"></p>
-<p id="msg"></p>
-
-<section id="authBox" class="card">
-<h2>Join Chama</h2>
-<div class="grid">
-<input id="name" placeholder="Full Name - e.g. Collins Letting" value="Collins Letting">
-<input id="phone" placeholder="Phone 0790928450" value="0790928450">
-<input id="idNo" placeholder="ID Number 41489464" value="41489464">
-<input id="email" placeholder="Email collinsletting48@gmail.com" value="collinsletting48@gmail.com">
-<input id="password" type="password" placeholder="Password (6+ chars)" value="123456">
-</div>
-<div class="row">
-<button id="btnRegister">Create Account & Join</button>
-<button id="btnLogin" class="alt">Already have account? Login</button>
-</div>
-<button id="btnForgot" class="link">Forgot password?</button>
-</section>
-
-<section id="memberBox" hidden class="card">
-<h2>Welcome <span id="memberName"></span></h2>
-<p>Phone: <span id="memberPhone"></span> | ID: <span id="memberId"></span></p>
-<p>Registration: <span id="regStatus" class="badge">Pending</span> | Saved: KES <span id="savedAmt">0</span></p>
-<div id="payInfo" class="card" style="background:#fff8e1">
-<b>Pay Registration KES 200 to:</b> <span id="payTo">0790928450</span><br>
-<span class="muted">After paying, click Confirm Payment and wait for admin approval.</span><br>
-<button id="btnConfirmPay" style="margin-top:8px">I Have Paid - Confirm</button>
-</div>
-<h3>My Chama Members (<span id="memberCount">0</span>/15)</h3>
-<div id="myMembersList"></div>
-<h3 style="margin-top:16px">Add New Member</h3>
-<div class="grid">
-<input id="newMemberName" placeholder="Member Name">
-<input id="newMemberPhone" placeholder="Member Phone 07...">
-<input id="newMemberId" placeholder="Member ID">
-</div>
-<button id="btnAdd">Add Member</button>
-<button id="btnLogout" class="alt">Logout</button>
-</section>
-
-<section id="adminBox" hidden class="card">
-<h2>Admin Panel - Collins</h2>
-<p class="muted">Approve registrations and payments</p>
-<div id="pendingList"></div>
-<h3>All Members</h3>
-<div id="allMembersList"></div>
-<button id="btnAdminLogout" class="alt">Logout</button>
-</section>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-auth-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-firestore-compat.min.js"></script>
 <script>
-// === INSTALL & DOWNLOAD LOGIC ===
-let deferredPrompt=null;
-const $=id=>document.getElementById(id);
-const say=t=>{$("msg").textContent=t;setTimeout(()=>{$("msg").textContent="";},6000);};
-
-// Make manifest dynamic if not exist
-if(!document.querySelector('link[rel="manifest"]')){
-  const m={name:"Amazing Grace Chama",short_name:"Chama",start_url:"/Kenya-Pay/",display:"standalone",background_color:"#f3f6f1",theme_color:"#0b6b3a",icons:[{src:"https://cdn-icons-png.flaticon.com/512/2830/2830284.png",sizes:"512x512",type:"image/png"}]};
-  const blob=new Blob([JSON.stringify(m)],{type:'application/json'});
-  const url=URL.createObjectURL(blob);
-  const link=document.createElement('link');link.rel='manifest';link.href=url;document.head.appendChild(link);
-}
-if('serviceWorker' in navigator){
-  const sw=`self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>self.clients.claim());self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).catch(()=>{})));`;
-  const blob=new Blob([sw],{type:'text/javascript'});
-  const url=URL.createObjectURL(blob);
-  navigator.serviceWorker.register(url).catch(()=>{});
-}
-
-window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault();deferredPrompt=e;
-  $("installBtn").textContent="📲 INSTALL NOW - TAP HERE (Ready!)";
-  $("installBtn").style.background="#0b6b3a";
-  $("instruct").style.display="block";
-  $("instruct").innerHTML="✅ <b>Ready to install!</b> Tap blue button above → Tap <b>Install</b> → App icon appears on home screen like MPESA!";
-});
-
-$("installBtn").onclick=async()=>{
-  const ins=$("instruct");
-  if(deferredPrompt){
-    deferredPrompt.prompt();
-    const {outcome}=await deferredPrompt.userChoice;
-    if(outcome==='accepted'){
-      say("✅ Installed! Check home screen for Chama icon");
-      $("installBtn").textContent="✅ Added to Home Screen!";
-      ins.innerHTML="✅ <b>Done!</b> Go to home screen → Find <b>Amazing Grace Chama</b> icon → Tap to open. Works offline!";
-      ins.style.background="#d4edda"; ins.style.display="block";
-    }
-    deferredPrompt=null;
-  } else {
-    ins.style.display="block";
-    const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
-    if(isIOS){
-      ins.innerHTML="<b>📱 iPhone:</b><br>1. Tap Share ⬆️ bottom<br>2. Tap <b>Add to Home Screen</b><br>3. Tap Add<br>✅ Icon appears!";
-    } else {
-      ins.innerHTML="<b>📱 Android:</b><br>1. Tap <b>⋮</b> 3 dots top right<br>2. Tap <b>Add to Home screen</b> or <b>Install app</b><br>3. Tap <b>Add / Install</b><br>✅ Icon appears like MPESA!";
-    }
-    say("Follow instructions to add icon");
-  }
-};
-
-$("downloadBtn").onclick=()=>{
-  try{
-    const html=document.documentElement.outerHTML;
-    const blob=new Blob([html],{type:'text/html'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');a.href=url;a.download='AmazingGraceChama.html';a.style.display='none';
-    document.body.appendChild(a);a.click();
-    setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
-    say("✅ Downloaded! Check Downloads folder");
-    $("instruct").style.display="block";
-    $("instruct").innerHTML="✅ File downloaded to <b>Downloads</b> folder. Open Files app → Downloads → Tap AmazingGraceChama.html to open. For app icon, use INSTALL button above.";
-  }catch(e){
-    say("Tap ⋮ menu → Save page or Add to Home screen");
-  }
-};
-
-$("howBtn").onclick=()=>{
-  const ins=$("instruct");
-  ins.style.display=ins.style.display==="none"?"block":"none";
-  ins.innerHTML="<b>How to install app icon:</b><br><br><b>Method 1 - INSTALL (Best):</b><br>Tap blue INSTALL button at top → Install → Icon appears<br><br><b>Method 2 - Manual:</b><br>Android: ⋮ menu → Add to Home screen<br>iPhone: Share ⬆️ → Add to Home Screen<br><br><b>Method 3 - Download:</b><br>Tap DOWNLOAD FILE → Open from Downloads";
-};
-
-// === FIREBASE & CHAMA LOGIC ===
-firebase.initializeApp({
+/* ============ SETTINGS — EDIT THESE ============ */
+const CHAMA_NAME   = "Amazing Grace Chama";
+const REG_FEE      = 200;                    // KES
+const PAY_TO       = "07XX XXX XXX";         // your M-Pesa number / Till
+const MAX_MEMBERS  = 15;                     // max members per chama leader
+const ADMIN_EMAILS = ["youradmin@email.com"]; // these emails see the admin page
+const firebaseConfig = {                     // paste from Firebase Console > Project settings
   apiKey: "AIzaSyA3rqKiUrn1Tr7gvo03VMGYEzJgG2QGqtQ",
   authDomain: "amazinggracecomments-e68ea.firebaseapp.com",
-  databaseURL: "https://amazinggracecomments-e68ea-default-rtdb.firebaseio.com",
   projectId: "amazinggracecomments-e68ea",
   storageBucket: "amazinggracecomments-e68ea.firebasestorage.app",
   messagingSenderId: "494112674814",
-  appId: "1:494112674814:web:abc6a684436bf7490b26af"
-});
-const auth=firebase.auth(), db=firebase.firestore();
-const ADMIN_EMAILS=["collinsletting48@gmail.com","sifdda@gmail.com","youradmin@email.com"];
-const PAY_TO="0790928450";
-const MAX_MEMBERS=15;
-$("payTo").textContent=PAY_TO;
-
-function isAdmin(email){return ADMIN_EMAILS.map(e=>e.toLowerCase()).includes((email||"").toLowerCase());}
-
-$("btnRegister").onclick=async()=>{
-  const name=$("name").value.trim(), phone=$("phone").value.trim(), idNo=$("idNo").value.trim(), email=$("email").value.trim(), password=$("password").value.trim();
-  if(!name||!phone||!email||password.length<6) return say("Fill Name, Phone, Email, Password 6+");
-  $("btnRegister").disabled=true; say("Creating...");
-  try{
-    const cred=await auth.createUserWithEmailAndPassword(email,password);
-    await db.collection("members").doc(cred.user.uid).set({name,phone,idNo,email,ownerUid:cred.user.uid,saved:0,status:"Pending",registrationFee:0,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-    say("✅ Account created!");
-  }catch(e){ say("❌ "+e.message); }
-  $("btnRegister").disabled=false;
+  appId: "1:494112674814:web:4d9054a64b923ee30b26af"
 };
+/* ================================================ */
 
-$("btnLogin").onclick=async()=>{
-  const email=$("email").value.trim(), password=$("password").value.trim();
-  if(!email||!password) return say("Enter Email & Password");
-  try{ await auth.signInWithEmailAndPassword(email,password); say("✅ Logged in"); }catch(e){ say("❌ "+e.message); }
-};
+const $ = id => document.getElementById(id);
+if (typeof firebase === "undefined") {
+  document.querySelector(".wrap").insertAdjacentHTML("afterbegin",
+    '<div class="msg err">Could not load Firebase. Check your internet connection and refresh.</div>');
+  throw new Error("Firebase failed to load");
+}
+if (firebaseConfig.apiKey === "YOUR_API_KEY") {
+  document.querySelector(".wrap").insertAdjacentHTML("afterbegin",
+    '<div class="msg err">Setup needed: paste your Firebase config in the SETTINGS block of this file.</div>');
+}
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth(), db = firebase.firestore();
+document.title = CHAMA_NAME; $("appName").textContent = CHAMA_NAME;
+document.querySelectorAll(".fee").forEach(e => e.textContent = REG_FEE);
+$("payTo").textContent = PAY_TO;
+document.querySelectorAll(".max").forEach(e => e.textContent = MAX_MEMBERS);
 
-$("btnForgot").onclick=async()=>{
-  const email=$("email").value.trim(); if(!email) return say("Enter Email first");
-  try{ await auth.sendPasswordResetEmail(email); say("✅ Reset email sent to "+email); }catch(e){ say(e.message); }
-};
-
-$("btnAdd").onclick=async()=>{
-  const u=auth.currentUser; if(!u) return say("Login first");
-  const name=$("newMemberName").value.trim(), phone=$("newMemberPhone").value.trim(), idNo=$("newMemberId").value.trim();
-  if(!name||!phone) return say("Enter Member Name & Phone");
-  $("btnAdd").disabled=true; $("btnAdd").textContent="Adding...";
-  try{
-    // Check count
-    const snap=await db.collection("members").where("ownerUid","==",u.uid).get();
-    if(snap.size>=MAX_MEMBERS){ say("❌ Max "+MAX_MEMBERS+" members reached"); $("btnAdd").disabled=false; $("btnAdd").textContent="Add Member"; return; }
-    await db.collection("members").add({name,phone,idNo,ownerUid:u.uid,saved:0,status:"Pending",registrationFee:0,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-    say("✅ Member "+name+" added!");
-    $("newMemberName").value=""; $("newMemberPhone").value=""; $("newMemberId").value="";
-  }catch(e){
-    console.log(e);
-    if(e.code==="permission-denied"||e.message.includes("permissions")){
-      say("❌ Permission denied - Go to Firebase Console → Firestore → Rules → Set allow read, write: if true → Publish");
-    } else {
-      say("❌ "+e.message);
-    }
-  }
-  $("btnAdd").disabled=false; $("btnAdd").textContent="Add Member";
-};
-
-$("btnConfirmPay").onclick=async()=>{
-  const u=auth.currentUser; if(!u) return;
-  try{
-    await db.collection("members").doc(u.uid).update({status:"Paid - Awaiting Approval"});
-    say("✅ Payment confirmed! Wait for admin approval");
-  }catch(e){ say(e.message); }
-};
-
-$("btnLogout").onclick=()=>auth.signOut();
-$("btnAdminLogout").onclick=()=>auth.signOut();
-
-auth.onAuthStateChanged(async u=>{
-  $("authBox").hidden=!!u;
-  $("memberBox").hidden=true;
-  $("adminBox").hidden=true;
-  $("whoLine").textContent=u?`Logged as ${u.email}`:"";
-  if(!u) return;
-  if(isAdmin(u.email)){
-    $("adminBox").hidden=false;
-    loadAdmin();
-  } else {
-    $("memberBox").hidden=false;
-    loadMember(u);
-  }
-});
-
-async function loadMember(u){
-  try{
-    const doc=await db.collection("members").doc(u.uid).get();
-    if(doc.exists){
-      const d=doc.data();
-      $("memberName").textContent=d.name||"";
-      $("memberPhone").textContent=d.phone||"";
-      $("memberId").textContent=d.idNo||"";
-      $("regStatus").textContent=d.status||"Pending";
-      $("savedAmt").textContent=d.saved||0;
-    }
-    const snap=await db.collection("members").where("ownerUid","==",u.uid).get();
-    $("memberCount").textContent=snap.size;
-    const list=$("myMembersList"); list.innerHTML="";
-    snap.forEach(doc=>{
-      const d=doc.data();
-      const div=document.createElement("div");
-      div.className="card";
-      div.innerHTML=`<b>${d.name}</b> - ${d.phone} - ${d.idNo||""} - <span class="badge">${d.status||"Pending"}</span>`;
-      list.appendChild(div);
-    });
-  }catch(e){ say(e.message); }
+function show(id){
+  ["vRegister","vLogin","vForgot","vMember","vAdmin"].forEach(v => $(v).classList.toggle("hide", v !== id));
+  document.querySelectorAll(".msg").forEach(m => { m.className = "msg"; m.textContent = ""; });
+}
+function say(id, text, ok){ const m = $(id); m.textContent = text; m.className = "msg " + (ok ? "ok" : "err"); }
+function nice(e){
+  const c = e.code || "";
+  if (c.includes("email-already")) return "This email is already registered. Please login.";
+  if (c.includes("invalid-credential") || c.includes("wrong-password") || c.includes("user-not-found")) return "Wrong email or PIN.";
+  if (c.includes("invalid-email")) return "Enter a valid email.";
+  if (c.includes("too-many")) return "Too many attempts. Try again later.";
+  if (c.includes("network")) return "Cannot reach the server. Make sure your Firebase settings are filled in and open this file in your browser (not the Claude preview).";
+  if (c.includes("api-key")) return "Firebase API key is invalid. Paste your real Firebase config in the settings block.";
+  return e.message || "Something went wrong.";
 }
 
-async function loadAdmin(){
-  try{
-    const snap=await db.collection("members").get();
-    const pending=$("pendingList"); pending.innerHTML="<h3>Pending / Paid</h3>";
-    const all=$("allMembersList"); all.innerHTML="";
-    snap.forEach(doc=>{
-      const d=doc.data();
-      const div=document.createElement("div");
-      div.className="card";
-      div.innerHTML=`<b>${d.name}</b> (${d.phone}) - ${d.email} - Status: ${d.status} <div class="row"><button data-approve="${doc.id}">Approve</button><button data-delete="${doc.id}" class="alt">Delete</button></div>`;
-      if(d.status && d.status.includes("Paid")) pending.appendChild(div.cloneNode(true));
-      all.appendChild(div);
+/* REGISTER */
+$("btnReg").onclick = async () => {
+  const name = $("rName").value.trim(), phone = $("rPhone").value.replace(/\s/g,""),
+        idNo = $("rId").value.trim(), email = $("rEmail").value.trim().toLowerCase(),
+        pin = $("rPin").value, pin2 = $("rPin2").value;
+  if (name.length < 3) return say("mReg","Enter your full name.");
+  if (!/^(07|01|\+?2547|\+?2541)\d{7,8}$/.test(phone)) return say("mReg","Enter a valid Kenyan phone number.");
+  if (!/^\d{6,9}$/.test(idNo)) return say("mReg","Enter a valid ID number.");
+  if (!/^\d{6}$/.test(pin)) return say("mReg","PIN must be exactly 6 digits.");
+  if (pin !== pin2) return say("mReg","PINs do not match.");
+  $("btnReg").disabled = true;
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, pin);
+    await db.collection("members").doc(cred.user.uid).set({
+      name, phone, idNo, email, amount: REG_FEE,
+      status: "pending", createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-    // Approve handlers
-    document.querySelectorAll("[data-approve]").forEach(btn=>{
-      btn.onclick=async()=>{
-        try{ await db.collection("members").doc(btn.getAttribute("data-approve")).update({status:"Approved",registrationFee:200}); say("✅ Approved"); loadAdmin(); }catch(e){ say(e.message); }
-      };
+  } catch (e) { say("mReg", nice(e)); }
+  $("btnReg").disabled = false;
+};
+
+/* LEADER ADDS MEMBERS */
+let myMembers = [];
+$("btnAdd").onclick = async () => {
+  const name = $("cName").value.trim(), phone = $("cPhone").value.replace(/\s/g,""), idNo = $("cId").value.trim();
+  if (myMembers.length >= MAX_MEMBERS) return say("mAdd","Limit reached: " + MAX_MEMBERS + " members per chama.");
+  if (name.length < 3) return say("mAdd","Enter the member's full name.");
+  if (!/^(07|01|\+?2547|\+?2541)\d{7,8}$/.test(phone)) return say("mAdd","Enter a valid Kenyan phone number.");
+  if (!/^\d{6,9}$/.test(idNo)) return say("mAdd","Enter a valid ID number.");
+  if (myMembers.some(m => m.idNo === idNo || m.phone === phone)) return say("mAdd","This member is already registered.");
+  $("btnAdd").disabled = true;
+  try {
+    const u = auth.currentUser;
+    await db.collection("members").add({
+      name, phone, idNo, ownerUid: u.uid, ownerName: u.email, amount: REG_FEE,
+      status: "pending", createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-    document.querySelectorAll("[data-delete]").forEach(btn=>{
-      btn.onclick=async()=>{
-        if(!confirm("Delete member?")) return;
-        try{ await db.collection("members").doc(btn.getAttribute("data-delete")).delete(); say("Deleted"); loadAdmin(); }catch(e){ say(e.message); }
-      };
+    ["cName","cPhone","cId"].forEach(i => $(i).value = "");
+    say("mAdd", name + " registered.", true);
+  } catch (e) { say("mAdd", nice(e)); }
+  $("btnAdd").disabled = false;
+};
+
+/* LOGIN */
+$("btnLogin").onclick = async () => {
+  $("btnLogin").disabled = true;
+  try { await auth.signInWithEmailAndPassword($("lEmail").value.trim().toLowerCase(), $("lPin").value); }
+  catch (e) { say("mLogin", nice(e)); }
+  $("btnLogin").disabled = false;
+};
+
+/* FORGOT PIN — Firebase emails a secure reset link */
+$("btnForgot").onclick = async () => {
+  const email = $("fEmail").value.trim().toLowerCase();
+  if (!email) return say("mForgot","Enter your email.");
+  $("btnForgot").disabled = true;
+  try {
+    await auth.sendPasswordResetEmail(email);
+    say("mForgot","Reset link sent. Check your email (and spam), then set a new 6-digit PIN.", true);
+  } catch (e) { say("mForgot", nice(e)); }
+  $("btnForgot").disabled = false;
+};
+
+function logout(){ auth.signOut(); }
+
+/* SESSION ROUTING */
+let unsub = null, unsubHist = null, unsubMine = null;
+auth.onAuthStateChanged(async user => {
+  if (unsub) { unsub(); unsub = null; }
+  if (unsubHist) { unsubHist(); unsubHist = null; }
+  if (unsubMine) { unsubMine(); unsubMine = null; }
+  if (!user) return show("vRegister");
+  if (ADMIN_EMAILS.includes(user.email)) {
+    show("vAdmin");
+    unsub = db.collection("members").orderBy("createdAt","desc").onSnapshot(snap => {
+      rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      $("adCount").textContent = rows.length + " registered • " + rows.filter(r => r.status === "confirmed").length + " confirmed • Total saved: KES " + rows.reduce((s, r) => s + (r.saved || 0), 0);
+      $("adBody").innerHTML = rows.map(r =>
+        `<tr><td>${esc(r.name)}</td><td>${esc(r.phone)}</td><td>${esc(r.idNo)}</td>
+         <td>${Number(r.saved || 0)}</td><td>${r.status === "confirmed" ? `<span class="badge confirmed">Paid</span> <button style="margin:4px 0 0;padding:6px" onclick="addSavings('${r.id}')">+ Save</button>`
+           : `<button style="margin:0;padding:6px" onclick="confirmPay('${r.id}')">Confirm</button>`}</td><td>${esc(r.ownerName || "Self")}</td></tr>`).join("");
     });
-  }catch(e){ say("Admin load error: "+e.message+" - Fix Firestore Rules to allow true"); }
+  } else {
+    show("vMember");
+    $("mdName").textContent = user.email;
+    unsubMine = db.collection("members").where("ownerUid", "==", user.uid).onSnapshot(s => {
+      myMembers = s.docs.map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => ((a.createdAt && a.createdAt.seconds) || 0) - ((b.createdAt && b.createdAt.seconds) || 0));
+      $("cmCount").textContent = myMembers.length;
+      $("cmBody").innerHTML = myMembers.map(m =>
+        `<tr><td>${esc(m.name)}</td><td>${esc(m.phone)}</td><td>${esc(m.idNo)}</td><td>${Number(m.saved || 0)}</td>
+         <td><span class="badge ${m.status === "confirmed" ? "confirmed" : "pending"}">${m.status === "confirmed" ? "Paid" : "Pending"}</span></td></tr>`).join("");
+    });
+    unsubHist = db.collection("members").doc(user.uid).collection("savings").orderBy("createdAt","desc").limit(20)
+      .onSnapshot(s => {
+        $("mdHist").innerHTML = s.docs.map(d => { const x = d.data(); return `<div>KES ${x.amount} — ${esc(x.note || "Savings")}</div>`; }).join("") || "No savings yet.";
+      });
+    unsub = db.collection("members").doc(user.uid).onSnapshot(d => {
+      const m = d.data();
+      if (!m) { $("mdPhone").textContent = "—"; $("mdStatus").textContent = "No fee record"; $("mdStatus").className = "badge pending"; return; }
+      $("mdName").textContent = m.name; $("mdPhone").textContent = m.phone;
+      const s = $("mdStatus"); s.textContent = m.status === "confirmed" ? "Confirmed" : "Pending confirmation";
+      s.className = "badge " + m.status;
+      $("mdSaved").textContent = Number(m.saved || 0);
+    });
+  }
+});
+
+/* ADMIN HELPERS */
+let rows = [];
+function esc(s){ return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+async function addSavings(id){
+  const a = Number(prompt("Amount saved (KES):"));
+  if (!a || a < 1) return;
+  const note = prompt("Note (optional, e.g. October contribution):") || "Savings";
+  const ref = db.collection("members").doc(id), batch = db.batch();
+  batch.update(ref, { saved: firebase.firestore.FieldValue.increment(a) });
+  batch.set(ref.collection("savings").doc(), { amount: a, note, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+  try { await batch.commit(); } catch (e) { alert(nice(e)); }
+}
+function confirmPay(id){ db.collection("members").doc(id).update({ status: "confirmed" }); }
+function exportCSV(){
+  const head = ["Name","Phone","ID","Email","Fee","Saved","Status","Leader"];
+  const lines = rows.map(r => [r.name,r.phone,r.idNo,r.email,r.amount,r.saved || 0,r.status,r.ownerName || "Self"].map(v => '"' + String(v ?? "").replace(/"/g,'""') + '"').join(","));
+  const blob = new Blob([[head.join(","), ...lines].join("\n")], { type: "text/csv" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "chama-members.csv"; a.click();
 }
 </script>
 </body>
