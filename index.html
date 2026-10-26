@@ -142,7 +142,7 @@ button.del{background:#b3261e}
     <button onclick="statement()">Download my statement (PDF)</button>
     <button class="alt" onclick="changePin()">Change PIN</button>
 
-    <p style="font-size:13px;color:var(--mut)">Use Record, Fee and Savings to keep each member\u2019s payments up to date.</p>
+    <p style="font-size:13px;color:var(--mut)">Use Record, Fee and Savings to keep each member’s payments up to date.</p>
     <h4 style="margin:18px 0 4px">My chama members (<span id="cmCount">0</span>/<span class="max"></span>)</h4>
     <input id="cName" placeholder="Member full name">
     <input id="cPhone" type="tel" placeholder="Phone 07xx xxx xxx" style="margin-top:6px">
@@ -317,13 +317,16 @@ auth.onAuthStateChanged(async user => {
   unsubMine = db.collection("members").where("ownerUid", "==", user.uid).onSnapshot(s => {
     myMembers = s.docs.map(d => ({ id: d.id, ...d.data() }))
       .sort((a, b) => ((a.createdAt && a.createdAt.seconds) || 0) - ((b.createdAt && b.createdAt.seconds) || 0));
+    window.paintMine = function(){
     $("cmCount").textContent = myMembers.length;
     updateTotal();
     $("cmBody").innerHTML = myMembers.map(m =>
       `<tr><td>${esc(m.name)}</td><td>${esc(m.phone)}</td><td>${esc(m.idNo)}</td><td>${Number(m.saved || 0)}</td>
        <td><span class="badge ${st(m)[1]}">${st(m)[0]}</span></td>
        <td><input class="mini" id="amt_${m.id}" type="number" min="1" placeholder="KES"> <button class="sm" onclick="recordFor('${m.id}')">Record</button> <button class="sm alt" onclick="editMember('${m.id}')">Edit</button> <button class="sm" onclick="editFee('${m.id}')">Fee</button> <button class="sm alt" onclick="editAmount('${m.id}')">Savings</button> <button class="sm del" onclick="removeMember('${m.id}')">Remove</button></td></tr>`).join("");
-  }, () => {});
+  };
+  paintMine();
+  }, e => say("mAdd", "Could not refresh the list: " + nice(e)));
   unsubHist = db.collection("members").doc(user.uid).collection("savings").orderBy("createdAt","desc").limit(20)
     .onSnapshot(s => {
       $("mdHist").innerHTML = s.docs.map(d => { const x = d.data(); return `<div>KES ${x.amount} — ${esc(x.note || "Savings")}</div>`; }).join("") || "No savings yet.";
@@ -391,8 +394,10 @@ async function removeMember(id){
   try {
     const ref = db.collection("members").doc(id), s = await ref.collection("savings").get();
     const b = db.batch(); s.forEach(d => b.delete(d.ref)); b.delete(ref); await b.commit();
+    myMembers = myMembers.filter(x => x.id !== id); updateTotal(); $("cmCount").textContent = myMembers.length;
+    if (window.paintMine) paintMine();
     say("mAdd", m.name + " removed.", true);
-  } catch (e) { say("mAdd", nice(e)); }
+  } catch (e) { say("mAdd", "Not removed: " + nice(e)); }
 }
 async function editMember(id){
   const m = myMembers.find(x => x.id === id); if (!m) return;
