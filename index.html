@@ -113,6 +113,7 @@ button.del{background:#b3261e}
     <p>Email: <b id="mdEmail">—</b></p>
     <p>Registration fee: KES <span class="fee"></span> — <span id="mdStatus" class="badge"></span></p>
     <p style="font-size:18px">Total saved: <b>KES <span id="mdSaved">0</span></b></p>
+    <p style="font-size:13px;color:var(--mut);margin-top:-8px">Your savings: KES <span id="mdOwn">0</span> + members: KES <span id="mdMem">0</span></p>
     <div id="mdHist" style="font-size:13px;margin-bottom:10px"></div>
 
     <label>Record amount received (KES)</label>
@@ -224,7 +225,11 @@ $("btnReg").onclick = async () => {
 };
 
 /* LEADER ADDS MEMBERS */
-let myMembers = [];
+let myMembers = [], ownSaved = 0;
+function updateTotal(){
+  const mem = myMembers.reduce((t, m) => t + Number(m.saved || 0), 0);
+  $("mdOwn").textContent = ownSaved; $("mdMem").textContent = mem; $("mdSaved").textContent = ownSaved + mem;
+}
 $("btnAdd").onclick = async () => {
   const name = $("cName").value.trim(), phone = $("cPhone").value.replace(/\s/g,""), idNo = $("cId").value.trim();
   if (myMembers.length >= MAX_MEMBERS) return say("mAdd","Limit reached: " + MAX_MEMBERS + " members per chama.");
@@ -334,6 +339,7 @@ auth.onAuthStateChanged(async user => {
       myMembers = s.docs.map(d => ({ id: d.id, ...d.data() }))
         .sort((a, b) => ((a.createdAt && a.createdAt.seconds) || 0) - ((b.createdAt && b.createdAt.seconds) || 0));
       $("cmCount").textContent = myMembers.length;
+      updateTotal();
       const full = myMembers.length >= MAX_MEMBERS;
       $("cmBody").innerHTML = myMembers.map(m =>
         `<tr><td>${esc(m.name)}</td><td>${esc(m.phone)}</td><td>${esc(m.idNo)}</td><td>${Number(m.saved || 0)}</td>
@@ -351,12 +357,12 @@ auth.onAuthStateChanged(async user => {
       });
     unsub = db.collection("members").doc(user.uid).onSnapshot(d => {
       const m = d.data();
-      if (!m) { $("mdPhone").textContent = "—"; $("mdStatus").textContent = "No fee record"; $("mdStatus").className = "badge pending"; return; }
+      if (!m) { ownSaved = 0; updateTotal(); $("mdPhone").textContent = "—"; $("mdStatus").textContent = "No fee record"; $("mdStatus").className = "badge pending"; return; }
       $("mdName").textContent = m.name; $("mdPhone").textContent = m.phone;
       $("mdId").textContent = m.idNo || "—"; $("mdEmail").textContent = m.email || (auth.currentUser && auth.currentUser.email) || "—";
       const s = $("mdStatus"); s.textContent = isPaid(m) ? "Paid" : "Pending";
       s.className = "badge " + (isPaid(m) ? "confirmed" : "pending");
-      $("mdSaved").textContent = Number(m.saved || 0);
+      ownSaved = Number(m.saved || 0); updateTotal();
     });
   }
 });
