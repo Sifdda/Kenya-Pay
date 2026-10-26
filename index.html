@@ -142,7 +142,7 @@ button.del{background:#b3261e}
     <button onclick="statement()">Download my statement (PDF)</button>
     <button class="alt" onclick="changePin()">Change PIN</button>
 
-    <p style="font-size:13px;color:var(--mut)">Your savings are recorded by the Treasurer once your M-Pesa payment is received.</p>
+    <p style="font-size:13px;color:var(--mut)">Use Record, Fee and Savings to keep each member\u2019s payments up to date.</p>
     <h4 style="margin:18px 0 4px">My chama members (<span id="cmCount">0</span>/<span class="max"></span>)</h4>
     <input id="cName" placeholder="Member full name">
     <input id="cPhone" type="tel" placeholder="Phone 07xx xxx xxx" style="margin-top:6px">
@@ -322,7 +322,7 @@ auth.onAuthStateChanged(async user => {
     $("cmBody").innerHTML = myMembers.map(m =>
       `<tr><td>${esc(m.name)}</td><td>${esc(m.phone)}</td><td>${esc(m.idNo)}</td><td>${Number(m.saved || 0)}</td>
        <td><span class="badge ${st(m)[1]}">${st(m)[0]}</span></td>
-       <td style="font-size:12px;color:var(--mut)">${st(m)[1] !== "confirmed" && !Number(m.feePaid || 0) && !Number(m.saved || 0) ? `<button class="sm del" onclick="removeMember('${m.id}')">Remove</button>` : "Treasurer records"}</td></tr>`).join("");
+       <td><input class="mini" id="amt_${m.id}" type="number" min="1" placeholder="KES"> <button class="sm" onclick="recordFor('${m.id}')">Record</button> <button class="sm alt" onclick="editMember('${m.id}')">Edit</button> <button class="sm" onclick="editFee('${m.id}')">Fee</button> <button class="sm alt" onclick="editAmount('${m.id}')">Savings</button> <button class="sm del" onclick="removeMember('${m.id}')">Remove</button></td></tr>`).join("");
   }, () => {});
   unsubHist = db.collection("members").doc(user.uid).collection("savings").orderBy("createdAt","desc").limit(20)
     .onSnapshot(s => {
@@ -385,9 +385,32 @@ async function editAmount(id){
   try { await batch.commit(); say("mAdd", m.name + " total updated to KES " + n + ".", true); } catch (e) { say("mAdd", nice(e)); }
 }
 async function removeMember(id){
-  const m = myMembers.find(x => x.id === id);
-  if (!m || !confirm("Remove " + m.name + " from your chama (left or declined)? This cannot be undone.")) return;
-  try { await db.collection("members").doc(id).delete(); say("mAdd", m.name + " removed.", true); } catch (e) { say("mAdd", nice(e)); }
+  const m = myMembers.find(x => x.id === id); if (!m) return;
+  const warn = Number(m.saved || 0) > 0 ? " They have KES " + Number(m.saved) + " saved \u2014 refund them first." : "";
+  if (!confirm("Remove " + m.name + " from your chama (left or declined)?" + warn + " This cannot be undone.")) return;
+  try {
+    const ref = db.collection("members").doc(id), s = await ref.collection("savings").get();
+    const b = db.batch(); s.forEach(d => b.delete(d.ref)); b.delete(ref); await b.commit();
+    say("mAdd", m.name + " removed.", true);
+  } catch (e) { say("mAdd", nice(e)); }
+}
+async function editMember(id){
+  const m = myMembers.find(x => x.id === id); if (!m) return;
+  const name = prompt("Full name:", m.name); if (name === null) return;
+  const phone = prompt("Phone number:", m.phone); if (phone === null) return;
+  const idNo = prompt("ID number:", m.idNo); if (idNo === null) return;
+  const ph = phone.replace(/\s/g, "");
+  if (name.trim().length < 3 || !/^(07|01|\+?2547|\+?2541)\d{7,8}$/.test(ph) || !/^\d{6,9}$/.test(idNo.trim())) return say("mAdd", "Check the name, phone and ID number.");
+  try { await db.collection("members").doc(id).update({ name: name.trim(), phone: ph, idNo: idNo.trim() }); say("mAdd", name.trim() + " updated.", true); }
+  catch (e) { say("mAdd", nice(e)); }
+}
+async function editFee(id){
+  const m = myMembers.find(x => x.id === id); if (!m) return;
+  const cur = m.feePaid != null ? Number(m.feePaid) : (st(m)[1] === "confirmed" ? REG_FEE : 0);
+  const v = prompt("Registration fee paid so far by " + m.name + " (full fee = KES " + REG_FEE + "):", cur); if (v === null) return;
+  const n = Number(v); if (v.trim() === "" || isNaN(n) || n < 0) return say("mAdd", "Enter a valid amount (0 or more).");
+  try { await db.collection("members").doc(id).update({ feePaid: n, status: n >= REG_FEE ? "confirmed" : (n > 0 ? "partial" : "pending") }); say("mAdd", m.name + " fee set to KES " + n + ".", true); }
+  catch (e) { say("mAdd", nice(e)); }
 }
 function exportCSV(){}
 async function changePin(){
