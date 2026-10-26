@@ -296,7 +296,15 @@ else if (!wasInstalled) {                     // not installed yet: show the dow
     } else if (isIOS) {
       alert("Tap the Share button at the bottom of Safari, then choose \"Add to Home Screen\".");
     } else {
-      alert("Open your browser menu (\u22EE) and choose \"Install app\" or \"Add to Home screen\".");
+      const probs = [];
+      if (!location.protocol.startsWith("https")) probs.push("page is not opened from an https link");
+      try { const r = await fetch("manifest.json", { cache: "no-store" }); if (!r.ok) probs.push("manifest.json is missing on the website"); } catch (e) { probs.push("manifest.json cannot be loaded"); }
+      try { const r = await fetch("icon-512.png", { cache: "no-store" }); if (!r.ok) probs.push("icon-512.png is missing on the website"); } catch (e) { probs.push("icon-512.png cannot be loaded"); }
+      try { const reg = await navigator.serviceWorker.getRegistration(); if (!reg) probs.push("sw.js is not running (upload sw.js, then refresh)"); } catch (e) { probs.push("service worker not supported in this browser"); }
+      const msg = probs.length
+        ? "Cannot install yet: " + probs.join("; ") + "."
+        : "The app is ready. Open the browser menu (\u22EE) and choose \"Install app\". If you only see \"Add to Home screen\", use Chrome and refresh the page once.";
+      hint.textContent = msg; alert(msg);
     }
   };
   window.addEventListener("appinstalled", markInstalled);
@@ -313,10 +321,10 @@ auth.onAuthStateChanged(async user => {
     show("vAdmin");
     unsub = db.collection("members").orderBy("createdAt","desc").onSnapshot(snap => {
       rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      $("adCount").textContent = rows.length + " registered • " + rows.filter(r => r.status === "confirmed").length + " confirmed • Total saved: KES " + rows.reduce((s, r) => s + (r.saved || 0), 0);
+      $("adCount").textContent = rows.length + " registered • " + rows.filter(isPaid).length + " confirmed • Total saved: KES " + rows.reduce((s, r) => s + (r.saved || 0), 0);
       $("adBody").innerHTML = rows.map(r =>
         `<tr><td>${esc(r.name)}</td><td>${esc(r.phone)}</td><td>${esc(r.idNo)}</td>
-         <td>${Number(r.saved || 0)}</td><td>${r.status === "confirmed" ? `<span class="badge confirmed">Paid</span> <button style="margin:4px 0 0;padding:6px" onclick="addSavings('${r.id}')">+ Save</button>`
+         <td>${Number(r.saved || 0)}</td><td>${isPaid(r) ? `<span class="badge confirmed">Paid</span> <button style="margin:4px 0 0;padding:6px" onclick="addSavings('${r.id}')">+ Save</button>`
            : `<button style="margin:0;padding:6px" onclick="confirmPay('${r.id}')">Confirm</button>`}</td><td>${esc(r.ownerName || "Self")}</td></tr>`).join("");
     });
   } else {
@@ -329,7 +337,7 @@ auth.onAuthStateChanged(async user => {
       const full = myMembers.length >= MAX_MEMBERS;
       $("cmBody").innerHTML = myMembers.map(m =>
         `<tr><td>${esc(m.name)}</td><td>${esc(m.phone)}</td><td>${esc(m.idNo)}</td><td>${Number(m.saved || 0)}</td>
-         <td><span class="badge ${m.status === "confirmed" ? "confirmed" : "pending"}">${m.status === "confirmed" ? "Paid" : "Pending"}</span></td>
+         <td><span class="badge ${isPaid(m) ? "confirmed" : "pending"}">${isPaid(m) ? "Paid" : "Pending"}</span></td>
          <td style="white-space:nowrap">
            <input class="mini" id="amt_${m.id}" type="number" min="1" placeholder="KES">
            <button class="sm" onclick="recordFor('${m.id}')">Record</button>
@@ -346,8 +354,8 @@ auth.onAuthStateChanged(async user => {
       if (!m) { $("mdPhone").textContent = "—"; $("mdStatus").textContent = "No fee record"; $("mdStatus").className = "badge pending"; return; }
       $("mdName").textContent = m.name; $("mdPhone").textContent = m.phone;
       $("mdId").textContent = m.idNo || "—"; $("mdEmail").textContent = m.email || (auth.currentUser && auth.currentUser.email) || "—";
-      const s = $("mdStatus"); s.textContent = m.status === "confirmed" ? "Confirmed" : "Pending confirmation";
-      s.className = "badge " + m.status;
+      const s = $("mdStatus"); s.textContent = isPaid(m) ? "Paid" : "Pending";
+      s.className = "badge " + (isPaid(m) ? "confirmed" : "pending");
       $("mdSaved").textContent = Number(m.saved || 0);
     });
   }
@@ -355,6 +363,7 @@ auth.onAuthStateChanged(async user => {
 
 /* ADMIN HELPERS */
 let rows = [];
+function isPaid(m){ return m.status === "confirmed" || Number(m.saved || 0) > 0; }
 function esc(s){ return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 
 async function recordSavings(id, a, note){
@@ -368,7 +377,7 @@ async function recordSavings(id, a, note){
     });
   }
   const batch = db.batch();
-  batch.update(ref, { saved: firebase.firestore.FieldValue.increment(a) });
+  batch.update(ref, { saved: firebase.firestore.FieldValue.increment(a), status: "confirmed" });
   batch.set(ref.collection("savings").doc(), { amount: a, note: note || "Savings", createdAt: firebase.firestore.FieldValue.serverTimestamp() });
   await batch.commit();
 }
