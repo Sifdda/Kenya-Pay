@@ -266,13 +266,78 @@
         const member = child.val() || {};
         const row = document.createElement("tr");
 
-        addCell(row, member.fullName);
-        addCell(row, member.phone);
-        addCell(row, member.email);
-        addCell(row, member.idNumber);
-        addCell(row, member.groupName);
+       
+addCell(row, member.fullName);
+addCell(row, member.phone);
+addCell(row, member.email);
+addCell(row, member.idNumber);
+addCell(row, member.groupName);
 
-        membersTable.appendChild(row);
+// Actions for this member
+const actionsCell = document.createElement("td");
+
+const editButton = document.createElement("button");
+editButton.type = "button";
+editButton.textContent = "Edit";
+editButton.style.marginRight = "8px";
+
+editButton.addEventListener("click", () => {
+  document.getElementById("fullName").value = member.fullName || "";
+  document.getElementById("phone").value = member.phone || "";
+  document.getElementById("memberEmail").value = member.email || "";
+  document.getElementById("idNumber").value = member.idNumber || "";
+  document.getElementById("groupName").value = member.groupName || "";
+
+  editingMemberId = child.key;
+  saveButton.textContent = "Update Member";
+
+  document.getElementById("fullName").focus();
+  showStatus("Editing member. Change the details and click Update Member.");
+});
+
+const deleteButton = document.createElement("button");
+deleteButton.type = "button";
+deleteButton.textContent = "Delete";
+deleteButton.style.background = "#b91c1c";
+
+deleteButton.addEventListener("click", async () => {
+  const confirmed = confirm(
+    "Are you sure you want to remove " +
+    (member.fullName || "this member") + "?"
+  );
+
+  if (!confirmed) return;
+
+  const user = auth.currentUser;
+  if (!user) {
+    alert("Please sign in again.");
+    return;
+  }
+
+  try {
+    await database.ref(
+      "leaders/" + user.uid + "/members/" + child.key
+    ).remove();
+
+    if (editingMemberId === child.key) {
+      memberForm.reset();
+      editingMemberId = null;
+      saveButton.textContent = "Register Member";
+    }
+
+    showStatus("Member removed successfully.");
+  } catch (error) {
+    showStatus("Could not delete member. Check your database rules.");
+    console.error(error);
+  }
+});
+
+actionsCell.appendChild(editButton);
+actionsCell.appendChild(deleteButton);
+row.appendChild(actionsCell);
+
+membersTable.appendChild(row);
+
       });
     };
 
