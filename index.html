@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chama Registration</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b6b3a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Chama">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%230b6b3a'/%3E%3Ccircle cx='50' cy='50' r='38' fill='none' stroke='%23f5b800' stroke-width='5'/%3E%3Ctext x='50' y='64' font-size='42' font-weight='bold' text-anchor='middle' fill='%23fff' font-family='Arial'%3EC%3C/text%3E%3C/svg%3E">
 <style>
 :root{--g:#0b6b3a;--y:#f5b800;--bg:#f3f6f4;--t:#16231c;--card:#fff;--mut:#667}
@@ -34,6 +40,8 @@ td,th{padding:7px 4px;border-bottom:1px solid #8884;text-align:left}
 .mini{width:70px;padding:6px;font-size:13px;display:inline-block}
 button.sm{width:auto;margin:4px 0 0;padding:6px 10px;font-size:13px}
 button.del{background:#b3261e}
+#installBox{display:none;background:var(--card);border:2px solid var(--y);border-radius:12px;padding:12px;margin:0 0 12px;text-align:center;font-size:14px}
+#installBox button{margin-top:8px}
 </style>
 </head>
 <body>
@@ -49,6 +57,13 @@ button.del{background:#b3261e}
     </svg>
     <h1 id="appName">Chama Registration</h1>
     <p>Save together. Grow together.</p>
+  </div>
+
+  <!-- INSTALL APP -->
+  <div id="installBox">
+    <b>Get the app on your phone</b>
+    <div id="installHint" style="color:var(--mut);margin-top:4px"></div>
+    <button id="btnInstall" class="alt" style="display:none">&#11015; Download app</button>
   </div>
 
   <!-- REGISTER -->
@@ -251,6 +266,41 @@ $("btnForgot").onclick = async () => {
 };
 
 function logout(){ auth.signOut(); }
+
+/* INSTALL AS APP (PWA) */
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+let installEvt = null;
+const KEY = "chamaInstalled";
+const isStandalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const box = $("installBox"), hint = $("installHint"), btn = $("btnInstall");
+function markInstalled(){ try { localStorage.setItem(KEY, "1"); } catch (e) {} box.style.display = "none"; }
+let wasInstalled = false;
+try { wasInstalled = localStorage.getItem(KEY) === "1"; } catch (e) {}
+if (isStandalone) markInstalled();            // running as the installed app
+else if (!wasInstalled) {                     // not installed yet: show the download button
+  box.style.display = "block";
+  btn.style.display = "block";
+  hint.textContent = isIOS
+    ? "On iPhone: tap the Share button in Safari, then \"Add to Home Screen\"."
+    : "Tap the button below to download the app to your phone.";
+  window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; });
+  btn.onclick = async () => {
+    if (installEvt) {
+      installEvt.prompt();
+      const r = await installEvt.userChoice;
+      installEvt = null;
+      if (r.outcome === "accepted") markInstalled();
+    } else if (isIOS) {
+      alert("Tap the Share button at the bottom of Safari, then choose \"Add to Home Screen\".");
+    } else {
+      alert("Open your browser menu (\u22EE) and choose \"Install app\" or \"Add to Home screen\".");
+    }
+  };
+  window.addEventListener("appinstalled", markInstalled);
+}
 
 /* SESSION ROUTING */
 let unsub = null, unsubHist = null, unsubMine = null;
