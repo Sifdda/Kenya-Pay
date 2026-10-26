@@ -134,13 +134,15 @@ button.del{background:#b3261e}
     <p style="font-size:13px;color:var(--mut);margin-top:-8px">Your savings: KES <span id="mdOwn">0</span> + members: KES <span id="mdMem">0</span></p>
     <div id="mdHist" style="font-size:13px;margin-bottom:10px"></div>
 
-    <label>Record amount received (KES)</label>
+    <div class="hide"><label>Record amount received (KES)</label>
     <input id="sAmt" type="number" inputmode="numeric" min="1" placeholder="e.g. 500">
     <input id="sNote" placeholder="Note (optional, e.g. October contribution)" style="margin-top:6px">
     <button id="btnSave">Record amount</button>
-    <div id="mSave" class="msg"></div>
+    <div id="mSave" class="msg"></div></div>
+    <button onclick="statement()">Download my statement (PDF)</button>
+    <button class="alt" onclick="changePin()">Change PIN</button>
 
-    <p style="font-size:13px;color:var(--mut)">Your payment is confirmed by the chama admin once it is received.</p>
+    <p style="font-size:13px;color:var(--mut)">Your savings are recorded by the Treasurer once your M-Pesa payment is received.</p>
     <h4 style="margin:18px 0 4px">My chama members (<span id="cmCount">0</span>/<span class="max"></span>)</h4>
     <input id="cName" placeholder="Member full name">
     <input id="cPhone" type="tel" placeholder="Phone 07xx xxx xxx" style="margin-top:6px">
@@ -161,6 +163,7 @@ button.del{background:#b3261e}
     <p id="adCount" style="font-size:14px"></p>
     <div class="scroll"></div>
     <button class="hide" onclick="exportCSV()">CSV</button>
+    <button onclick="changePin()">Change PIN</button>
     <button class="alt" onclick="logout()">Logout</button>
   </div>
 </div>
@@ -319,10 +322,7 @@ auth.onAuthStateChanged(async user => {
     $("cmBody").innerHTML = myMembers.map(m =>
       `<tr><td>${esc(m.name)}</td><td>${esc(m.phone)}</td><td>${esc(m.idNo)}</td><td>${Number(m.saved || 0)}</td>
        <td><span class="badge ${isPaid(m) ? "confirmed" : "pending"}">${isPaid(m) ? "Paid" : "Pending"}</span></td>
-       <td style="white-space:nowrap"><input class="mini" id="amt_${m.id}" type="number" min="1" placeholder="KES">
-         <button class="sm" onclick="recordFor('${m.id}')">Record</button>
-         <button class="sm alt" onclick="editAmount('${m.id}')">Edit</button>
-         <button class="sm del" onclick="removeMember('${m.id}')">Remove</button></td></tr>`).join("");
+       <td style="font-size:12px;color:var(--mut)">Treasurer records</td></tr>`).join("");
   }, () => {});
   unsubHist = db.collection("members").doc(user.uid).collection("savings").orderBy("createdAt","desc").limit(20)
     .onSnapshot(s => {
@@ -386,6 +386,39 @@ async function removeMember(id){
   try { await db.collection("members").doc(id).delete(); say("mAdd", m.name + " removed.", true); } catch (e) { say("mAdd", nice(e)); }
 }
 function exportCSV(){}
+async function changePin(){
+  const u = auth.currentUser; if (!u) return;
+  const cur = prompt("Enter your current PIN:"); if (cur === null) return;
+  const nw = prompt("Enter a new 6-digit PIN:"); if (nw === null) return;
+  if (!/^\d{6}$/.test(nw)) return alert("The new PIN must be exactly 6 digits.");
+  try {
+    await u.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email, cur));
+    await u.updatePassword(nw); alert("PIN changed successfully.");
+  } catch (e) { alert(nice(e)); }
+}
+async function statement(){
+  const u = auth.currentUser, w = window.open("", "_blank");
+  if (!w) return alert("Please allow pop-ups to open your statement.");
+  w.document.write("Preparing statement...");
+  try {
+    const ref = db.collection("members").doc(u.uid);
+    const [me, s] = await Promise.all([ref.get(), ref.collection("savings").orderBy("createdAt", "asc").get()]);
+    const m = me.data() || {}; let run = 0;
+    const rowsH = s.docs.map(d => { const x = d.data(); run += Number(x.amount || 0);
+      return `<tr><td>${x.createdAt ? x.createdAt.toDate().toLocaleDateString() : ""}</td><td>${esc(x.note || "Savings")}</td><td>${x.amount}</td><td>${run}</td></tr>`; }).join("");
+    const mt = myMembers.reduce((t, x) => t + Number(x.saved || 0), 0);
+    const memH = myMembers.map(x => `<tr><td>${esc(x.name)}</td><td>${esc(x.phone)}</td><td>${Number(x.saved || 0)}</td><td>${isPaid(x) ? "Paid" : "Pending"}</td></tr>`).join("");
+    w.document.open();
+    w.document.write(`<html><head><title>Statement</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#111}h2{color:#0b6b3a;margin:0}table{width:100%;border-collapse:collapse;margin:8px 0 18px;font-size:14px}td,th{border-bottom:1px solid #ccc;padding:6px;text-align:left}</style></head><body>
+      <h2>${esc(CHAMA_NAME)}</h2><p>Member statement &mdash; ${new Date().toLocaleDateString()}</p>
+      <p><b>${esc(m.name || u.email)}</b><br>Phone: ${esc(m.phone || "")} &nbsp; ID: ${esc(m.idNo || "")}<br>Email: ${esc(m.email || u.email)}</p>
+      <h3>My savings</h3><table><tr><th>Date</th><th>Note</th><th>KES</th><th>Balance</th></tr>${rowsH || "<tr><td colspan=4>No savings yet.</td></tr>"}</table>
+      <h3>My chama members</h3><table><tr><th>Name</th><th>Phone</th><th>Saved</th><th>Status</th></tr>${memH || "<tr><td colspan=4>None.</td></tr>"}</table>
+      <p><b>My savings: KES ${run} &nbsp; Members: KES ${mt} &nbsp; Total: KES ${run + mt}</b></p></body></html>`);
+    w.document.close(); w.focus(); setTimeout(() => w.print(), 400);
+  } catch (e) { w.close(); alert(nice(e)); }
+}
+
 </script>
 
 <script>
