@@ -321,8 +321,8 @@ auth.onAuthStateChanged(async user => {
     updateTotal();
     $("cmBody").innerHTML = myMembers.map(m =>
       `<tr><td>${esc(m.name)}</td><td>${esc(m.phone)}</td><td>${esc(m.idNo)}</td><td>${Number(m.saved || 0)}</td>
-       <td><span class="badge ${isPaid(m) ? "confirmed" : "pending"}">${isPaid(m) ? "Paid" : "Pending"}</span></td>
-       <td style="font-size:12px;color:var(--mut)">Treasurer records</td></tr>`).join("");
+       <td><span class="badge ${st(m)[1]}">${st(m)[0]}</span></td>
+       <td style="font-size:12px;color:var(--mut)">${st(m)[1] !== "confirmed" && !Number(m.feePaid || 0) && !Number(m.saved || 0) ? `<button class="sm del" onclick="removeMember('${m.id}')">Remove</button>` : "Treasurer records"}</td></tr>`).join("");
   }, () => {});
   unsubHist = db.collection("members").doc(user.uid).collection("savings").orderBy("createdAt","desc").limit(20)
     .onSnapshot(s => {
@@ -333,8 +333,8 @@ auth.onAuthStateChanged(async user => {
     if (!m) { ownSaved = 0; updateTotal(); $("mdPhone").textContent = "—"; $("mdStatus").textContent = "No fee record"; $("mdStatus").className = "badge pending"; return; }
     $("mdName").textContent = m.name; $("mdPhone").textContent = m.phone;
     $("mdId").textContent = m.idNo || "—"; $("mdEmail").textContent = m.email || (auth.currentUser && auth.currentUser.email) || "—";
-    const s = $("mdStatus"); s.textContent = isPaid(m) ? "Paid" : "Pending";
-    s.className = "badge " + (isPaid(m) ? "confirmed" : "pending");
+    const s = $("mdStatus"); s.textContent = st(m)[0];
+    s.className = "badge " + st(m)[1];
     ownSaved = Number(m.saved || 0); updateTotal();
   }, () => {});
 });
@@ -342,6 +342,10 @@ auth.onAuthStateChanged(async user => {
 /* SHARED HELPERS */
 let rows = [];
 function isPaid(m){ return m.status === "confirmed" || Number(m.saved || 0) > 0; }
+function st(m){ const f = Number(m.feePaid || 0), full = m.status === "confirmed" || Number(m.saved || 0) > 0;
+  if (m.feePaid != null && f > 0 && f < REG_FEE) return ["Part paid " + f + "/" + REG_FEE, "pending"];
+  if (m.feePaid != null && f >= REG_FEE) return ["Paid", "confirmed"];
+  return full ? ["Paid", "confirmed"] : ["Pending", "pending"]; }
 function esc(s){ return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 
 async function recordSavings(id, a, note){
@@ -382,7 +386,7 @@ async function editAmount(id){
 }
 async function removeMember(id){
   const m = myMembers.find(x => x.id === id);
-  if (!m || !confirm("Remove " + m.name + " from your chama? This cannot be undone.")) return;
+  if (!m || !confirm("Remove " + m.name + " from your chama (left or declined)? This cannot be undone.")) return;
   try { await db.collection("members").doc(id).delete(); say("mAdd", m.name + " removed.", true); } catch (e) { say("mAdd", nice(e)); }
 }
 function exportCSV(){}
@@ -407,7 +411,7 @@ async function statement(){
     const rowsH = s.docs.map(d => { const x = d.data(); run += Number(x.amount || 0);
       return `<tr><td>${x.createdAt ? x.createdAt.toDate().toLocaleDateString() : ""}</td><td>${esc(x.note || "Savings")}</td><td>${x.amount}</td><td>${run}</td></tr>`; }).join("");
     const mt = myMembers.reduce((t, x) => t + Number(x.saved || 0), 0);
-    const memH = myMembers.map(x => `<tr><td>${esc(x.name)}</td><td>${esc(x.phone)}</td><td>${Number(x.saved || 0)}</td><td>${isPaid(x) ? "Paid" : "Pending"}</td></tr>`).join("");
+    const memH = myMembers.map(x => `<tr><td>${esc(x.name)}</td><td>${esc(x.phone)}</td><td>${Number(x.saved || 0)}</td><td>${st(x)[0]}</td></tr>`).join("");
     w.document.open();
     w.document.write(`<html><head><title>Statement</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#111}h2{color:#0b6b3a;margin:0}table{width:100%;border-collapse:collapse;margin:8px 0 18px;font-size:14px}td,th{border-bottom:1px solid #ccc;padding:6px;text-align:left}</style></head><body>
       <h2>${esc(CHAMA_NAME)}</h2><p>Member statement &mdash; ${new Date().toLocaleDateString()}</p>
@@ -427,7 +431,7 @@ async function statement(){
   const num = v => Number(v || 0);
   const can = {
     admin:     { edit:1, del:1, money:1, meet:1, welf:1, share:1, staff:1 },
-    treasurer: { edit:1, money:1, welf:1, share:1 },
+    treasurer: { edit:1, del:1, money:1, welf:1, share:1 },
     secretary: { meet:1 }
   };
   let role = null, unsubs = [], tab = "dash", q = "", fs = "all", fl = "all", sort = "new", pg = 0;
@@ -470,7 +474,7 @@ async function statement(){
   /* ---------- actions (called from buttons) ---------- */
   window.AT = {
     tab(t) { tab = t; pg = 0; full(); if (t === "dash") loadMonthly(); },
-    confirm(id) { db.collection("members").doc(id).update({ status: "confirmed" }).then(() => log("confirm", find(id))).catch(fail); },
+    confirm(id) { db.collection("members").doc(id).update({ status: "confirmed", feePaid: REG_FEE }).then(() => log("confirm", find(id))).catch(fail); },
     async save(id) {
       const a = Number(prompt("Amount received (KES):")); if (!a || a < 1) return;
       const n = prompt("Note (optional):") || "Savings";
@@ -487,19 +491,39 @@ async function statement(){
     },
     async del(id) {
       const m = find(id); if (!m) return;
-      if (!confirm("Delete " + m.name + " and all their savings records? This cannot be undone.")) return;
-      const reason = need("Reason for deleting " + m.name + ":"); if (!reason) return;
+      if (!confirm("Remove " + m.name + " from the chama and delete all their records" + (num(m.saved) > 0 ? " (they have KES " + num(m.saved) + " saved \u2014 refund them first)" : "") + "? This cannot be undone.")) return;
+      const reason = need("Reason for removing " + m.name + " (e.g. left the chama / declined):"); if (!reason) return;
       try {
         const ref = db.collection("members").doc(id), s = await ref.collection("savings").get();
         const b = db.batch(); s.forEach(d => b.delete(d.ref)); b.delete(ref); await b.commit();
         log("delete", m, reason, { name: m.name, phone: m.phone, saved: num(m.saved) }, null);
       } catch (e) { fail(e); }
     },
+    async fee(id) {
+      const m = find(id); if (!m) return;
+      const cur = m.feePaid != null ? num(m.feePaid) : (st(m)[1] === "confirmed" ? REG_FEE : 0);
+      const v = prompt("Registration fee paid so far by " + m.name + " (full fee = KES " + REG_FEE + "):", cur); if (v === null) return;
+      const n = Number(v); if (v.trim() === "" || isNaN(n) || n < 0) return alert("Enter a valid amount (0 or more).");
+      const reason = need("Note (e.g. paid the balance by M-Pesa):"); if (!reason) return;
+      try { await db.collection("members").doc(id).update({ feePaid: n, status: n >= REG_FEE ? "confirmed" : (n > 0 ? "partial" : "pending") }); log("fee " + cur + " to " + n, m, reason); } catch (e) { fail(e); }
+    },
+    async setSaved(id) {
+      const m = find(id); if (!m) return; const cur = num(m.saved);
+      const v = prompt("Set TOTAL saved for " + m.name + " (KES). Currently " + cur + ":", cur); if (v === null) return;
+      const n = Number(v); if (v.trim() === "" || isNaN(n) || n < 0) return alert("Enter a valid amount (0 or more).");
+      const d = n - cur; if (d === 0) return;
+      const reason = need("Reason (e.g. member paid the balance):"); if (!reason) return;
+      try {
+        const ref = db.collection("members").doc(id), b = db.batch();
+        b.update(ref, { saved: n }); b.set(ref.collection("savings").doc(), { amount: d, note: "Correction: " + reason + " (was " + cur + ")", createdAt: ts() });
+        await b.commit(); log("savings " + cur + " to " + n, m, reason);
+      } catch (e) { fail(e); }
+    },
     search(v) { q = v; pg = 0; table(); },
     filt(k, v) { if (k === "s") fs = v; else if (k === "l") fl = v; else sort = v; pg = 0; table(); },
     page(d) { pg += d; table(); },
     csv() {
-      const lines = filtered().map(r => [r.name, r.phone, r.idNo, r.email || "", num(r.saved), isPaid(r) ? "Paid" : "Pending", r.ownerName || "Self"].map(v => '"' + String(v).replace(/"/g, '""') + '"').join(","));
+      const lines = filtered().map(r => [r.name, r.phone, r.idNo, r.email || "", num(r.saved), st(r)[0], r.ownerName || "Self"].map(v => '"' + String(v).replace(/"/g, '""') + '"').join(","));
       dl("members.csv", ["Name,Phone,ID,Email,Saved,Status,Leader", ...lines].join("\n"));
     },
     async meeting() {
@@ -547,7 +571,7 @@ async function statement(){
     const s = q.toLowerCase();
     const a = mem.filter(m =>
       (!s || ((m.name || "") + " " + (m.phone || "") + " " + (m.idNo || "")).toLowerCase().includes(s)) &&
-      (fs === "all" || (fs === "paid") === isPaid(m)) &&
+      (fs === "all" || (fs === "paid") === (st(m)[1] === "confirmed")) &&
       (fl === "all" || (m.ownerName || "Self") === fl));
     if (sort === "name") a.sort((x, y) => (x.name || "").localeCompare(y.name || ""));
     if (sort === "saved") a.sort((x, y) => num(y.saved) - num(x.saved));
@@ -575,7 +599,7 @@ async function statement(){
     return `<div class="tabs">${t.map(x => `<button class="${tab === x[0] ? "" : "off"}" onclick="AT.tab('${x[0]}')">${x[1]}</button>`).join("")}</div>`;
   }
   function vDash() {
-    const paid = mem.filter(isPaid).length, pend = mem.length - paid, tot = mem.reduce((t, m) => t + num(m.saved), 0);
+    const paid = mem.filter(m => st(m)[1] === "confirmed").length, pend = mem.length - paid, tot = mem.reduce((t, m) => t + num(m.saved), 0);
     const wb = welfare.reduce((t, w) => t + (w.type === "payout" ? -num(w.amount) : num(w.amount)), 0);
     const unpaid = fines.filter(f => !f.paid).reduce((t, f) => t + num(f.amount), 0);
     let h = `<div class="grid"><div class="stat">Members<b>${mem.length}</b></div><div class="stat">Paid<b>${paid}</b></div><div class="stat">Pending<b>${pend}</b></div><div class="stat">Total savings<b>${kes(tot)}</b></div>`;
@@ -600,8 +624,8 @@ async function statement(){
     const a = filtered(), pages = Math.max(1, Math.ceil(a.length / PS)); pg = Math.min(Math.max(pg, 0), pages - 1);
     box.innerHTML = `<p style="font-size:13px">${a.length} of ${mem.length} members</p><div class="scroll"><table><thead><tr><th>Name</th><th>Phone</th><th>Saved</th><th>Status</th><th>Leader</th><th>Actions</th></tr></thead><tbody>` +
       a.slice(pg * PS, pg * PS + PS).map(m => `<tr><td>${esc(m.name)}<br><small>${esc(m.idNo)}</small></td><td>${esc(m.phone)}</td><td>${num(m.saved)}</td>
-        <td><span class="badge ${isPaid(m) ? "confirmed" : "pending"}">${isPaid(m) ? "Paid" : "Pending"}</span></td><td>${esc(m.ownerName || "Self")}</td>
-        <td style="white-space:nowrap">${!isPaid(m) && P("money") ? `<button class="sm" onclick="AT.confirm('${m.id}')">Confirm</button> ` : ""}${P("money") ? `<button class="sm" onclick="AT.save('${m.id}')">+ Save</button> ` : ""}${P("edit") ? `<button class="sm alt" onclick="AT.edit('${m.id}')">Edit</button> ` : ""}${P("del") ? `<button class="sm del" onclick="AT.del('${m.id}')">Delete</button>` : ""}</td></tr>`).join("") +
+        <td><span class="badge ${st(m)[1]}">${st(m)[0]}</span></td><td>${esc(m.ownerName || "Self")}</td>
+        <td>${P("money") ? `${st(m)[1] !== "confirmed" ? `<button class="sm" onclick="AT.confirm('${m.id}')">Confirm fee</button> ` : ""}<button class="sm" onclick="AT.fee('${m.id}')">Fee</button> <button class="sm" onclick="AT.save('${m.id}')">+ Save</button> <button class="sm" onclick="AT.setSaved('${m.id}')">Edit savings</button> ` : ""}${P("edit") ? `<button class="sm alt" onclick="AT.edit('${m.id}')">Edit</button> ` : ""}${P("del") ? `<button class="sm del" onclick="AT.del('${m.id}')">Remove</button>` : ""}</td></tr>`).join("") +
       `</tbody></table></div><div class="row"><button class="sm" ${pg ? "" : "disabled"} onclick="AT.page(-1)">&laquo; Prev</button><span style="text-align:center;font-size:13px;align-self:center">Page ${pg + 1} / ${pages}</span><button class="sm" ${pg + 1 < pages ? "" : "disabled"} onclick="AT.page(1)">Next &raquo;</button></div>`;
   }
   function vMeet() {
