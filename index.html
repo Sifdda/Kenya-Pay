@@ -94,6 +94,8 @@ button.del{background:#b3261e}
   <div id="vMember" class="card hide">
     <h3 style="margin:0">Welcome, <span id="mdName"></span></h3>
     <p>Phone: <b id="mdPhone"></b></p>
+    <p>ID number: <b id="mdId">—</b></p>
+    <p>Email: <b id="mdEmail">—</b></p>
     <p>Registration fee: KES <span class="fee"></span> — <span id="mdStatus" class="badge"></span></p>
     <p style="font-size:18px">Total saved: <b>KES <span id="mdSaved">0</span></b></p>
     <div id="mdHist" style="font-size:13px;margin-bottom:10px"></div>
@@ -281,7 +283,8 @@ auth.onAuthStateChanged(async user => {
          <td style="white-space:nowrap">
            <input class="mini" id="amt_${m.id}" type="number" min="1" placeholder="KES">
            <button class="sm" onclick="recordFor('${m.id}')">Record</button>
-           ${full ? `<button class="sm del" onclick="removeMember('${m.id}')">Remove</button>` : ""}
+           <button class="sm alt" onclick="editAmount('${m.id}')">Edit</button>
+           <button class="sm del" onclick="removeMember('${m.id}')">Remove</button>
          </td></tr>`).join("");
     });
     unsubHist = db.collection("members").doc(user.uid).collection("savings").orderBy("createdAt","desc").limit(20)
@@ -292,6 +295,7 @@ auth.onAuthStateChanged(async user => {
       const m = d.data();
       if (!m) { $("mdPhone").textContent = "—"; $("mdStatus").textContent = "No fee record"; $("mdStatus").className = "badge pending"; return; }
       $("mdName").textContent = m.name; $("mdPhone").textContent = m.phone;
+      $("mdId").textContent = m.idNo || "—"; $("mdEmail").textContent = m.email || (auth.currentUser && auth.currentUser.email) || "—";
       const s = $("mdStatus"); s.textContent = m.status === "confirmed" ? "Confirmed" : "Pending confirmation";
       s.className = "badge " + m.status;
       $("mdSaved").textContent = Number(m.saved || 0);
@@ -333,6 +337,23 @@ async function recordFor(id){             // leader records for a member
   const a = Number($("amt_" + id).value);
   if (!a || a < 1) return say("mAdd", "Enter a valid amount.");
   try { await recordSavings(id, a, "Savings"); say("mAdd", "KES " + a + " recorded.", true); }
+  catch (e) { say("mAdd", nice(e)); }
+}
+
+async function editAmount(id){           // leader corrects a member's total saved
+  const m = myMembers.find(x => x.id === id);
+  if (!m) return;
+  const current = Number(m.saved || 0);
+  const v = prompt("Edit total saved for " + m.name + " (KES):", current);
+  if (v === null) return;
+  const n = Number(v);
+  if (v.trim() === "" || isNaN(n) || n < 0) return say("mAdd", "Enter a valid amount (0 or more).");
+  const diff = n - current;
+  if (diff === 0) return;
+  const ref = db.collection("members").doc(id), batch = db.batch();
+  batch.update(ref, { saved: n });
+  batch.set(ref.collection("savings").doc(), { amount: diff, note: "Correction (was " + current + ")", createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+  try { await batch.commit(); say("mAdd", m.name + " total updated to KES " + n + ".", true); }
   catch (e) { say("mAdd", nice(e)); }
 }
 
