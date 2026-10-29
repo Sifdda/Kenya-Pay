@@ -264,24 +264,23 @@ function logout(){ auth.signOut(); }
 /* INSTALL AS APP (PWA) */
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
 let installEvt = null;
-const KEY = "chamaInstalled";
 const isStandalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
 const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const inApp = /FBAN|FBAV|Instagram|WhatsApp|Snapchat|TikTok|Line\/|; wv\)/i.test(navigator.userAgent);
 const box = $("installBox"), hint = $("installHint"), btn = $("btnInstall");
-function markInstalled(){ try { localStorage.setItem(KEY, "1"); } catch (e) {} box.style.display = "none"; }
-let wasInstalled = false;
-try { wasInstalled = localStorage.getItem(KEY) === "1"; } catch (e) {}
-if (isStandalone) markInstalled();
-else if (!wasInstalled) {
+if (!isStandalone) {
   box.style.display = "block"; btn.style.display = "block";
-  hint.textContent = isIOS ? "On iPhone: tap the Share button in Safari, then \"Add to Home Screen\"." : "Tap the button below to download the app to your phone.";
+  hint.textContent = inApp
+    ? "You opened this inside another app. Tap the menu (\u22EE) and choose \"Open in browser\" (Chrome or Safari), then install from there."
+    : (isIOS ? "On iPhone: tap the Share button in Safari, then \"Add to Home Screen\"." : "Tap the button below to download the app to your phone.");
   window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; });
   btn.onclick = async () => {
-    if (installEvt) { installEvt.prompt(); const r = await installEvt.userChoice; installEvt = null; if (r.outcome === "accepted") markInstalled(); }
+    if (installEvt) { installEvt.prompt(); const r = await installEvt.userChoice; installEvt = null; if (r.outcome === "accepted") box.style.display = "none"; }
+    else if (inApp) alert("Open this page in Chrome or Safari first: tap the menu (\u22EE) and choose \"Open in browser\".");
     else if (isIOS) alert("Tap the Share button at the bottom of Safari, then choose \"Add to Home Screen\".");
-    else alert("Open the browser menu (\u22EE) and choose \"Install app\" or \"Add to Home screen\". Use Chrome and refresh once if you do not see it.");
+    else alert("Open the browser menu (\u22EE) and choose \"Install app\" or \"Add to home screen\". Use Chrome and refresh once if you do not see it.");
   };
-  window.addEventListener("appinstalled", markInstalled);
+  window.addEventListener("appinstalled", () => { box.style.display = "none"; });
 }
 
 /* SESSION ROUTING (staff screens are handled by the admin tools script) */
