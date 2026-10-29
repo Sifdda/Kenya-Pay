@@ -584,6 +584,30 @@ async function statement(){
         await b.commit(); ["mTitle", "mMin"].forEach(i => el(i).value = ""); alert("Meeting saved." + (fine > 0 && absent.length ? " " + absent.length + " fine(s) created." : ""));
       } catch (e) { fail(e); }
     },
+    async editMeeting(id) {
+      const m = meetings.find(x => x.id === id); if (!m) return;
+      const title = prompt("Meeting title:", m.title); if (title === null) return;
+      const date = prompt("Date (YYYY-MM-DD):", m.date); if (date === null) return;
+      const minutes = prompt("Minutes / decisions:", m.minutes || ""); if (minutes === null) return;
+      if (!title.trim() || !/^\d{4}-\d{2}-\d{2}$/.test(date.trim())) return alert("Enter a title and a date like 2026-10-29.");
+      try {
+        await db.collection("meetings").doc(id).update({ title: title.trim(), date: date.trim(), minutes: minutes.trim() });
+        log("edit meeting", { id, name: m.title }, "Meeting edited");
+      } catch (e) { fail(e); }
+    },
+    async delMeeting(id) {
+      const m = meetings.find(x => x.id === id); if (!m) return;
+      if (!confirm("Delete the meeting \"" + m.title + "\" (" + m.date + ")? Its unpaid fines will also be deleted; paid fines are kept. This cannot be undone.")) return;
+      const reason = need("Reason for deleting this meeting:"); if (!reason) return;
+      try {
+        const snap = await db.collection("fines").where("meetingId", "==", id).get();
+        const b = db.batch();
+        snap.forEach(d => { if (!d.data().paid) b.delete(d.ref); });
+        b.delete(db.collection("meetings").doc(id));
+        await b.commit();
+        log("delete meeting", { id, name: m.title }, reason);
+      } catch (e) { fail(e); }
+    },
     payFine(id) { db.collection("fines").doc(id).update({ paid: true }).then(() => log("fine paid", { id })).catch(fail); },
     async post() {
       const t = el("aTxt").value.trim(); if (!t) return;
@@ -687,7 +711,7 @@ async function statement(){
         <button onclick="AT.meeting()">Save meeting</button><h4>Announcement</h4><textarea id="aTxt" placeholder="Message to all members"></textarea><button onclick="AT.post()">Post announcement</button>`;
     }
     h += `<h4>Announcements</h4>` + (ann.slice(0, 5).map(a => `<div style="font-size:14px;margin:6px 0">${esc(a.text)} <small style="color:var(--mut)">${fmt(a.at)}</small> ${P("meet") ? `<a class="lnk" style="display:inline;margin:0" onclick="AT.delAnn('${a.id}')">delete</a>` : ""}</div>`).join("") || "<p style='font-size:13px'>None.</p>");
-    h += `<h4>Past meetings</h4><div class="scroll"><table><thead><tr><th>Date</th><th>Title</th><th>Present</th><th>Absent</th><th>Minutes</th></tr></thead><tbody>${meetings.slice(0, 15).map(m => `<tr><td>${esc(m.date)}</td><td>${esc(m.title)}</td><td>${num(m.present)}</td><td>${num(m.absent)}</td><td>${esc((m.minutes || "").slice(0, 80))}</td></tr>`).join("")}</tbody></table></div>`;
+    h += `<h4>Past meetings</h4><div class="scroll"><table><thead><tr><th>Date</th><th>Title</th><th>Present</th><th>Absent</th><th>Minutes</th><th></th></tr></thead><tbody>${meetings.slice(0, 15).map(m => `<tr><td>${esc(m.date)}</td><td>${esc(m.title)}</td><td>${num(m.present)}</td><td>${num(m.absent)}</td><td>${esc((m.minutes || "").slice(0, 80))}</td><td>${P("meet") ? `<button class="sm alt" onclick="AT.editMeeting('${m.id}')">Edit</button> <button class="sm del" onclick="AT.delMeeting('${m.id}')">Delete</button>` : ""}</td></tr>`).join("")}</tbody></table></div>`;
     h += `<h4>Fines</h4><div class="scroll"><table><thead><tr><th>Member</th><th>Meeting</th><th>KES</th><th></th></tr></thead><tbody>${fines.slice(0, 30).map(f => `<tr><td>${esc(f.memberName)}</td><td>${esc(f.meetingTitle)}</td><td>${num(f.amount)}</td><td>${f.paid ? '<span class="badge confirmed">Paid</span>' : (P("money") ? `<button class="sm" onclick="AT.payFine('${f.id}')">Mark paid</button>` : '<span class="badge pending">Unpaid</span>')}</td></tr>`).join("")}</tbody></table></div>`;
     return h;
   }
