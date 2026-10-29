@@ -547,6 +547,24 @@ async function statement(){
         await b.commit(); log("savings " + cur + " to " + n, m, reason);
       } catch (e) { fail(e); }
     },
+    async addMember() {
+      if (!P("edit")) return;
+      const name = el("aName").value.trim(), phone = el("aPhone").value.replace(/\s/g, ""), idNo = el("aId").value.trim();
+      if (name.length < 3) return say("mStaffAdd", "Enter the member's full name.");
+      if (!/^(07|01|\+?2547|\+?2541)\d{7,8}$/.test(phone)) return say("mStaffAdd", "Enter a valid Kenyan phone number.");
+      if (!/^\d{6,9}$/.test(idNo)) return say("mStaffAdd", "Enter a valid ID number.");
+      if (mem.some(m => m.idNo === idNo || m.phone === phone)) return say("mStaffAdd", "This member is already registered.");
+      try {
+        const u = auth.currentUser;
+        const ref = await db.collection("members").add({
+          name, phone, idNo, ownerUid: u.uid, ownerName: u.email, amount: REG_FEE,
+          status: "pending", createdAt: ts()
+        });
+        log("add member", { id: ref.id, name }, "Added by staff");
+        ["aName", "aPhone", "aId"].forEach(i => el(i).value = "");
+        say("mStaffAdd", name + " registered.", true);
+      } catch (e) { say("mStaffAdd", nice(e)); }
+    },
     search(v) { q = v; pg = 0; table(); },
     filt(k, v) { if (k === "s") fs = v; else if (k === "l") fl = v; else sort = v; pg = 0; table(); },
     page(d) { pg += d; table(); },
@@ -639,9 +657,13 @@ async function statement(){
     const top = [...mem].sort((a, b) => num(b.saved) - num(a.saved)).filter(m => num(m.saved) > 0).slice(0, 5), mx2 = top.length ? num(top[0].saved) : 1;
     return h + (top.map(m => bar(m.name || "?", num(m.saved), mx2, kes(m.saved))).join("") || `<p style="font-size:13px;color:var(--mut)">No savings yet.</p>`);
   }
+  function addForm() {
+    if (!P("edit")) return "";
+    return `<h4>Add member</h4><div class="row"><input id="aName" placeholder="Full name"><input id="aPhone" type="tel" placeholder="Phone 07xx xxx xxx"><input id="aId" inputmode="numeric" placeholder="National ID number"></div><button class="sm" onclick="AT.addMember()">Add member</button><div id="mStaffAdd" class="msg"></div><h4>All members</h4>`;
+  }
   function vMembers() {
     const leaders = [...new Set(mem.map(m => m.ownerName || "Self"))].sort();
-    return `<div class="row"><input id="atQ" placeholder="Search name, phone or ID" value="${esc(q)}" oninput="AT.search(this.value)">
+    return addForm() + `<div class="row"><input id="atQ" placeholder="Search name, phone or ID" value="${esc(q)}" oninput="AT.search(this.value)">
       <select onchange="AT.filt('s',this.value)"><option value="all">All status</option><option value="paid"${fs === "paid" ? " selected" : ""}>Paid</option><option value="pending"${fs === "pending" ? " selected" : ""}>Pending</option></select>
       <select onchange="AT.filt('l',this.value)"><option value="all">All leaders</option>${leaders.map(l => `<option${fl === l ? " selected" : ""}>${esc(l)}</option>`).join("")}</select>
       <select onchange="AT.filt('o',this.value)"><option value="new">Newest</option><option value="name"${sort === "name" ? " selected" : ""}>Name A–Z</option><option value="saved"${sort === "saved" ? " selected" : ""}>Most saved</option></select></div>
