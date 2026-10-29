@@ -9,28 +9,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Chama">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%230b6b3a'/%3E%3Ccircle cx='50' cy='50' r='38' fill='none' stroke='%23f5b800' stroke-width='5'/%3E%3Ctext x='50' y='64' font-size='42' font-weight='bold' text-anchor='middle' fill='%23fff' font-family='Arial'%3EC%3C/text%3E%3C/svg%3E">
-<script>
-/* Built-in app manifest (works even if manifest.json is not uploaded) */
-(function(){
-  var base = location.origin + location.pathname.replace(/[^\/]*$/, "");
-  var ICON = "data:image/svg+xml," + encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='#0b6b3a'/><circle cx='50' cy='50' r='38' fill='none' stroke='#f5b800' stroke-width='5'/><circle cx='30' cy='40' r='7' fill='#fff'/><circle cx='50' cy='32' r='7' fill='#fff'/><circle cx='70' cy='40' r='7' fill='#fff'/><path d='M20 66c0-9 7-14 10-14s7 2 10 2 7-2 10-2 7 2 10 2 7-2 10-2 10 5 10 14v6H20z' fill='#f5b800'/></svg>");
-  var man = {
-    id: base, name: "Amazing Chama Book Record", short_name: "Chama",
-    description: "Save together. Grow together. Created By Collins Letting",
-    start_url: base, scope: base, display: "standalone", orientation: "portrait",
-    background_color: "#800000", theme_color: "#800000",
-    icons: [
-      { src: ICON, sizes: "any", type: "image/svg+xml", purpose: "any" },
-      { src: ICON, sizes: "512x512", type: "image/svg+xml", purpose: "any" }
-    ]
-  };
-  var l = document.createElement("link"); l.rel = "manifest";
-  l.href = URL.createObjectURL(new Blob([JSON.stringify(man)], { type: "application/manifest+json" }));
-  document.head.appendChild(l);
-  var a = document.createElement("link"); a.rel = "apple-touch-icon"; a.href = ICON;
-  document.head.appendChild(a);
-})();
-</script>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
 :root{--g:#0b6b3a;--y:#f5b800;--bg:#800000;--t:#16231c;--card:#fff;--mut:#667}
 @media(prefers-color-scheme:dark){:root{--bg:#5c0000;--t:#e8f1ec;--card:#18241e;--mut:#9ab}}
