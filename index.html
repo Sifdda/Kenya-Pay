@@ -450,6 +450,8 @@ async function statement(){
   const ts = () => firebase.firestore.FieldValue.serverTimestamp();
   const need = t => { const r = (prompt(t) || "").trim(); if (r.length < 3) { alert("A reason (at least 3 characters) is required."); return null; } return r; };
   const fail = e => alert(nice(e));
+  /* WhatsApp: turn 07xx / 01xx / +254... into 254xxxxxxxxx */
+  const waNum = p => { p = String(p || "").replace(/\D/g, ""); return p.startsWith("0") ? "254" + p.slice(1) : p; };
 
   const css = document.createElement("style");
   css.textContent = `
@@ -466,6 +468,7 @@ async function statement(){
   #at .bar{display:flex;align-items:center;gap:6px;font-size:12px;margin:4px 0}
   #at .bar span{width:70px;flex:none}#at .bar i{display:block;height:14px;background:var(--g);border-radius:4px;min-width:2px}
   #at .bar b{flex:none}#at h4{margin:16px 0 6px}
+  #at a.wa{display:inline-block;text-decoration:none;background:#25d366;color:#fff;padding:6px 10px;border-radius:9px;font-size:13px;font-weight:700;margin:2px 0}
   #atAnn{background:#fff8dc;color:#4a3b00;border-left:4px solid var(--y);padding:10px;border-radius:8px;font-size:14px;margin:10px 0}`;
   document.head.appendChild(css);
 
@@ -675,10 +678,11 @@ async function statement(){
   function table() {
     const box = el("atTbl"); if (!box) return;
     const a = filtered(), pages = Math.max(1, Math.ceil(a.length / PS)); pg = Math.min(Math.max(pg, 0), pages - 1);
+    const latest = ann[0] ? ann[0].text : "";
     box.innerHTML = `<p style="font-size:13px">${a.length} of ${mem.length} members</p><div class="scroll"><table><thead><tr><th>Name</th><th>Phone</th><th>Saved</th><th>Status</th><th>Leader</th><th>Actions</th></tr></thead><tbody>` +
       a.slice(pg * PS, pg * PS + PS).map(m => `<tr><td>${esc(m.name)}<br><small>${esc(m.idNo)}</small></td><td>${esc(m.phone)}</td><td>${num(m.saved)}</td>
         <td><span class="badge ${st(m)[1]}">${st(m)[0]}</span></td><td>${esc(m.ownerName || "Self")}</td>
-        <td>${P("money") ? `${st(m)[1] !== "confirmed" ? `<button class="sm" onclick="AT.confirm('${m.id}')">Confirm fee</button> ` : ""}<button class="sm" onclick="AT.fee('${m.id}')">Fee</button> <button class="sm" onclick="AT.save('${m.id}')">+ Save</button> <button class="sm" onclick="AT.setSaved('${m.id}')">Edit savings</button> ` : ""}${P("edit") ? `<button class="sm alt" onclick="AT.edit('${m.id}')">Edit</button> ` : ""}${P("del") ? `<button class="sm del" onclick="AT.del('${m.id}')">Remove</button>` : ""}</td></tr>`).join("") +
+        <td><a class="wa" target="_blank" rel="noopener" href="https://wa.me/${esc(waNum(m.phone))}?text=${encodeURIComponent("Hello " + (m.name || "") + (latest ? ", " + latest : ","))}">WhatsApp</a> ${P("money") ? `${st(m)[1] !== "confirmed" ? `<button class="sm" onclick="AT.confirm('${m.id}')">Confirm fee</button> ` : ""}<button class="sm" onclick="AT.fee('${m.id}')">Fee</button> <button class="sm" onclick="AT.save('${m.id}')">+ Save</button> <button class="sm" onclick="AT.setSaved('${m.id}')">Edit savings</button> ` : ""}${P("edit") ? `<button class="sm alt" onclick="AT.edit('${m.id}')">Edit</button> ` : ""}${P("del") ? `<button class="sm del" onclick="AT.del('${m.id}')">Remove</button>` : ""}</td></tr>`).join("") +
       `</tbody></table></div><div class="row"><button class="sm" ${pg ? "" : "disabled"} onclick="AT.page(-1)">&laquo; Prev</button><span style="text-align:center;font-size:13px;align-self:center">Page ${pg + 1} / ${pages}</span><button class="sm" ${pg + 1 < pages ? "" : "disabled"} onclick="AT.page(1)">Next &raquo;</button></div>`;
   }
   function vMeet() {
