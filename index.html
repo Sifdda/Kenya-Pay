@@ -611,6 +611,16 @@ async function statement(){
     },
     rmStaff(email) { if (confirm("Remove " + email + " from staff?")) db.collection("staff").doc(email).delete().then(() => log("role removed", { name: email })).catch(fail); },
     share() { render(); },
+    smsAll() {
+      const t = ann[0] ? ann[0].text : ""; if (!t) return alert("Post an announcement first.");
+      const nums = [...new Set(mem.map(m => waNum(m.phone)).filter(Boolean))].map(n => "+" + n).join(",");
+      const sep = /iphone|ipad/i.test(navigator.userAgent) ? "&" : "?";
+      location.href = "sms:" + nums + sep + "body=" + encodeURIComponent(t);
+    },
+    copyNums() {
+      const nums = [...new Set(mem.map(m => waNum(m.phone)).filter(Boolean))].join(", ");
+      navigator.clipboard.writeText(nums).then(() => alert("Numbers copied."));
+    },
     shareCsv() {
       const rows = shareRows(); if (!rows.length) return;
       dl("share-out.csv", ["Name,Saved,Percent,Profit share,Total payout", ...rows.map(r => [r.name, r.saved, r.pct.toFixed(2), r.share.toFixed(0), r.total.toFixed(0)].map(v => '"' + String(v).replace(/"/g, '""') + '"').join(","))].join("\n"));
@@ -694,6 +704,11 @@ async function statement(){
         <button onclick="AT.meeting()">Save meeting</button><h4>Announcement</h4><textarea id="aTxt" placeholder="Message to all members"></textarea><button onclick="AT.post()">Post announcement</button>`;
     }
     h += `<h4>Announcements</h4>` + (ann.slice(0, 5).map(a => `<div style="font-size:14px;margin:6px 0">${esc(a.text)} <small style="color:var(--mut)">${fmt(a.at)}</small> ${P("meet") ? `<a class="lnk" style="display:inline;margin:0" onclick="AT.delAnn('${a.id}')">delete</a>` : ""}</div>`).join("") || "<p style='font-size:13px'>None.</p>");
+    if (P("meet") && ann[0]) {
+      h += `<h4>Send latest announcement</h4><p style="font-size:14px">"${esc(ann[0].text)}"</p>
+        <button class="sm" onclick="AT.smsAll()">SMS all members</button> <button class="sm alt" onclick="AT.copyNums()">Copy all numbers</button>
+        <div style="margin-top:8px">${mem.map(m => `<a class="wa" target="_blank" rel="noopener" href="https://wa.me/${esc(waNum(m.phone))}?text=${encodeURIComponent(ann[0].text)}">${esc(m.name)}</a>`).join(" ")}</div>`;
+    }
     h += `<h4>Past meetings</h4><div class="scroll"><table><thead><tr><th>Date</th><th>Title</th><th>Present</th><th>Absent</th><th>Minutes</th><th></th></tr></thead><tbody>${meetings.slice(0, 15).map(m => `<tr><td>${esc(m.date)}</td><td>${esc(m.title)}</td><td>${num(m.present)}</td><td>${num(m.absent)}</td><td>${esc((m.minutes || "").slice(0, 80))}</td><td>${P("meet") ? `<button class="sm alt" onclick="AT.editMeeting('${m.id}')">Edit</button> <button class="sm del" onclick="AT.delMeeting('${m.id}')">Delete</button>` : ""}</td></tr>`).join("")}</tbody></table></div>`;
     h += `<h4>Fines</h4><div class="scroll"><table><thead><tr><th>Member</th><th>Meeting</th><th>KES</th><th></th></tr></thead><tbody>${fines.slice(0, 30).map(f => `<tr><td>${esc(f.memberName)}</td><td>${esc(f.meetingTitle)}</td><td>${num(f.amount)}</td><td>${f.paid ? '<span class="badge confirmed">Paid</span>' : (P("money") ? `<button class="sm" onclick="AT.payFine('${f.id}')">Mark paid</button>` : '<span class="badge pending">Unpaid</span>')}</td></tr>`).join("")}</tbody></table></div>`;
     return h;
