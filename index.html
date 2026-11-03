@@ -482,6 +482,7 @@ async function statement(){
   }
 
   /* ---------- actions (called from buttons) ---------- */
+  let wi = 0;
   window.AT = {
     tab(t) { tab = t; pg = 0; full(); if (t === "dash") loadMonthly(); },
     confirm(id) { db.collection("members").doc(id).update({ status: "confirmed", feePaid: REG_FEE }).then(() => log("confirm", find(id))).catch(fail); },
@@ -593,7 +594,12 @@ async function statement(){
     payFine(id) { db.collection("fines").doc(id).update({ paid: true }).then(() => log("fine paid", { id })).catch(fail); },
     async post() {
       const t = el("aTxt").value.trim(); if (!t) return;
-      try { await db.collection("announcements").add({ text: t, by: auth.currentUser.email, at: ts() }); el("aTxt").value = ""; } catch (e) { fail(e); }
+      const w = window.open("about:blank", "_blank");
+      try {
+        await db.collection("announcements").add({ text: t, by: auth.currentUser.email, at: ts() });
+        el("aTxt").value = "";
+        if (w) w.location = "https://api.whatsapp.com/send?text=" + encodeURIComponent(t);
+      } catch (e) { if (w) w.close(); fail(e); }
     },
     delAnn(id) { if (confirm("Delete this announcement?")) db.collection("announcements").doc(id).delete().catch(fail); },
     async welf() {
@@ -616,6 +622,14 @@ async function statement(){
       const nums = [...new Set(mem.map(m => waNum(m.phone)).filter(Boolean))].map(n => "+" + n).join(",");
       const sep = /iphone|ipad/i.test(navigator.userAgent) ? "&" : "?";
       location.href = "sms:" + nums + sep + "body=" + encodeURIComponent(t);
+    },
+    waNext() {
+      const t = ann[0] ? ann[0].text : ""; if (!t) return alert("Post an announcement first.");
+      const seen = new Set(), list = mem.filter(m => { const n = waNum(m.phone); if (!n || seen.has(n)) return false; seen.add(n); return true; });
+      if (wi >= list.length) { wi = 0; return alert("Done. All " + list.length + " members opened."); }
+      const m = list[wi++];
+      window.open("https://wa.me/" + waNum(m.phone) + "?text=" + encodeURIComponent(t), "_blank");
+      alert("Opened " + m.name + " (" + wi + "/" + list.length + "). Send it, then tap this button again.");
     },
     copyNums() {
       const nums = [...new Set(mem.map(m => waNum(m.phone)).filter(Boolean))].join(", ");
@@ -706,7 +720,7 @@ async function statement(){
     h += `<h4>Announcements</h4>` + (ann.slice(0, 5).map(a => `<div style="font-size:14px;margin:6px 0">${esc(a.text)} <small style="color:var(--mut)">${fmt(a.at)}</small> ${P("meet") ? `<a class="lnk" style="display:inline;margin:0" onclick="AT.delAnn('${a.id}')">delete</a>` : ""}</div>`).join("") || "<p style='font-size:13px'>None.</p>");
     if (P("meet") && ann[0]) {
       h += `<h4>Send latest announcement</h4><p style="font-size:14px">"${esc(ann[0].text)}"</p>
-        <button class="sm" onclick="AT.smsAll()">SMS all members</button> <button class="sm alt" onclick="AT.copyNums()">Copy all numbers</button>
+        <button class="sm" onclick="AT.waNext()">WhatsApp next member</button> <button class="sm" onclick="AT.smsAll()">SMS all members</button> <button class="sm alt" onclick="AT.copyNums()">Copy all numbers</button>
         <div style="margin-top:8px">${mem.map(m => `<a class="wa" target="_blank" rel="noopener" href="https://wa.me/${esc(waNum(m.phone))}?text=${encodeURIComponent(ann[0].text)}">${esc(m.name)}</a>`).join(" ")}</div>`;
     }
     h += `<h4>Past meetings</h4><div class="scroll"><table><thead><tr><th>Date</th><th>Title</th><th>Present</th><th>Absent</th><th>Minutes</th><th></th></tr></thead><tbody>${meetings.slice(0, 15).map(m => `<tr><td>${esc(m.date)}</td><td>${esc(m.title)}</td><td>${num(m.present)}</td><td>${num(m.absent)}</td><td>${esc((m.minutes || "").slice(0, 80))}</td><td>${P("meet") ? `<button class="sm alt" onclick="AT.editMeeting('${m.id}')">Edit</button> <button class="sm del" onclick="AT.delMeeting('${m.id}')">Delete</button>` : ""}</td></tr>`).join("")}</tbody></table></div>`;
