@@ -443,7 +443,7 @@ async function statement(){
   };
   let role = null, unsubs = [], tab = "dash", q = "", fs = "all", fl = "all", sort = "new", pg = 0;
   let mem = [], meetings = [], fines = [], ann = [], welfare = [], staff = [], audit = [], monthly = {};
-  const PS = 10, P = a => role && can[role][a];
+  const PS = 5, P = a => role && can[role][a];
   const fmt = t => t && t.toDate ? t.toDate().toLocaleDateString() : "";
   const kes = n => "KES " + num(n).toLocaleString();
   const find = id => mem.find(m => m.id === id);
